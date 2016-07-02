@@ -7,12 +7,16 @@ import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 
+import android.util.Log;
+
 public class DetectionBasedTracker
 {
     public DetectionBasedTracker(String cascadeName, int minFaceSize, String modelSp) {
         mNativeObj = nativeCreateObject(cascadeName, minFaceSize);
         if (new File(modelSp).exists()) {
             mNativeModel = nativeCreateModel(modelSp);
+        } else {
+            Log.e("DetectionBasedTracker", "findEyes file doesn't exists !" + modelSp);
         }
     }
 

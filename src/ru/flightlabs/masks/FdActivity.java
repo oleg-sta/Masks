@@ -139,6 +139,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 
                 try {
                     // load cascade file from application resources
+                    Log.e(TAG, "findEyes onManagerConnected");
                     File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
 
                     mCascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
@@ -153,6 +154,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 
                     final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
                     detectorName = prefs.getString(Settings.MODEL_PATH, Settings.MODEL_PATH_DEFAULT);
+                    Log.e(TAG, "findEyes onManagerConnectedb " + detectorName);
                     mNativeDetector = new DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0, detectorName);
 
 //                    AssetManager assetManager = getApplication().getAssets();
@@ -450,7 +452,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         if (leftCorner != null) {
             Log.i(TAG, "mNativeDetector.findEyes");
             Rect r = facesArray[0];
-            if (findPupils) {
+            if (true) {
+                Log.i(TAG, "mNativeDetector.findEyes!!!");
                 foundEyes = mNativeDetector.findEyes(mGray, r, detectorName);
                 Log.i(TAG, "findEyes116 java " + foundEyes.length);
                 if (foundEyes != null && foundEyes.length > 1) {

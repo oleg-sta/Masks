@@ -75,7 +75,7 @@ JNIEXPORT jlong JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeCre
 	LOGD("findEyes119 dd");
 	jlong result = 0;
 	result = (jlong)new ModelClass(jenv->GetStringUTFChars(jFileName, NULL));
-	LOGD("findEyes119 dde");
+	LOGD("findEyes119 dde111 %i", result);
 	return result;
 }
 
