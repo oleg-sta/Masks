@@ -261,7 +261,7 @@ void findEyes(cv::Mat frame_gray, cv::Rect face, std::vector<cv::Point> &pixels,
   LOGD("findEyes114");
   //std::vector<dlib::rectangle> dets;
   //dets.push_back(dlib::rectangle);
-  dlib::rectangle d(face.x, face.y, face.width, face.height);
+  dlib::rectangle d(face.x, face.y, face.x + face.width, face.y + face.height+100);
   LOGD("findEyes115");
   //deserialize(s) >> sp;
   LOGD("findEyes113");

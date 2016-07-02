@@ -18,6 +18,7 @@ public class DetectionBasedTracker
         } else {
             Log.e("DetectionBasedTracker", "findEyes file doesn't exists !" + modelSp);
         }
+        Log.e("DetectionBasedTracker", "findEyes mNativeModel " + mNativeModel);
     }
 
     public void start() {

@@ -449,6 +449,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         // поиск зрачков
         Point rEye = null;
         Point lEye = null;
+        foundEyes = null;
         if (leftCorner != null) {
             Log.i(TAG, "mNativeDetector.findEyes");
             Rect r = facesArray[0];
@@ -523,7 +524,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 public void run() {
                     borderCam.setVisibility(View.INVISIBLE);
                     cameraButton.setImageResource(R.drawable.ic_camera);
-                    startActivity(new Intent(d, Gallery.class));
+                    //startActivity(new Intent(d, Gallery.class));
                }
             });
             Log.i(TAG, "saving end " + true);
