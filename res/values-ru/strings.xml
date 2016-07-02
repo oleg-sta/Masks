@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_field">О ПРОГРАММЕ</string>
+    <string name="options_field">ОПЦИИ</string>
+    <string name="version_field">ВЕРСИЯ ПРОГРАММЫ V 1.0</string>
+    <string name="mail_field">ОБРАТНАЯ СВЯЗЬ</string>
+    <string name="send_mail_with">Отправить письмо с помощью</string>
+    <string name="send_photo_with">отправить с помощью</string>
+    <string name="delete_photo">Удалить фотографию</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+</resources>

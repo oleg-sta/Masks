@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="eyes">
+    </array>
+    <integer-array name="eyes_center_y">
+        <item>4</item>
+        <item>8</item>
+        <item>16</item>
+        <item>32</item>
+    </integer-array>
+</resources>
