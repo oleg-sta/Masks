@@ -11,6 +11,7 @@
 
 #include "constants.h"
 #include "helpers.h"
+#include "ModelClass.cpp"
 
 #include <dlib/image_processing/frontal_face_detector.h>
 #include <dlib/image_processing/render_face_detections.h>
@@ -18,6 +19,7 @@
 #include <dlib/gui_widgets.h>
 #include <dlib/image_io.h>
 #include <dlib/opencv.h>
+
 
 #define LOG_TAG "FaceDetection/DetectionBasedTracker"
 #define LOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__))
@@ -33,7 +35,7 @@ inline void vector_Rect_to_Mat(cv::vector<Rect>& v_rect, Mat& mat)
 }
 
 JNIEXPORT jlong JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeCreateObject
-(JNIEnv * jenv, jclass, jstring jFileName, jint faceSize, jstring model)
+(JNIEnv * jenv, jclass, jstring jFileName, jint faceSize)
 {
     LOGD("Java_org_opencv_samples_facedetect_DetectionBasedTracker_nativeCreateObject enter");
     const char* jnamestr = jenv->GetStringUTFChars(jFileName, NULL);
@@ -65,6 +67,16 @@ JNIEXPORT jlong JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeCre
 
     LOGD("Java_org_opencv_samples_facedetect_DetectionBasedTracker_nativeCreateObject exit");
     return result;
+}
+
+JNIEXPORT jlong JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeCreateModel
+(JNIEnv * jenv, jclass, jstring jFileName)
+{
+	LOGD("findEyes119 dd");
+	jlong result = 0;
+	result = (jlong)new ModelClass(jenv->GetStringUTFChars(jFileName, NULL));
+	LOGD("findEyes119 dde");
+	return result;
 }
 
 JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDestroyObject
@@ -178,7 +190,7 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeSetF
 }
 
 JNIEXPORT jobjectArray JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_findEyes
-(JNIEnv * jenv, jclass, jlong thiz, jlong imageGray, jint x, jint y, jint height, jint width, jstring availableProcessors)
+(JNIEnv * jenv, jclass, jlong thiz, jlong imageGray, jint x, jint y, jint height, jint width, jlong thizModel)
 {
 	LOGD("Java_ru_flightlabs_masks_DetectionBasedTracker_findEyes");
 
@@ -187,7 +199,7 @@ JNIEXPORT jobjectArray JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_fi
 	LOGD("findEyes imageGray %d %d", imageGrayInner.rows, imageGrayInner.cols);
 	LOGD("findEyes face %d %d %d %d", faceRect.x, faceRect.y, faceRect.height, faceRect.width);
 	std::vector<cv::Point> pixels;
-	findEyes(imageGrayInner, faceRect, pixels, jenv->GetStringUTFChars(availableProcessors, NULL));
+	findEyes(imageGrayInner, faceRect, pixels, (ModelClass*)thizModel);
 
 
 	jclass clsPoint = jenv->FindClass("org/opencv/core/Point");
@@ -232,7 +244,7 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDete
     LOGD("Java_org_opencv_samples_facedetect_DetectionBasedTracker_nativeDetect exit");
 }
 
-void findEyes(cv::Mat frame_gray, cv::Rect face, std::vector<cv::Point> &pixels, const char *s) {
+void findEyes(cv::Mat frame_gray, cv::Rect face, std::vector<cv::Point> &pixels, ModelClass *modelClass) {
   LOGD("findEyes111");
   shape_predictor sp;
   LOGD("findEyes112");
@@ -251,9 +263,10 @@ void findEyes(cv::Mat frame_gray, cv::Rect face, std::vector<cv::Point> &pixels,
   //dets.push_back(dlib::rectangle);
   dlib::rectangle d(face.x, face.y, face.width, face.height);
   LOGD("findEyes115");
-  deserialize(s) >> sp;
+  //deserialize(s) >> sp;
   LOGD("findEyes113");
-  full_object_detection shape = sp(img, d);
+//  full_object_detection shape = sp(img, d);
+  full_object_detection shape = modelClass->getsp(img, d);
   LOGD("findEyes116 %i", shape.num_parts());
   if (shape.num_parts() > 2) {
 	  LOGD("findEyes116 %i %i", shape.part(0).x(), shape.part(0).y());

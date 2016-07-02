@@ -151,7 +151,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                     } else
                         Log.i(TAG, "Loaded cascade classifier from " + mCascadeFile.getAbsolutePath());
 
-                    detectorName = "/storage/extSdCard/sp.dat";
+                    final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
+                    detectorName = prefs.getString(Settings.MODEL_PATH, Settings.MODEL_PATH_DEFAULT);
                     mNativeDetector = new DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0, detectorName);
 
 //                    AssetManager assetManager = getApplication().getAssets();
@@ -440,10 +441,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 leftCorner = facesArray[i].tl();
                 rightCorner = facesArray[i].br();
             }
-            if (debugMode) {
-                Core.rectangle(mRgba, new Point(leftCorner.y, leftCorner.x), new Point(rightCorner.y, rightCorner.x),
-                        FACE_RECT_COLOR, 3);
-            }
+            Core.rectangle(mRgba, new Point(leftCorner.y, leftCorner.x), new Point(rightCorner.y, rightCorner.x),
+                    FACE_RECT_COLOR, 3);
         }
         // поиск зрачков
         Point rEye = null;
