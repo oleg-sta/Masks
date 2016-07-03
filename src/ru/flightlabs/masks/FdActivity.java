@@ -52,7 +52,7 @@ import android.widget.ListView;
 
 public class FdActivity extends Activity implements CvCameraViewListener2 {
 
-    public static final String DIRECTORY_SELFIE = "eSelfie";
+    public static final String DIRECTORY_SELFIE = "Masks";
     //public static int counter;
     public static boolean makePhoto;
     // Size constants of eye

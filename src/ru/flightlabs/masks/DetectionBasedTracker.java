@@ -14,7 +14,11 @@ public class DetectionBasedTracker
     public DetectionBasedTracker(String cascadeName, int minFaceSize, String modelSp) {
         mNativeObj = nativeCreateObject(cascadeName, minFaceSize);
         if (new File(modelSp).exists()) {
-            mNativeModel = nativeCreateModel(modelSp);
+            Log.e("DetectionBasedTracker", "findEyes DetectionBasedTracker !" + modelSp);
+            long nat = nativeCreateModel(modelSp);
+            if (nat != 0) {
+                mNativeModel = nat;
+            }
         } else {
             Log.e("DetectionBasedTracker", "findEyes file doesn't exists !" + modelSp);
         }
@@ -43,7 +47,7 @@ public class DetectionBasedTracker
     }
     
     public Point[] findEyes(Mat imageGray, Rect face, String modelSp) {
-        if (mNativeModel > 0) {
+        if (mNativeModel != null) {
             return findEyes(mNativeObj, imageGray.getNativeObjAddr(), face.x, face.y, face.height, face.width, mNativeModel);
         } else {
             return new Point[0];
@@ -51,7 +55,7 @@ public class DetectionBasedTracker
     }
 
     private long mNativeObj = 0;
-    private long mNativeModel = 0;
+    private Long mNativeModel = null;
 
     private static native long nativeCreateObject(String cascadeName, int minFaceSize);
     private static native long nativeCreateModel(String cascadeName);
