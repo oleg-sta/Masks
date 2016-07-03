@@ -9,6 +9,7 @@ class ModelClass {
 public:
 	shape_predictor sp;
 	ModelClass(const char *s);
+	full_object_detection getsp(array2d<rgb_pixel> &img, dlib::rectangle &d);
 	full_object_detection getsp(array2d<int> &img, dlib::rectangle &d);
 };
 

@@ -47,6 +47,9 @@ import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 
@@ -126,6 +129,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     int availableProcessors = 1;
     
     String detectorName;
+    
+    boolean rgbMode;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -313,6 +318,15 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             }
         });
         noPerson = (ImageView) findViewById(R.id.no_person);
+        
+        CheckBox c = (CheckBox)findViewById(R.id.rgbCheckBox);
+        c.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                rgbMode = isChecked;
+            }
+        });
     }
 
     @Override
@@ -405,6 +419,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             Log.i(TAG, "onCameraFrame6");
         }
 
+        Log.e(TAG, "findEyes666 " + mRgba.type());
         if (mAbsoluteFaceSize == 0) {
             int height = mGray.cols();
             if (Math.round(height * mRelativeFaceSize) > 0) {
@@ -439,6 +454,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         Point leftCorner = null;
         Point rightCorner = null;
         for (int i = 0; i < facesArray.length; i++) {
+            facesArray[i].height = (int)(facesArray[i].height * 1.2f);
             if (i == 0) {
                 leftCorner = facesArray[i].tl();
                 rightCorner = facesArray[i].br();
@@ -455,7 +471,11 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             Rect r = facesArray[0];
             if (true) {
                 Log.i(TAG, "mNativeDetector.findEyes!!!");
-                foundEyes = mNativeDetector.findEyes(mGray, r, detectorName);
+                if (rgbMode) {
+                    foundEyes = mNativeDetector.findEyes(mRgba, r, detectorName);
+                } else {
+                    foundEyes = mNativeDetector.findEyes(mGray, r, detectorName);  
+                }
                 Log.i(TAG, "findEyes116 java " + foundEyes.length);
                 if (foundEyes != null && foundEyes.length > 1) {
                     Log.i(TAG, "findEyes116 java " + foundEyes[0].x + " " + foundEyes[0].y);
