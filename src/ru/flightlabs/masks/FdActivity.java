@@ -95,7 +95,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     
     private final static int maxSizeEyeWidth = 367;
 
-    Mat currentEye; // рисунок хранится с альфа каналом
+    Mat currentMaskLandScaped; // рисунок хранится с альфа каналом для наложения, уже повернут для наложения в режиме landscape
     
     TypedArray eyesResources;
     int currentIndexEye = -1;
@@ -187,6 +187,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     
     
     // TODO: лучше делать асинхронно
+    // загрузка рисунка с альфа каналом + поворот для наложение в landscape
     private void loadNewEye(int index) throws NotFoundException, IOException {
         File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
         File newEyeFile = new File(cascadeDir, "temp.png");
@@ -201,9 +202,9 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         Mat newEyeTmp = newEyeTmp2.t();
         Core.flip(newEyeTmp2.t(), newEyeTmp, 0);
         newEyeTmp2.release();
-        currentEye = newEyeTmp;
+        currentMaskLandScaped = newEyeTmp;
         cascadeDir.delete();
-        Log.i(TAG, "loadNewEye " + currentEye.type() + " " + currentEye.channels());
+        Log.i(TAG, "loadNewEye " + currentMaskLandScaped.type() + " " + currentMaskLandScaped.channels());
     }
 
     public static void resourceToFile(InputStream is, File toFile) throws IOException {
@@ -595,19 +596,19 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         Point centerEye = new Point((rEye.x + lEye.x) / 2, (rEye.y + lEye.y) / 2);
         double distanceEye = Math.sqrt(Math.pow(rEye.x - lEye.x, 2) +  Math.pow(rEye.y - lEye.y, 2));
         double scale = distanceEye / maxSizeEyeWidth;
-        double angle = -angleOfYx(lEye, rEye);
+        double angle = -angleOfYx(lEye, rEye); // угол поворота глаз от горизонта
         
         
 //        Point centerEyePic = new Point(currentEye.cols() / 2, currentEye.rows() / 2);
-        Point centerEyePic = new Point(currentEye.cols() / 2, 378);
-        Rect bbox = new RotatedRect(centerEyePic, new Size(currentEye.size().width * scale, currentEye.size().height * scale), angle).boundingRect();
+        Point centerEyePic = new Point(378, currentMaskLandScaped.rows() / 2);
+        Rect bbox = new RotatedRect(centerEyePic, new Size(currentMaskLandScaped.size().width * scale, currentMaskLandScaped.size().height * scale), angle).boundingRect();
         
         Mat affineMat = Imgproc.getRotationMatrix2D(centerEyePic, angle, scale);
         double[] x1 = affineMat.get(0, 2);
         double[] y1 = affineMat.get(1, 2);
-        x1[0] = x1[0] + bbox.width / 2.0 - centerEyePic.x;
+        x1[0] = x1[0] + bbox.width * centerEyePic.x / currentMaskLandScaped.cols() - centerEyePic.x;
         y1[0] = y1[0] + bbox.height / 2.0 - centerEyePic.y;
-        Point leftPoint = new Point(centerEye.x - bbox.width / 2.0, centerEye.y - bbox.height / 2.0);
+        Point leftPoint = new Point(centerEye.x - bbox.width * centerEyePic.x / currentMaskLandScaped.cols(), centerEye.y - bbox.height / 2.0);
         if (leftPoint.y < 0) {
             bbox.height = (int)(bbox.height + leftPoint.y);
             y1[0] = y1[0] + leftPoint.y;
@@ -630,13 +631,15 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         affineMat.put(1, 2, y1);
         
         Size newSize = new Size(bbox.size().width, bbox.size().height);
-        Mat sizedRotatedEye = new Mat(newSize, currentEye.type());
-        Imgproc.warpAffine(currentEye, sizedRotatedEye, affineMat, newSize);
+        Mat sizedRotatedEye = new Mat(newSize, currentMaskLandScaped.type());
+        Imgproc.warpAffine(currentMaskLandScaped, sizedRotatedEye, affineMat, newSize);
         
         int newEyeHeight = sizedRotatedEye.height();
         int newEyeWidth = sizedRotatedEye.width();
         Rect r = new Rect((int) (leftPoint.x), (int) (leftPoint.y),
                 newEyeWidth, newEyeHeight);
+        
+        Core.rectangle(mRgba, r.tl(), r.br(), new Scalar(255, 0, 0), 3);
         Mat rgbaInnerWindow = mRgba.submat(r.y, r.y + r.height, r.x, r.x + r.width);
         
         List<Mat> layers = new ArrayList<Mat>();
