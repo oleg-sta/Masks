@@ -53,6 +53,10 @@ public class DetectionBasedTracker
             return new Point[0];
         }
     }
+    
+    public void mergeAlpha(Mat fromImage, Mat toImage) {
+        mergeAlpha(fromImage.getNativeObjAddr(), toImage.getNativeObjAddr());
+    }
 
     private long mNativeObj = 0;
     private Long mNativeModel = null;
@@ -65,4 +69,5 @@ public class DetectionBasedTracker
     private static native void nativeSetFaceSize(long thiz, int size);
     private static native void nativeDetect(long thiz, long inputImage, long faces);
     private static native Point[] findEyes(long thiz, long inputImage, int x, int y, int height, int width, long modelSp);
+    private static native void mergeAlpha(long fromImage, long toImage);
 }

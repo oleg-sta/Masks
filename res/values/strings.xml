@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">Masks</string>
     <array name="effects_array">
+        <item>@drawable/bear</item>
     </array>
 
     <string name="settings_field">ABOUT</string>

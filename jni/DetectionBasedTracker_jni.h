@@ -52,6 +52,9 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeStop
   (JNIEnv *, jclass, jlong, jint);
 
 
+  JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_mergeAlpha
+  (JNIEnv * jenv, jclass, jlong imageFrom, jlong imageTo);
+
   JNIEXPORT jobjectArray JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_findEyes
   (JNIEnv * jenv, jclass, jlong thiz, jlong imageGray, jint x, jint y, jint height, jint width, jlong);
 /*

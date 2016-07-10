@@ -189,6 +189,29 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeSetF
     LOGD("Java_org_opencv_samples_facedetect_DetectionBasedTracker_nativeSetFaceSize exit");
 }
 
+JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_mergeAlpha
+(JNIEnv * jenv, jclass, jlong imageFrom, jlong imageTo)
+{
+	LOGD("findEyes Java_ru_flightlabs_masks_DetectionBasedTracker_mergeAlpha");
+	cv::Mat imageFromMat = *((Mat*)imageFrom);
+	cv::Mat imageToMat = *((Mat*)imageTo);
+	LOGD("findEyes Java_ru_flightlabs_masks_DetectionBasedTracker_mergeAlpha2 %i %i", imageFromMat.cols, imageFromMat.rows);
+	for (int i = 0; (i < imageFromMat.rows && i < imageToMat.rows); i++) {
+		  //LOGD("findEyes1124");
+		//LOGD("findEyes Java_ru_flightlabs_masks_DetectionBasedTracker_mergeAlpha3 %i", i);
+		  for (int j = 0; (j < imageFromMat.cols && j < imageToMat.cols) ; j++) {
+			  //LOGD("findEyes115");
+			  //img[i][j] = frame_gray.at<uchar>(i, j);
+			  cv::Vec4b pixelFrom = imageFromMat.at<cv::Vec4b>(i, j);
+			  cv::Vec4b pixelTo = imageToMat.at<cv::Vec4b>(i, j);
+			  int alpha = pixelFrom[3] / 2;
+			  for (int ij = 0; ij < 3; ij++) {
+				  pixelTo[ij] = (pixelTo[ij] * (255 - alpha) + pixelFrom[ij] * alpha) / 255;
+			  }
+			  imageToMat.at<cv::Vec4b>(i, j) = pixelTo;
+		  }
+	}
+}
 JNIEXPORT jobjectArray JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_findEyes
 (JNIEnv * jenv, jclass, jlong thiz, jlong imageGray, jint x, jint y, jint height, jint width, jlong thizModel)
 {
@@ -245,96 +268,43 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDete
 }
 
 void findEyes(cv::Mat frame_gray, cv::Rect face, std::vector<cv::Point> &pixels, ModelClass *modelClass) {
-  LOGD("findEyes111");
-  shape_predictor sp;
-  LOGD("findEyes112");
-  //array2d<int> img;
-  LOGD("findEyes1121 %i", frame_gray.type());
-  bool rgb = false;
-  if (frame_gray.type() == 24) {
-	  rgb = true;
-  }
-  if (rgb) {
-  array2d<rgb_pixel> img;
+	LOGD("findEyes111");
+	shape_predictor sp;
+	LOGD("findEyes112");
+	//array2d<int> img;
+	LOGD("findEyes1121 %i", frame_gray.type());
 
 //  assign_image(img, cv_image<uchar>(frame_gray));
-  if (rgb) {
-	  img.set_size(frame_gray.rows, frame_gray.cols);
-  } else {
-	  img.set_size(frame_gray.cols, frame_gray.rows); // for grey
-  }
-  LOGD("findEyes1122");
-  for (int i = 0; i < frame_gray.cols; i++) {
-	  //LOGD("findEyes1124");
-	  for (int j = 0; j < frame_gray.rows; j++) {
-		  //LOGD("findEyes115");
-		  //img[i][j] = frame_gray.at<uchar>(i, j);
-		  cv::Vec4b pixel = frame_gray.at<cv::Vec4b>(i, j);
-		  //LOGD("findEyes1126");
-          rgb_pixel p;
-          p.red   = pixel[0];
-          p.green = pixel[1];
-          p.blue  = pixel[2];
-          //LOGD("findEyes1128");
-//		  assign_pixel(img[i][j], p); // for grey
-//		  assign_pixel(img[j][i], p); // for rgb
-		  if (rgb) {
-			  assign_pixel(img[j][i], p); // for rgb
-		  } else {
-			  assign_pixel(img[i][j], p); // for grey
-		  }
-	  }
-  }
-////  cv_image<bgr_pixel> image(frame_gray);
-  LOGD("findEyes114");
-  //std::vector<dlib::rectangle> dets;
-  //dets.push_back(dlib::rectangle);
-  dlib::rectangle d(face.x, face.y, face.x + face.width, face.y + face.height);
-  LOGD("findEyes115");
-  //deserialize(s) >> sp;
-  LOGD("findEyes113");
-//  full_object_detection shape = sp(img, d);
-  full_object_detection shape = modelClass->getsp(img, d);
-  LOGD("findEyes116 %i", shape.num_parts());
-  if (shape.num_parts() > 2) {
-	  LOGD("findEyes116 %i %i", shape.part(0).x(), shape.part(0).y());
-	  LOGD("findEyes116 %i %i", shape.part(1).x(), shape.part(1).y());
-  }
-  for (int i = 0; i < shape.num_parts(); i++) {
-	  pixels.push_back(cv::Point(shape.part(i).x(), shape.part(i).y()));
-  }
-  } else {
-	  array2d<int> img;
-	  img.set_size(frame_gray.cols, frame_gray.rows); // for grey
-	  LOGD("findEyes1122");
-	  for (int i = 0; i < frame_gray.cols; i++) {
-		  //LOGD("findEyes1124");
-		  for (int j = 0; j < frame_gray.rows; j++) {
-			  //LOGD("findEyes115");
-			  img[i][j] = frame_gray.at<uchar>(i, j);
-		  }
-	  }
+	array2d<int> img;
+	img.set_size(frame_gray.rows, frame_gray.cols); // for grey
+	LOGD("findEyes1122");
+	for (int i = 0; i < frame_gray.rows; i++) {
+		//LOGD("findEyes1124");
+		for (int j = 0; j < frame_gray.cols; j++) {
+			//LOGD("findEyes115");
+			img[i][j] = frame_gray.at<uchar>(i, j);
+		}
+	}
 	////  cv_image<bgr_pixel> image(frame_gray);
-	  LOGD("findEyes114");
-	  //std::vector<dlib::rectangle> dets;
-	  //dets.push_back(dlib::rectangle);
-	  dlib::rectangle d(face.x, face.y, face.x + face.width, face.y + face.height);
-	  LOGD("findEyes115");
-	  //deserialize(s) >> sp;
-	  LOGD("findEyes113");
+	LOGD("findEyes114");
+	//std::vector<dlib::rectangle> dets;
+	//dets.push_back(dlib::rectangle);
+	dlib::rectangle d(face.x, face.y, face.x + face.width,
+			face.y + face.height);
+	LOGD("findEyes115");
+	//deserialize(s) >> sp;
+	LOGD("findEyes113");
 	//  full_object_detection shape = sp(img, d);
-	  full_object_detection shape = modelClass->getsp(img, d);
-	  LOGD("findEyes116 %i", shape.num_parts());
-	  if (shape.num_parts() > 2) {
-		  LOGD("findEyes116 %i %i", shape.part(0).x(), shape.part(0).y());
-		  LOGD("findEyes116 %i %i", shape.part(1).x(), shape.part(1).y());
-	  }
-	  for (int i = 0; i < shape.num_parts(); i++) {
-		  pixels.push_back(cv::Point(shape.part(i).x(), shape.part(i).y()));
-	  }
-  }
-  LOGD("findEyes116");
+	full_object_detection shape = modelClass->getsp(img, d);
+	LOGD("findEyes116 %i", shape.num_parts());
+	if (shape.num_parts() > 2) {
+		LOGD("findEyes116 %i %i", shape.part(0).x(), shape.part(0).y());
+		LOGD("findEyes116 %i %i", shape.part(1).x(), shape.part(1).y());
+	}
+	for (int i = 0; i < shape.num_parts(); i++) {
+		pixels.push_back(cv::Point(shape.part(i).x(), shape.part(i).y()));
+	}
+	LOGD("findEyes116");
 
-
-  LOGD("findEyes116");
+	LOGD("findEyes116");
 }

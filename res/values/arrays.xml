@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <array name="eyes">
+        <item>@raw/bear</item>
     </array>
+
     <integer-array name="eyes_center_y">
-        <item>4</item>
-        <item>8</item>
-        <item>16</item>
-        <item>32</item>
+        <item>17</item><!-- chin -->
+        <item>5</item><!-- eyebrow -->
+        <item>5</item><!-- eyebrow -->
+        <item>4</item><!-- nose -->
+        <item>5</item><!-- nose lower -->
+        <item>6</item><!-- eye -->
+        <item>6</item><!-- eye -->
+        <item>12</item><!-- lips outer -->
+        <item>8</item><!-- lips inner -->
     </integer-array>
+
 </resources>

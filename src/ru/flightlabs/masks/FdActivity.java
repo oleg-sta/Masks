@@ -93,7 +93,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     private float mRelativeFaceSize = 0.3f;
     private int mAbsoluteFaceSize = 0;
     
-    private final static int maxSizeEyeWidth = 460;
+    private final static int maxSizeEyeWidth = 367;
 
     Mat currentEye; // рисунок хранится с альфа каналом
     
@@ -129,8 +129,6 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     int availableProcessors = 1;
     
     String detectorName;
-    
-    boolean rgbMode;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -185,6 +183,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             }
         }
     };
+    protected boolean drawMask;
     
     
     // TODO: лучше делать асинхронно
@@ -197,6 +196,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         Bitmap bmp = BitmapFactory.decodeFile(newEyeFile.getAbsolutePath());
         Mat newEyeTmp2 = new Mat(bmp.getHeight(), bmp.getWidth(), CvType.CV_8UC4);
         Utils.bitmapToMat(bmp, newEyeTmp2, true);
+        
         Log.i(TAG, "loadNewEye2 " + index + " " + newEyeTmp2.type() + " " + newEyeTmp2.channels());
         Mat newEyeTmp = newEyeTmp2.t();
         Core.flip(newEyeTmp2.t(), newEyeTmp, 0);
@@ -324,7 +324,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                rgbMode = isChecked;
+                drawMask = isChecked;
             }
         });
     }
@@ -471,11 +471,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             Rect r = facesArray[0];
             if (true) {
                 Log.i(TAG, "mNativeDetector.findEyes!!!");
-                if (rgbMode) {
-                    foundEyes = mNativeDetector.findEyes(mRgba, r, detectorName);
-                } else {
-                    foundEyes = mNativeDetector.findEyes(mGray, r, detectorName);  
-                }
+                foundEyes = mNativeDetector.findEyes(mGray, r, detectorName);  
                 Log.i(TAG, "findEyes116 java " + foundEyes.length);
                 if (foundEyes != null && foundEyes.length > 1) {
                     Log.i(TAG, "findEyes116 java " + foundEyes[0].x + " " + foundEyes[0].y);
@@ -496,11 +492,53 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         
         if (foundEyes != null) {
             for (Point p : foundEyes) {
-                Core.circle(mRgba, new Point(p.y, p.x), 2,
-                        FACE_RECT_COLOR);
+                Core.circle(mRgba, new Point(p.y, p.x), 2, FACE_RECT_COLOR);
             }
+            if (drawMask) {
+                int[] bases = getResources().getIntArray(R.array.eyes_center_y);
+                int indexPo = 0;
+                Point leftEye = null;
+                Point rightEye = null;
+                Point pPrev = null;
+                int indexLine = 0;
+                for (int lineSize : bases) {
+                    for (int i = 0; i < lineSize; i++) {
+                        if (indexLine == 5) {
+                            if ((i == 0 || i == 3)) {
+                                if (leftEye == null) {
+                                    leftEye = new Point(foundEyes[indexPo].y, foundEyes[indexPo].x);
+                                } else {
+                                    leftEye = new Point((leftEye.x + foundEyes[indexPo].y) / 2,
+                                            (leftEye.y + foundEyes[indexPo].x) / 2);
+                                }
+                            }
+                        } else if (indexLine == 6) {
+                            if ((i == 0 || i == 3)) {
+                                if (rightEye == null) {
+                                    rightEye = new Point(foundEyes[indexPo].y, foundEyes[indexPo].x);
+                                } else {
+                                    rightEye = new Point((rightEye.x + foundEyes[indexPo].y) / 2,
+                                            (rightEye.y + foundEyes[indexPo].x) / 2);
+                                }
+                            }
+                        }
+                        if (indexPo < foundEyes.length) {
+                            Point pNew = new Point(foundEyes[indexPo].y, foundEyes[indexPo].x);
+                            if (pPrev != null) {
+                                Core.line(mRgba, pPrev, pNew, FACE_RECT_COLOR);
+                            }
+                            pPrev = pNew;
+                        }
+                        indexPo++;
+                    }
+                    pPrev = null;
+                    indexLine++;
+                }
+                drawEye(mRgba, leftEye, rightEye);
+            }
+
         }
-        
+
         Log.i(TAG, "onCameraFrame6");
         if (debugMode) {
             Core.putText(mRgba, "frames " + String.format("%.3f", (1f / lastCount) * 10) + " in 1 second.", new Point(50, 50), Core.FONT_HERSHEY_SIMPLEX, 1,
@@ -559,7 +597,9 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         double scale = distanceEye / maxSizeEyeWidth;
         double angle = -angleOfYx(lEye, rEye);
         
-        Point centerEyePic = new Point(currentEye.cols() / 2, currentEye.rows() / 2);
+        
+//        Point centerEyePic = new Point(currentEye.cols() / 2, currentEye.rows() / 2);
+        Point centerEyePic = new Point(currentEye.cols() / 2, 378);
         Rect bbox = new RotatedRect(centerEyePic, new Size(currentEye.size().width * scale, currentEye.size().height * scale), angle).boundingRect();
         
         Mat affineMat = Imgproc.getRotationMatrix2D(centerEyePic, angle, scale);
@@ -601,9 +641,37 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         
         List<Mat> layers = new ArrayList<Mat>();
         Core.split(sizedRotatedEye, layers);
-        sizedRotatedEye.copyTo(rgbaInnerWindow, layers.get(3)); // копируем повернутый глаз по альфа-каналу(4-й слой)
+//        sizedRotatedEye.copyTo(rgbaInnerWindow, layers.get(3)); // копируем повернутый глаз по альфа-каналу(4-й слой)
+//        mNativeDetector.mergeAlpha(sizedRotatedEye, mRgba);
+        mNativeDetector.mergeAlpha(sizedRotatedEye, rgbaInnerWindow);
+//        for(int i = 0; i < sizedRotatedEye.cols(); i++) {
+//            for(int j = 0; j < sizedRotatedEye.rows(); j++) {
+//                double[] pixel = sizedRotatedEye.get(j, i);
+//                double aplha = pixel[3];
+//                double[] pixelOld = rgbaInnerWindow.get(j, i);
+//                for (int ij = 0; ij < 3; ij++) {
+//                    pixelOld[ij] = (pixelOld[ij] * (255 - aplha) + pixel[ij] * aplha) / 255;
+//                }
+//                
+//                rgbaInnerWindow.put(j, i, pixelOld);
+//            }
+//        }
         rgbaInnerWindow.release();
         sizedRotatedEye.release();
+        
+        // ------------------CHECK------------------------------
+//        int ij = 0;
+//        Mat alpha = layers.get(3);
+//        for(int i = 0; i < alpha.cols(); i++) {
+//            for(int j = 0; j < alpha.rows(); j++) {
+//                double jee = alpha.get(j, i)[0];
+//                if (jee > 0) {
+//                    Log.i(TAG, "loadNewEye2 dc " + ij + " " + jee);
+//                }
+//                ij++;
+//            }
+//        }
+        // ------------------CHECK------------------------------
         
         if (debugMode) {
             Core.rectangle(mRgba, new Point(r.x, r.y), new Point(r.x + r.width, r.y + r.height), FACE_RECT_COLOR, 3);
