@@ -1,9 +1,11 @@
 package ru.flightlabs.masks;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -586,6 +588,22 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                     //startActivity(new Intent(d, Gallery.class));
                }
             });
+            if (foundEyes != null) {
+                OutputStream out;
+                try {
+                    out = new FileOutputStream(new File(newFile, "eSelfie" + counter + ".jpg.txt"));
+                    for (Point point : foundEyes) {
+                        out.write((point.x + ";" + point.y + "\r\n").getBytes());
+                    }
+                    out.close();
+                } catch (FileNotFoundException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
             Log.i(TAG, "saving end " + true);
         }
         fremaCounter++;
