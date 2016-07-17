@@ -2,6 +2,7 @@
 #include <jni.h>
 #include <opencv2/core/core.hpp>
 #include "ModelClass.h"
+#include "Triangle.h"
 /* Header for class org_opencv_samples_fd_DetectionBasedTracker */
 
 #ifndef _Included_org_opencv_samples_fd_DetectionBasedTracker
@@ -65,8 +66,16 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeStop
 JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDetect
   (JNIEnv *, jclass, jlong, jlong, jlong);
 
-void findEyes(cv::Mat frame_gray, cv::Rect face, std::vector<cv::Point> &pixels,  ModelClass *modelClass);
+JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDrawMask
+(JNIEnv * jenv, jclass, jlong imageFrom, jlong imageTo, jobjectArray, jobjectArray, jobjectArray, jobjectArray);
 
+
+void findEyes(cv::Mat frame_gray, cv::Rect face, std::vector<cv::Point> &pixels,  ModelClass *modelClass);
+bool checkInTriangle(cv::Point*, Triangle* triangle, cv::Point**);
+int getSide(cv::Point* pointCheck, cv::Point* point1, cv::Point* point2);
+int signum(double value);
+double getObjectFieldD(JNIEnv* env, jobject obj, jclass clsFeature, const char* name);
+int getObjectFieldI(JNIEnv* env, jobject obj, jclass clsFeature, const char* name);
 
 #ifdef __cplusplus
 }

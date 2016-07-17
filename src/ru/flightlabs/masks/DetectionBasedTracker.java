@@ -7,6 +7,9 @@ import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 
+import ru.flightlabs.masks.model.Line;
+import ru.flightlabs.masks.model.Triangle;
+
 import android.util.Log;
 
 public class DetectionBasedTracker
@@ -57,6 +60,11 @@ public class DetectionBasedTracker
     public void mergeAlpha(Mat fromImage, Mat toImage) {
         mergeAlpha(fromImage.getNativeObjAddr(), toImage.getNativeObjAddr());
     }
+    
+    public void drawMask(Mat currentMaskLandScaped, Mat mRgba, ru.flightlabs.masks.model.Point[] pointsWas, Point[] foundEyes, Line[] lines, Triangle[] trianlges) {
+        nativeDrawMask(currentMaskLandScaped.getNativeObjAddr(), mRgba.getNativeObjAddr(), pointsWas,
+                foundEyes, lines, trianlges);
+     }
 
     private long mNativeObj = 0;
     private Long mNativeModel = null;
@@ -70,4 +78,8 @@ public class DetectionBasedTracker
     private static native void nativeDetect(long thiz, long inputImage, long faces);
     private static native Point[] findEyes(long thiz, long inputImage, int x, int y, int height, int width, long modelSp);
     private static native void mergeAlpha(long fromImage, long toImage);
+    private static native void nativeDrawMask(long maskImage, long toImage, ru.flightlabs.masks.model.Point[] pointsWas,
+            Point[] foundEyes, Line[] lines, Triangle[] trianlges);
+
+    
 }

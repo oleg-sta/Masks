@@ -1,6 +1,7 @@
 #include <DetectionBasedTracker_jni.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/contrib/detection_based_tracker.hpp>
+#include "opencv2/imgproc/imgproc.hpp"
 
 #include <string>
 #include <vector>
@@ -12,6 +13,8 @@
 #include "constants.h"
 #include "helpers.h"
 #include "ModelClass.cpp"
+#include "Line.cpp"
+#include "Triangle.cpp"
 
 #include <dlib/image_processing/frontal_face_detector.h>
 #include <dlib/image_processing/render_face_detections.h>
@@ -212,6 +215,147 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_mergeAlpha
 		  }
 	}
 }
+
+JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDrawMask(
+		JNIEnv * jenv, jclass, jlong imageFrom, jlong imageTo,
+		jobjectArray pointsWas1, jobjectArray pointsTo1, jobjectArray lines1,
+		jobjectArray triangle1) {
+	cv::Mat imageFromMat = *((Mat*) imageFrom);
+	cv::Mat imageToMat = *((Mat*) imageTo);
+
+
+	int pointsWasLength = jenv->GetArrayLength(pointsWas1);
+	Point** pointsWas = new Point*[pointsWasLength];
+	for(int i = 0; i < pointsWasLength; i++) {
+		jobject point = jenv->GetObjectArrayElement((jobjectArray) pointsWas1, i);
+		jclass cls = jenv->GetObjectClass(point);
+		pointsWas[i] = new Point(getObjectFieldD(jenv, point, cls, "x"), getObjectFieldD(jenv, point, cls, "y"));
+		jenv->DeleteLocalRef(cls);
+		jenv->DeleteLocalRef(point);
+	}
+
+	int pointsToLength = jenv->GetArrayLength(pointsTo1);
+	Point** pointsTo = new Point*[jenv->GetArrayLength(pointsTo1)];
+	for(int i = 0; i < pointsToLength; i++) {
+		jobject point = jenv->GetObjectArrayElement((jobjectArray) pointsTo1, i);
+		jclass cls = jenv->GetObjectClass(point);
+		pointsTo[i] = new Point(getObjectFieldD(jenv, point, cls, "x"), getObjectFieldD(jenv, point, cls, "y"));
+		jenv->DeleteLocalRef(cls);
+		jenv->DeleteLocalRef(point);
+	}
+
+	int linesLength = jenv->GetArrayLength(lines1);
+	Line** lines = new Line*[linesLength];
+	for(int i = 0; i < linesLength; i++) {
+		jobject point = jenv->GetObjectArrayElement((jobjectArray) lines1, i);
+		jclass cls = jenv->GetObjectClass(point);
+		lines[i] = new Line(getObjectFieldI(jenv, point, cls, "pointStart"), getObjectFieldI(jenv, point, cls, "pointEnd"));
+		jenv->DeleteLocalRef(cls);
+		jenv->DeleteLocalRef(point);
+	}
+
+	int trianglesLength = jenv->GetArrayLength(triangle1);
+	Triangle** triangles = new Triangle*[trianglesLength];
+	for(int i = 0; i < trianglesLength; i++) {
+		jobject point = jenv->GetObjectArrayElement((jobjectArray) triangle1, i);
+		jclass cls = jenv->GetObjectClass(point);
+		triangles[i] = new Triangle(getObjectFieldI(jenv, point, cls, "point1"), getObjectFieldI(jenv, point, cls, "point2"), getObjectFieldI(jenv, point, cls, "point3"));
+		jenv->DeleteLocalRef(cls);
+		jenv->DeleteLocalRef(point);
+	}
+
+
+	for (int i = 0; i < imageToMat.rows; i++) {
+		LOGD("findEyes nativeDrawMask i = %i", i);
+		for (int j = 0; j < imageToMat.cols; j++) {
+			// check triangle
+			for (int k = 0; k < trianglesLength; k++) {
+				Triangle* triangle = triangles[k];
+				Point* curPpoint = new Point(i, j);
+				if (checkInTriangle(curPpoint, triangle, pointsTo)) {
+					LOGD("findEyes nativeDrawMask in Tria i = %i, j = %i", i, j);
+					Point2f srcTri[3];
+					Point2f dstTri[3];
+					Mat affine(2, 3, CV_32FC1);
+
+					srcTri[0] = Point2f(pointsTo[triangle->p1]->x,
+							pointsTo[triangle->p1]->y);
+					srcTri[1] = Point2f(pointsTo[triangle->p2]->x,
+							pointsTo[triangle->p2]->y);
+					srcTri[2] = Point2f(pointsTo[triangle->p3]->x,
+							pointsTo[triangle->p3]->y);
+
+					dstTri[0] = Point2f(pointsWas[triangle->p1]->x,
+							pointsWas[triangle->p1]->y);
+					dstTri[1] = Point2f(pointsWas[triangle->p2]->x,
+							pointsWas[triangle->p2]->y);
+					dstTri[2] = Point2f(pointsWas[triangle->p3]->x,
+							pointsWas[triangle->p3]->y);
+
+					affine = cv::getAffineTransform(srcTri, dstTri);
+
+					double origX = affine.at<double>(0, 0) * i
+							+ affine.at<double>(0, 1) * j
+							+ affine.at<double>(0, 2);
+					double origY = affine.at<double>(1, 0) * i
+							+ affine.at<double>(1, 1) * j
+							+ affine.at<double>(1, 2);
+
+					cv::Vec4b pixelFrom = imageFromMat.at<cv::Vec4b>(origY,
+							origX);
+					cv::Vec4b pixelTo = imageToMat.at<cv::Vec4b>(i, j);
+					int alpha = pixelFrom[3] / 2;
+					for (int ij = 0; ij < 3; ij++) {
+						pixelTo[ij] = (pixelTo[ij] * (255 - alpha)
+								+ pixelFrom[ij] * alpha) / 255;
+					}
+					imageToMat.at<cv::Vec4b>(i, j) = pixelTo;
+					break;
+				}
+			}
+		}
+	}
+
+}
+
+double getObjectFieldD(JNIEnv* env, jobject obj, jclass clsFeature, const char* name) {
+	jfieldID x1FieldId2 = env->GetFieldID(clsFeature, name, "D");
+	return env->GetFloatField(obj, x1FieldId2);
+}
+
+int getObjectFieldI(JNIEnv* env, jobject obj, jclass clsFeature, const char* name) {
+	jfieldID x1FieldId2 = env->GetFieldID(clsFeature, name, "I");
+	return env->GetIntField(obj, x1FieldId2);
+}
+
+bool checkInTriangle(Point* point, Triangle* triangle, Point** points) {
+
+    int sign1 = getSide(point, points[triangle->p1], points[triangle->p2]);
+    int sign2 = getSide(point, points[triangle->p2], points[triangle->p3]);
+    int sign3 = getSide(point, points[triangle->p3], points[triangle->p1]);
+    if ((sign1 >= 0 && sign2 >= 0 && sign3 >= 0) || (sign1 <= 0 && sign2 <= 0 && sign3 <= 0)) {
+        return true;
+    }
+    return false;
+}
+
+int getSide(Point* pointCheck, Point* point1, Point* point2) {
+        if (point1->y != point2->y) {
+            return signum((point2->x - point1->x) * (pointCheck->y - point1->y) / (point2->y - point1->y) + point1->x - pointCheck->x) * signum(point2->y - point1->y);
+        } else {
+            return signum(pointCheck->y - point1->y) * signum(point2->x - point1->x);
+        }
+    }
+
+int signum(double value) {
+	if (value > 0) {
+		return 1;
+	} else if (value < 0) {
+		return -1;
+	}
+	return 0;
+}
+
 JNIEXPORT jobjectArray JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_findEyes
 (JNIEnv * jenv, jclass, jlong thiz, jlong imageGray, jint x, jint y, jint height, jint width, jlong thizModel)
 {

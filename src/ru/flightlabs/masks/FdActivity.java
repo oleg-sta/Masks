@@ -29,6 +29,12 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
+import ru.flightlabs.masks.model.ImgLabModel;
+import ru.flightlabs.masks.model.Line;
+import ru.flightlabs.masks.model.SimpleModel;
+import ru.flightlabs.masks.model.Triangle;
+import ru.flightlabs.masks.totriangle.StupidTriangleModel;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -131,6 +137,10 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     int availableProcessors = 1;
     
     String detectorName;
+    
+    ru.flightlabs.masks.model.Point[] pointsWas;
+    Line[] lines;
+    Triangle[] trianlges;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -161,6 +171,15 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                     detectorName = prefs.getString(Settings.MODEL_PATH, Settings.MODEL_PATH_DEFAULT);
                     Log.e(TAG, "findEyes onManagerConnectedb " + detectorName);
                     mNativeDetector = new DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0, detectorName);
+                    
+                    File fModel = new File(cascadeDir, "testing_with_face_landmarks.xml");
+                    resourceToFile(getResources().openRawResource(R.raw.testing_with_face_landmarks), fModel);
+                    SimpleModel modelFrom = new ImgLabModel(fModel.getPath());
+                    
+                    pointsWas = modelFrom.getPointsWas();
+                    lines = modelFrom.getLines();
+                    lines = StupidTriangleModel.convertToTriangle(pointsWas, lines);
+                    trianlges = StupidTriangleModel.getTriagles(pointsWas, lines);
 
 //                    AssetManager assetManager = getApplication().getAssets();
 //                    detectorName = getFilesDir() + File.separator + "sp.dat";
@@ -537,7 +556,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                     pPrev = null;
                     indexLine++;
                 }
-                drawEye(mRgba, leftEye, rightEye);
+//                drawEye(mRgba, leftEye, rightEye);
+                mNativeDetector.drawMask(currentMaskLandScaped, mRgba, pointsWas, foundEyes, lines, trianlges);
             }
 
         }
