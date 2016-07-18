@@ -180,6 +180,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                     lines = modelFrom.getLines();
                     lines = StupidTriangleModel.convertToTriangle(pointsWas, lines);
                     trianlges = StupidTriangleModel.getTriagles(pointsWas, lines);
+                    Log.e(TAG, "findEyes sizes " + pointsWas.length + " " + lines.length + " " + trianlges.length);
+                    Log.e(TAG, "findEyes firsts " + pointsWas[0].x + " " + pointsWas[0].y + " " + lines[0].pointStart + " " + lines[0].pointEnd + " " + trianlges[0].point1 + " " + trianlges[0].point2 + " " + trianlges[0].point3);
 
 //                    AssetManager assetManager = getApplication().getAssets();
 //                    detectorName = getFilesDir() + File.separator + "sp.dat";
@@ -216,14 +218,15 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         // load eye to Mat
         // используем загрузку через андроид, т.к. opencv ломает цвета
         Bitmap bmp = BitmapFactory.decodeFile(newEyeFile.getAbsolutePath());
-        Mat newEyeTmp2 = new Mat(bmp.getHeight(), bmp.getWidth(), CvType.CV_8UC4);
-        Utils.bitmapToMat(bmp, newEyeTmp2, true);
+//        Mat newEyeTmp2 = new Mat(bmp.getHeight(), bmp.getWidth(), CvType.CV_8UC4);
+        currentMaskLandScaped= new Mat();
+        Utils.bitmapToMat(bmp, currentMaskLandScaped, true);
         
-        Log.i(TAG, "loadNewEye2 " + index + " " + newEyeTmp2.type() + " " + newEyeTmp2.channels());
-        Mat newEyeTmp = newEyeTmp2.t();
-        Core.flip(newEyeTmp2.t(), newEyeTmp, 0);
-        newEyeTmp2.release();
-        currentMaskLandScaped = newEyeTmp;
+//        Log.i(TAG, "loadNewEye2 " + index + " " + newEyeTmp2.type() + " " + newEyeTmp2.channels());
+//        Mat newEyeTmp = newEyeTmp2.t();
+//        Core.flip(newEyeTmp2.t(), newEyeTmp, 0);
+//        newEyeTmp2.release();
+//        currentMaskLandScaped = newEyeTmp;
         cascadeDir.delete();
         Log.i(TAG, "loadNewEye " + currentMaskLandScaped.type() + " " + currentMaskLandScaped.channels());
     }

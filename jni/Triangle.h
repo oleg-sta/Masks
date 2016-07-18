@@ -4,6 +4,7 @@
 class Triangle {
 public:
 	int p1,p2,p3;
+	double minX, maxX, minY, maxY;
 	Triangle(int,int,int);
 };
 

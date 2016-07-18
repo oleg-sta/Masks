@@ -260,40 +260,45 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDraw
 		jobject point = jenv->GetObjectArrayElement((jobjectArray) triangle1, i);
 		jclass cls = jenv->GetObjectClass(point);
 		triangles[i] = new Triangle(getObjectFieldI(jenv, point, cls, "point1"), getObjectFieldI(jenv, point, cls, "point2"), getObjectFieldI(jenv, point, cls, "point3"));
+		triangles[i]->minX = std::min(std::min(pointsTo[triangles[i]->p1]->x, pointsTo[triangles[i]->p2]->x), pointsTo[triangles[i]->p3]->x);
+		triangles[i]->maxX = std::max(std::max(pointsTo[triangles[i]->p1]->x, pointsTo[triangles[i]->p2]->x), pointsTo[triangles[i]->p3]->x);
+		triangles[i]->minY = std::min(std::min(pointsTo[triangles[i]->p1]->y, pointsTo[triangles[i]->p2]->y), pointsTo[triangles[i]->p3]->y);
+		triangles[i]->maxY = std::max(std::max(pointsTo[triangles[i]->p1]->y, pointsTo[triangles[i]->p2]->y), pointsTo[triangles[i]->p3]->y);
 		jenv->DeleteLocalRef(cls);
 		jenv->DeleteLocalRef(point);
 	}
 
 
-	for (int i = 0; i < imageToMat.rows; i++) {
-		LOGD("findEyes nativeDrawMask i = %i", i);
-		for (int j = 0; j < imageToMat.cols; j++) {
-			// check triangle
-			for (int k = 0; k < trianglesLength; k++) {
-				Triangle* triangle = triangles[k];
+	double test = 1.1;
+	LOGD("findEyes firsts %i %i %i %i %i %i %i %i %i %i", (int)pointsWas[0]->x, (int)pointsWas[0]->y, (int)pointsTo[0]->x, (int)pointsTo[1]->y, lines[0]->p1,lines[0]->p2, triangles[0]->p1, triangles[0]->p2, triangles[0]->p3, (int)test);
+
+	for (int k = 0; k < trianglesLength; k++) {
+		Triangle* triangle = triangles[k];
+
+		Point2f srcTri[3];
+		Point2f dstTri[3];
+		Mat affine(2, 3, CV_32FC1);
+
+		srcTri[0] = Point2f(pointsTo[triangle->p1]->x,
+				pointsTo[triangle->p1]->y);
+		srcTri[1] = Point2f(pointsTo[triangle->p2]->x,
+				pointsTo[triangle->p2]->y);
+		srcTri[2] = Point2f(pointsTo[triangle->p3]->x,
+				pointsTo[triangle->p3]->y);
+
+		dstTri[0] = Point2f(pointsWas[triangle->p1]->x,
+				pointsWas[triangle->p1]->y);
+		dstTri[1] = Point2f(pointsWas[triangle->p2]->x,
+				pointsWas[triangle->p2]->y);
+		dstTri[2] = Point2f(pointsWas[triangle->p3]->x,
+				pointsWas[triangle->p3]->y);
+
+		affine = cv::getAffineTransform(srcTri, dstTri);
+
+		for (int i = triangle->minX; i < triangle->maxX; i++) {
+			for (int j = triangle->minY; j < triangle->maxY; j++) {
 				Point* curPpoint = new Point(i, j);
 				if (checkInTriangle(curPpoint, triangle, pointsTo)) {
-					LOGD("findEyes nativeDrawMask in Tria i = %i, j = %i", i, j);
-					Point2f srcTri[3];
-					Point2f dstTri[3];
-					Mat affine(2, 3, CV_32FC1);
-
-					srcTri[0] = Point2f(pointsTo[triangle->p1]->x,
-							pointsTo[triangle->p1]->y);
-					srcTri[1] = Point2f(pointsTo[triangle->p2]->x,
-							pointsTo[triangle->p2]->y);
-					srcTri[2] = Point2f(pointsTo[triangle->p3]->x,
-							pointsTo[triangle->p3]->y);
-
-					dstTri[0] = Point2f(pointsWas[triangle->p1]->x,
-							pointsWas[triangle->p1]->y);
-					dstTri[1] = Point2f(pointsWas[triangle->p2]->x,
-							pointsWas[triangle->p2]->y);
-					dstTri[2] = Point2f(pointsWas[triangle->p3]->x,
-							pointsWas[triangle->p3]->y);
-
-					affine = cv::getAffineTransform(srcTri, dstTri);
-
 					double origX = affine.at<double>(0, 0) * i
 							+ affine.at<double>(0, 1) * j
 							+ affine.at<double>(0, 2);
@@ -304,23 +309,44 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDraw
 					cv::Vec4b pixelFrom = imageFromMat.at<cv::Vec4b>(origY,
 							origX);
 					cv::Vec4b pixelTo = imageToMat.at<cv::Vec4b>(i, j);
-					int alpha = pixelFrom[3] / 2;
+					int alpha = pixelFrom[3];
 					for (int ij = 0; ij < 3; ij++) {
 						pixelTo[ij] = (pixelTo[ij] * (255 - alpha)
 								+ pixelFrom[ij] * alpha) / 255;
 					}
 					imageToMat.at<cv::Vec4b>(i, j) = pixelTo;
-					break;
 				}
+				delete curPpoint;
 			}
 		}
 	}
+	// release resources
+	Triangle** triangles = new Triangle*[trianglesLength];
+	for(int i = 0; i < trianglesLength; i++) {
+		delete triangles[i];
+	}
+	delete triangles;
+	for(int i = 0; i < linesLength; i++) {
+		delete lines[i];
+	}
+	delete lines;
+
+	Point** pointsTo = new Point*[jenv->GetArrayLength(pointsTo1)];
+	for(int i = 0; i < pointsToLength; i++) {
+		delete pointsTo[i];
+	}
+	delete pointsTo;
+
+	for(int i = 0; i < pointsWasLength; i++) {
+		delete pointsWas[i];
+	}
+	delete pointsWas;
 
 }
 
 double getObjectFieldD(JNIEnv* env, jobject obj, jclass clsFeature, const char* name) {
 	jfieldID x1FieldId2 = env->GetFieldID(clsFeature, name, "D");
-	return env->GetFloatField(obj, x1FieldId2);
+	return env->GetDoubleField(obj, x1FieldId2);
 }
 
 int getObjectFieldI(JNIEnv* env, jobject obj, jclass clsFeature, const char* name) {
@@ -329,7 +355,9 @@ int getObjectFieldI(JNIEnv* env, jobject obj, jclass clsFeature, const char* nam
 }
 
 bool checkInTriangle(Point* point, Triangle* triangle, Point** points) {
-
+	if (point->x < triangle->minX || point->x > triangle->maxX || point->y < triangle->minY || point->y > triangle->maxY) {
+		return false;
+	}
     int sign1 = getSide(point, points[triangle->p1], points[triangle->p2]);
     int sign2 = getSide(point, points[triangle->p2], points[triangle->p3]);
     int sign3 = getSide(point, points[triangle->p3], points[triangle->p1]);
