@@ -321,7 +321,6 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDraw
 		}
 	}
 	// release resources
-	Triangle** triangles = new Triangle*[trianglesLength];
 	for(int i = 0; i < trianglesLength; i++) {
 		delete triangles[i];
 	}
@@ -331,7 +330,6 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDraw
 	}
 	delete lines;
 
-	Point** pointsTo = new Point*[jenv->GetArrayLength(pointsTo1)];
 	for(int i = 0; i < pointsToLength; i++) {
 		delete pointsTo[i];
 	}
