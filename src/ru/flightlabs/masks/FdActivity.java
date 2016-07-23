@@ -66,6 +66,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     public static final String DIRECTORY_SELFIE = "Masks";
     //public static int counter;
     public static boolean makePhoto;
+    public static boolean preMakePhoto;
     // Size constants of eye
     int kEyePercentTop = 25;
     int kEyePercentSide = 13;
@@ -123,6 +124,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     long timeStart;
     double lastCount = 0.5f;
     
+    int haarModel = 0;
+    
     int cameraIndex;
     int numberOfCameras;
     boolean cameraFacing;
@@ -156,21 +159,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                     // load cascade file from application resources
                     Log.e(TAG, "findEyes onManagerConnected");
                     File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
-
-                    mCascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
-                    resourceToFile(getResources().openRawResource(R.raw.lbpcascade_frontalface), mCascadeFile);
-
-                    mJavaDetector = new CascadeClassifier(mCascadeFile.getAbsolutePath());
-                    if (mJavaDetector.empty()) {
-                        Log.e(TAG, "Failed to load cascade classifier");
-                        mJavaDetector = null;
-                    } else
-                        Log.i(TAG, "Loaded cascade classifier from " + mCascadeFile.getAbsolutePath());
-
-                    final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
-                    detectorName = prefs.getString(Settings.MODEL_PATH, Settings.MODEL_PATH_DEFAULT);
-                    Log.e(TAG, "findEyes onManagerConnectedb " + detectorName);
-                    mNativeDetector = new DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0, detectorName);
+                    loadHaarModel(R.raw.lbpcascade_frontalface);
                     
                     File fModel = new File(cascadeDir, "testing_with_face_landmarks.xml");
                     resourceToFile(getResources().openRawResource(R.raw.testing_with_face_landmarks), fModel);
@@ -352,6 +341,48 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 drawMask = isChecked;
             }
         });
+        
+        findViewById(R.id.setting_button).setOnClickListener(new OnClickListener() {
+            
+            @Override
+            public void onClick(View v) {
+                haarModel++;
+                if (haarModel % 2 == 0) {
+                    loadHaarModel(R.raw.lbpcascade_frontalface);
+                } else {
+                    loadHaarModel(R.raw.haarcascade_frontalface_alt2);
+                }
+                
+            }
+        });
+    }
+    
+    private void loadHaarModel(int resource) {
+        File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
+
+        mCascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
+        try {
+            resourceToFile(getResources().openRawResource(resource), mCascadeFile);
+        } catch (NotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        
+        mJavaDetector = new CascadeClassifier(mCascadeFile.getAbsolutePath());
+        if (mJavaDetector.empty()) {
+            Log.e(TAG, "Failed to load cascade classifier");
+            mJavaDetector = null;
+        } else
+            Log.i(TAG, "Loaded cascade classifier from " + mCascadeFile.getAbsolutePath());
+
+        final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
+        detectorName = prefs.getString(Settings.MODEL_PATH, Settings.MODEL_PATH_DEFAULT);
+        Log.e(TAG, "findEyes onManagerConnectedb " + detectorName);
+        mNativeDetector = new DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0, detectorName);
     }
 
     @Override
@@ -427,7 +458,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         }
         Log.i(TAG, "onCameraFrame3");
         if (cameraFacing) {
-            Core.flip(mGrayTmp.t(), mGray, 0);
+            Core.flip(mGrayTmp.t(), mGray, -1);
+//            mGray = mGrayTmp.t();
         } else {
             mGray = mGrayTmp.t();
         }
@@ -452,7 +484,56 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             }
             mNativeDetector.setMinFaceSize(mAbsoluteFaceSize);
         }
-
+        
+        int w = mRgba.cols();
+        int h = mRgba.rows();
+        
+        int counter = 0;
+        // save original pic
+        if (makePhoto) {
+            preMakePhoto = true;
+            makePhoto = false;
+            final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
+            counter = prefs.getInt(Settings.COUNTER_PHOTO, 0);
+            counter++;
+            Editor editor = prefs.edit();
+            editor.putInt(Settings.COUNTER_PHOTO, counter);
+            editor.commit();
+            
+            File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+            File newFile = new File(file, DIRECTORY_SELFIE);
+            
+            Mat mRgbaToSave = mRgba.t();
+            Core.flip(mRgba.t(), mRgbaToSave, 1);
+            File fileJpg = new File(newFile, "eSelfie_orig_" + counter + ".jpg");
+            
+            Bitmap bitmap = Bitmap.createBitmap(mRgbaToSave.cols(), mRgbaToSave.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(mRgbaToSave, bitmap);
+            saveBitmap(fileJpg.getPath(),bitmap);
+            bitmap.recycle();
+            mRgbaToSave.release();
+            MediaScannerConnection.scanFile(this, new String[] { fileJpg.getPath() }, new String[] { "image/jpeg" }, null);
+            
+            File fileJpg2 = new File(newFile, "eSelfie_gray_" + counter + ".jpg");
+            Bitmap bitmap2 = Bitmap.createBitmap(mGray.cols(), mGray.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(mGray, bitmap2);
+            saveBitmap(fileJpg2.getPath(),bitmap2);
+            bitmap2.recycle();
+            MediaScannerConnection.scanFile(this, new String[] { fileJpg2.getPath() }, new String[] { "image/jpeg" }, null);
+        }
+        
+        // выводим серый в направлении для поиска для дебага
+        Mat mGrayTo = new Mat(new Size(100, 100), mGray.type());
+        Imgproc.resize(mGray, mGrayTo, new Size(100, 100));
+        Mat mGrayToColor = new Mat(new Size(100, 100), mRgba.type());
+        Imgproc.cvtColor(mGrayTo, mGrayToColor, Imgproc.COLOR_GRAY2RGBA);
+        mGrayTo.release();
+        Mat rgbaInnerWindow = mRgba.submat(0, 100, 0, 100);
+        mGrayToColor.copyTo(rgbaInnerWindow); // копируем повернутый глаз по
+                                              // альфа-каналу(4-й слой)
+        rgbaInnerWindow.release();
+        mGrayToColor.release();
+                
         faces = new MatOfRect();
 
         if (mDetectorType == JAVA_DETECTOR) {
@@ -479,12 +560,12 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         Point leftCorner = null;
         Point rightCorner = null;
         for (int i = 0; i < facesArray.length; i++) {
-            facesArray[i].height = (int)(facesArray[i].height * 1.2f);
+            //facesArray[i].height = (int)(facesArray[i].height * 1.2f);
             if (i == 0) {
                 leftCorner = facesArray[i].tl();
                 rightCorner = facesArray[i].br();
             }
-            Core.rectangle(mRgba, new Point(leftCorner.y, leftCorner.x), new Point(rightCorner.y, rightCorner.x),
+            Core.rectangle(mRgba, orient(leftCorner, w, h), orient(rightCorner, w, h),
                     FACE_RECT_COLOR, 3);
         }
         // поиск зрачков
@@ -517,7 +598,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         
         if (foundEyes != null) {
             for (Point p : foundEyes) {
-                Core.circle(mRgba, new Point(p.y, p.x), 2, FACE_RECT_COLOR);
+                Core.circle(mRgba, orient(p, w, h), 2, FACE_RECT_COLOR);
             }
             if (drawMask) {
                 int[] bases = getResources().getIntArray(R.array.eyes_center_y);
@@ -571,14 +652,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                     new Scalar(255, 255, 255), 2);
         }
         Log.i(TAG, "onCameraFrame end " + new Date());
-        if (makePhoto) {
-            makePhoto = false;
-            final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
-            int counter = prefs.getInt(Settings.COUNTER_PHOTO, 0);
-            counter++;
-            Editor editor = prefs.edit();
-            editor.putInt(Settings.COUNTER_PHOTO, counter);
-            editor.commit();
+        if (preMakePhoto) {
+            preMakePhoto = false;
             Log.i(TAG, "saving start " + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
             File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
             File newFile=new File(file, DIRECTORY_SELFIE);
@@ -631,6 +706,23 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         }
         fremaCounter++;
         return mRgba;
+    }
+    
+    
+    private static Point orient(Point point, int width, int heigth) {
+        return orient(point, 0, width, heigth);
+    }
+    
+    private static Point orient(Point point, int orient, int width, int heigth) {
+        if (orient == 3) {
+            return point;
+        } else if (orient == 0) {
+            return new Point(point.y, heigth - point.x);
+        } else if (orient == 1) {
+            return new Point(width - point.x, heigth - point.y);
+        } else {
+            return new Point(width - point.y, point.x);
+        }
     }
     
     private void drawEye(Mat mRgba, Point rEye, Point lEye) {

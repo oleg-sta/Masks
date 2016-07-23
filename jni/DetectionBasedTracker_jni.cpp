@@ -383,7 +383,7 @@ int signum(double value) {
 }
 
 JNIEXPORT jobjectArray JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_findEyes
-(JNIEnv * jenv, jclass, jlong thiz, jlong imageGray, jint x, jint y, jint height, jint width, jlong thizModel)
+(JNIEnv * jenv, jclass, jlong thiz, jlong imageGray, jint x, jint y, jint width, jint height, jlong thizModel)
 {
 	LOGD("Java_ru_flightlabs_masks_DetectionBasedTracker_findEyes");
 

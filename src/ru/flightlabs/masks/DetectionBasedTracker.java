@@ -51,7 +51,8 @@ public class DetectionBasedTracker
     
     public Point[] findEyes(Mat imageGray, Rect face, String modelSp) {
         if (mNativeModel != null) {
-            return findEyes(mNativeObj, imageGray.getNativeObjAddr(), face.x, face.y, face.height, face.width, mNativeModel);
+//            return findEyes(mNativeObj, imageGray.getNativeObjAddr(), face.x, face.y, face.width, face.height, mNativeModel);
+            return findEyes(mNativeObj, imageGray.getNativeObjAddr(), face.x, face.y, face.width, face.height, mNativeModel);
         } else {
             return new Point[0];
         }

@@ -23,6 +23,17 @@
             android:rotation="270"
             android:src="@drawable/ic_settings" />
         
+         <ImageView
+            android:id="@+id/setting_button2"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="9dp"
+            android:layout_marginLeft="59dp"
+            android:rotation="270"
+            android:src="@drawable/ic_settings" />
+        
         <ImageView
             android:id="@+id/sound_button"
             android:layout_width="40dp"
