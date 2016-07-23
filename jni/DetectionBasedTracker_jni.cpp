@@ -216,12 +216,14 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_mergeAlpha
 	}
 }
 
+// ВАЖНО: изображение, куда накладываем рисунок находится в landscape
 JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDrawMask(
 		JNIEnv * jenv, jclass, jlong imageFrom, jlong imageTo,
 		jobjectArray pointsWas1, jobjectArray pointsTo1, jobjectArray lines1,
 		jobjectArray triangle1) {
 	cv::Mat imageFromMat = *((Mat*) imageFrom);
-	cv::Mat imageToMat = *((Mat*) imageTo);
+	cv::Mat imageToMat = *((Mat*) imageTo); // данное изображение находится в landscape режиме
+	int width = imageToMat.rows; // ширина "неправильная"
 
 
 	int pointsWasLength = jenv->GetArrayLength(pointsWas1);
@@ -235,7 +237,7 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDraw
 	}
 
 	int pointsToLength = jenv->GetArrayLength(pointsTo1);
-	Point** pointsTo = new Point*[jenv->GetArrayLength(pointsTo1)];
+	Point** pointsTo = new Point*[jenv->GetArrayLength(pointsTo1)]; // точки найденые на ч\б изображении
 	for(int i = 0; i < pointsToLength; i++) {
 		jobject point = jenv->GetObjectArrayElement((jobjectArray) pointsTo1, i);
 		jclass cls = jenv->GetObjectClass(point);
@@ -308,13 +310,13 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDraw
 
 					cv::Vec4b pixelFrom = imageFromMat.at<cv::Vec4b>(origY,
 							origX);
-					cv::Vec4b pixelTo = imageToMat.at<cv::Vec4b>(i, j);
+					cv::Vec4b pixelTo = imageToMat.at<cv::Vec4b>(width - i, j);
 					int alpha = pixelFrom[3];
 					for (int ij = 0; ij < 3; ij++) {
 						pixelTo[ij] = (pixelTo[ij] * (255 - alpha)
 								+ pixelFrom[ij] * alpha) / 255;
 					}
-					imageToMat.at<cv::Vec4b>(i, j) = pixelTo;
+					imageToMat.at<cv::Vec4b>(width - i, j) = pixelTo;
 				}
 				delete curPpoint;
 			}

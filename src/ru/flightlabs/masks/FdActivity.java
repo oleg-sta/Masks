@@ -629,7 +629,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                             }
                         }
                         if (indexPo < foundEyes.length) {
-                            Point pNew = new Point(foundEyes[indexPo].y, foundEyes[indexPo].x);
+                            Point pNew = orient(foundEyes[indexPo], w, h);
                             if (pPrev != null) {
                                 Core.line(mRgba, pPrev, pNew, FACE_RECT_COLOR);
                             }
