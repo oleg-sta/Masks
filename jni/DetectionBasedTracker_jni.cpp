@@ -298,27 +298,30 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDraw
 		affine = cv::getAffineTransform(srcTri, dstTri);
 
 		for (int i = triangle->minX; i < triangle->maxX; i++) {
-			for (int j = triangle->minY; j < triangle->maxY; j++) {
-				Point* curPpoint = new Point(i, j);
-				if (checkInTriangle(curPpoint, triangle, pointsTo)) {
-					double origX = affine.at<double>(0, 0) * i
-							+ affine.at<double>(0, 1) * j
-							+ affine.at<double>(0, 2);
-					double origY = affine.at<double>(1, 0) * i
-							+ affine.at<double>(1, 1) * j
-							+ affine.at<double>(1, 2);
+			int* minMax = new int[4];
+			minMax[2] = -1;
+			minMax[3] = -1;
+			getBorder(pointsTo[triangle->p1], pointsTo[triangle->p2], pointsTo[triangle->p3], i, minMax);
+			getBorder(pointsTo[triangle->p2], pointsTo[triangle->p3], pointsTo[triangle->p1], i, minMax);
+			getBorder(pointsTo[triangle->p3], pointsTo[triangle->p1], pointsTo[triangle->p2], i, minMax);
+			if (minMax[0] >= triangle->minY && minMax[1] <= triangle->maxY) {
+			for (int j = minMax[0]; j < minMax[1]; j++) {
+				double origX = affine.at<double>(0, 0) * i
+						+ affine.at<double>(0, 1) * j + affine.at<double>(0, 2);
+				double origY = affine.at<double>(1, 0) * i
+						+ affine.at<double>(1, 1) * j + affine.at<double>(1, 2);
 
-					cv::Vec4b pixelFrom = imageFromMat.at<cv::Vec4b>(origY,
-							origX);
-					cv::Vec4b pixelTo = imageToMat.at<cv::Vec4b>(width - i, j);
-					int alpha = pixelFrom[3];
-					for (int ij = 0; ij < 3; ij++) {
-						pixelTo[ij] = (pixelTo[ij] * (255 - alpha)
-								+ pixelFrom[ij] * alpha) / 255;
-					}
-					imageToMat.at<cv::Vec4b>(width - i, j) = pixelTo;
+				cv::Vec4b pixelFrom = imageFromMat.at<cv::Vec4b>(origY, origX);
+				cv::Vec4b pixelTo = imageToMat.at<cv::Vec4b>(width - i, j);
+				int alpha = pixelFrom[3];
+				for (int ij = 0; ij < 3; ij++) {
+					pixelTo[ij] = (pixelTo[ij] * (255 - alpha)
+							+ pixelFrom[ij] * alpha) / 255;
 				}
-				delete curPpoint;
+				imageToMat.at<cv::Vec4b>(width - i, j) = pixelTo;
+			}
+			} else {
+				LOGD("findEyes superError!!!");
 			}
 		}
 	}
@@ -365,6 +368,29 @@ bool checkInTriangle(Point* point, Triangle* triangle, Point** points) {
         return true;
     }
     return false;
+}
+
+void getBorder(Point* p1, Point* p2, Point* opposite, int x, int* minMax) {
+	if (p2->x != p1->x) {
+		double y = p1->y + (x - p1->x) * (p2->y - p1->y) / (p2->x - p1->x);
+		double y2 = p1->y
+				+ (opposite->x - p1->x) * (p2->y - p1->y) / (p2->x - p1->x);
+		if (opposite->y > y2) {
+			// TODO possible error
+			if (minMax[2] == -1) {
+				minMax[2] = 0;
+				minMax[0] = (int) y;
+			}
+			minMax[0] = std::max(minMax[0], (int) y);
+		} else {
+			if (minMax[3] == -1) {
+				minMax[3] = 0;
+				minMax[1] = (int) y;
+			}
+			minMax[1] = std::min(minMax[1], (int) y);
+		}
+
+	}
 }
 
 int getSide(Point* pointCheck, Point* point1, Point* point2) {

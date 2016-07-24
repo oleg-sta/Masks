@@ -72,6 +72,7 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDraw
 
 void findEyes(cv::Mat frame_gray, cv::Rect face, std::vector<cv::Point> &pixels,  ModelClass *modelClass);
 bool checkInTriangle(cv::Point*, Triangle* triangle, cv::Point**);
+void getBorder(cv::Point* p1, cv::Point* p2, cv::Point* opposite, int x, int* minMax);
 int getSide(cv::Point* pointCheck, cv::Point* point1, cv::Point* point2);
 int signum(double value);
 double getObjectFieldD(JNIEnv* env, jobject obj, jclass clsFeature, const char* name);
