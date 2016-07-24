@@ -91,6 +91,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     private File mCascadeFile;
     private CascadeClassifier mJavaDetector;
     private DetectionBasedTracker mNativeDetector;
+    private static final int[] resourceDetector = {R.raw.lbpcascade_frontalface, R.raw.haarcascade_frontalface_alt2, R.raw.my_detector};
 
     private boolean debugMode = true;
     private boolean showEyes = true;
@@ -159,7 +160,12 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                     // load cascade file from application resources
                     Log.e(TAG, "findEyes onManagerConnected");
                     File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
-                    loadHaarModel(R.raw.lbpcascade_frontalface);
+                    loadHaarModel(resourceDetector[0]);
+                    
+                    final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
+                    detectorName = prefs.getString(Settings.MODEL_PATH, Settings.MODEL_PATH_DEFAULT);
+                    Log.e(TAG, "findEyes onManagerConnectedb " + detectorName);
+                    mNativeDetector = new DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0, detectorName);
                     
                     File fModel = new File(cascadeDir, "testing_with_face_landmarks.xml");
                     resourceToFile(getResources().openRawResource(R.raw.testing_with_face_landmarks), fModel);
@@ -342,22 +348,21 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             }
         });
         
-        findViewById(R.id.setting_button).setOnClickListener(new OnClickListener() {
+        findViewById(R.id.setting_button2).setOnClickListener(new OnClickListener() {
             
             @Override
             public void onClick(View v) {
                 haarModel++;
-                if (haarModel % 2 == 0) {
-                    loadHaarModel(R.raw.lbpcascade_frontalface);
-                } else {
-                    loadHaarModel(R.raw.haarcascade_frontalface_alt2);
+                if (haarModel >= resourceDetector.length) {
+                    haarModel = 0;
                 }
-                
+                loadHaarModel(resourceDetector[haarModel % resourceDetector.length]);
             }
         });
     }
     
     private void loadHaarModel(int resource) {
+        Log.i(TAG, "loadHaarModel " + getResources().getResourceName(resource));
         File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
 
         mCascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
@@ -370,7 +375,6 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
         
         mJavaDetector = new CascadeClassifier(mCascadeFile.getAbsolutePath());
         if (mJavaDetector.empty()) {
@@ -379,10 +383,10 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         } else
             Log.i(TAG, "Loaded cascade classifier from " + mCascadeFile.getAbsolutePath());
 
-        final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
-        detectorName = prefs.getString(Settings.MODEL_PATH, Settings.MODEL_PATH_DEFAULT);
-        Log.e(TAG, "findEyes onManagerConnectedb " + detectorName);
-        mNativeDetector = new DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0, detectorName);
+//        final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
+//        detectorName = prefs.getString(Settings.MODEL_PATH, Settings.MODEL_PATH_DEFAULT);
+//        Log.e(TAG, "findEyes onManagerConnectedb " + detectorName);
+//        mNativeDetector = new DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0, detectorName);
     }
 
     @Override
@@ -399,7 +403,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         super.onResume();
         
         final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
-        debugMode = prefs.getBoolean(Settings.DEBUG_MODE, false);
+        debugMode = prefs.getBoolean(Settings.DEBUG_MODE, true);
         findPupils = prefs.getBoolean(Settings.PUPILS_MODE, true);
         multi = prefs.getBoolean(Settings.MULTI_MODE, true);
         OpenCVLoader.initDebug();
@@ -649,6 +653,10 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         Log.i(TAG, "onCameraFrame6");
         if (debugMode) {
             Core.putText(mRgba, "frames " + String.format("%.3f", (1f / lastCount) * 10) + " in 1 second.", new Point(50, 50), Core.FONT_HERSHEY_SIMPLEX, 1,
+                    new Scalar(255, 255, 255), 2);
+            String resource = getResources().getResourceName(resourceDetector[haarModel % resourceDetector.length]);
+            resource = resource.substring(resource.indexOf("raw") + 3);
+            Core.putText(mRgba, "haarModel " + resource, new Point(50, 100), Core.FONT_HERSHEY_SIMPLEX, 1,
                     new Scalar(255, 255, 255), 2);
         }
         Log.i(TAG, "onCameraFrame end " + new Date());
