@@ -37,16 +37,25 @@ public class ImgLabModel implements SimpleModel {
         this.points = points.toArray(new Point[0]);
         //Utils.upsideDown(this.points);
         int[] liness = {17,5,5,4,5,6,6,12,8};
+        boolean[] closedLiness = {false, false, false, false, false, true, true, true, true};
         List<Line> lines = new ArrayList<Line>();
+        int lineCount = 0;
         int j = 0;
         for (int lineLength : liness) {
+            int startPoint = j;
+            int endPoint = j;
             for (int i = 1; i < lineLength; i++) {
+                endPoint = j + 1;
                 if (j + 1 < points.size()) {
-                    lines.add(new Line(j , j + 1, true));
+                    lines.add(new Line(j, j + 1, true));
                 }
                 j++;
             }
+            if (closedLiness[lineCount]) {
+                lines.add(new Line(startPoint, endPoint, true));
+            }
             j++;
+            lineCount++;
         }
         this.lines = lines.toArray(new Line[0]);
     }

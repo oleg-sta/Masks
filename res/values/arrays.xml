@@ -15,5 +15,17 @@
         <item>12</item><!-- lips outer -->
         <item>8</item><!-- lips inner -->
     </integer-array>
+    
+        <integer-array name="eyes_center_boolean">
+        <item>0</item><!-- chin -->
+        <item>0</item><!-- eyebrow -->
+        <item>0</item><!-- eyebrow -->
+        <item>0</item><!-- nose -->
+        <item>0</item><!-- nose lower -->
+        <item>1</item><!-- eye -->
+        <item>1</item><!-- eye -->
+        <item>1</item><!-- lips outer -->
+        <item>1</item><!-- lips inner -->
+    </integer-array>
 
 </resources>

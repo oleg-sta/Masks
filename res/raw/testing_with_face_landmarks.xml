@@ -57,26 +57,26 @@
       <part name='45' x='612' y='383'/>
       <part name='46' x='580' y='418'/>
       <part name='47' x='538' y='418'/>
-      <part name='48' x='250' y='702'/>
-      <part name='49' x='290' y='674'/>
-      <part name='50' x='335' y='658'/>
-      <part name='51' x='382' y='666'/>
+      <part name='48' x='245' y='693'/>
+      <part name='49' x='295' y='665'/>
+      <part name='50' x='334' y='655'/>
+      <part name='51' x='380' y='656'/>
       <part name='52' x='430' y='663'/>
-      <part name='53' x='470' y='661'/>
-      <part name='54' x='507' y='712'/>
-      <part name='55' x='464' y='737'/>
-      <part name='56' x='422' y='747'/>
-      <part name='57' x='372' y='756'/>
-      <part name='58' x='323' y='749'/>
-      <part name='59' x='283' y='735'/>
-      <part name='60' x='302' y='705'/>
-      <part name='61' x='339' y='697'/>
-      <part name='62' x='382' y='690'/>
-      <part name='63' x='426' y='695'/>
-      <part name='64' x='467' y='705'/>
-      <part name='65' x='421' y='723'/>
-      <part name='66' x='381' y='725'/>
-      <part name='67' x='340' y='722'/>
+      <part name='53' x='471' y='665'/>
+      <part name='54' x='505' y='707'/>
+      <part name='55' x='461' y='737'/>
+      <part name='56' x='423' y='738'/>
+      <part name='57' x='385' y='745'/>
+      <part name='58' x='334' y='741'/>
+      <part name='59' x='291' y='734'/>
+      <part name='60' x='282' y='697'/>
+      <part name='61' x='333' y='677'/>
+      <part name='62' x='382' y='671'/>
+      <part name='63' x='424' y='678'/>
+      <part name='64' x='473' y='699'/>
+      <part name='65' x='423' y='692'/>
+      <part name='66' x='385' y='692'/>
+      <part name='67' x='335' y='691'/>
     </box>
   </image>
 </images>
