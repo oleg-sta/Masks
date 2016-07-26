@@ -77,6 +77,11 @@
       <part name='65' x='423' y='692'/>
       <part name='66' x='385' y='692'/>
       <part name='67' x='335' y='691'/>
+      <part name='68' x='49' y='192'/>
+      <part name='69' x='156' y='89'/>
+      <part name='70' x='365' y='48'/>
+      <part name='71' x='594' y='92'/>
+      <part name='72' x='684' y='195'/>
     </box>
   </image>
 </images>

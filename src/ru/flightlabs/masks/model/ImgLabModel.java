@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import ru.flightlabs.masks.model.primitives.Line;
+import ru.flightlabs.masks.model.primitives.Point;
+
 public class ImgLabModel implements SimpleModel {
 
     Point[] points;

@@ -1,4 +1,4 @@
-package ru.flightlabs.masks.model;
+package ru.flightlabs.masks.model.primitives;
 
 public class Triangle {
     
@@ -9,7 +9,7 @@ public class Triangle {
         this.point3 = point3;
     }
     
-    // TODO пполхой способ
+    // TODO пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     public boolean pointInside(Point point, Point[] points) {
         int sign1 = getSide(point, points[point1], points[point2]);
         int sign2 = getSide(point, points[point2], points[point3]);

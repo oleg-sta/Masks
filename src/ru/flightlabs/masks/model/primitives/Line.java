@@ -1,4 +1,4 @@
-package ru.flightlabs.masks.model;
+package ru.flightlabs.masks.model.primitives;
 
 public class Line {
     public int pointStart;

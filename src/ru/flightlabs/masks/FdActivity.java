@@ -30,9 +30,9 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
 import ru.flightlabs.masks.model.ImgLabModel;
-import ru.flightlabs.masks.model.Line;
 import ru.flightlabs.masks.model.SimpleModel;
-import ru.flightlabs.masks.model.Triangle;
+import ru.flightlabs.masks.model.primitives.Line;
+import ru.flightlabs.masks.model.primitives.Triangle;
 import ru.flightlabs.masks.totriangle.StupidTriangleModel;
 
 import android.app.Activity;
@@ -142,7 +142,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     
     String detectorName;
     
-    ru.flightlabs.masks.model.Point[] pointsWas;
+    ru.flightlabs.masks.model.primitives.Point[] pointsWas;
     Line[] lines;
     Triangle[] trianlges;
 
@@ -645,6 +645,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                     indexLine++;
                 }
 //                drawEye(mRgba, leftEye, rightEye);
+                
+                foundEyes = ru.flightlabs.masks.model.Utils.completeModel(pointsWas, foundEyes, new int[]{0, 16, 27});
                 mNativeDetector.drawMask(currentMaskLandScaped, mRgba, pointsWas, foundEyes, lines, trianlges);
             }
 
