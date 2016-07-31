@@ -487,7 +487,10 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 Editor editor = prefs.edit();
                 editor.putInt(Settings.COUNTER_PHOTO, counter);
                 editor.commit();
-                videoWriter = new VideoWriter("/storage/sdcard0/DCIM/Masks/Masks" + counter + ".avi", VideoWriter.fourcc('M', 'J', 'P', 'G'), 10, new Size(ret.width(), ret.height()));
+                File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+                File newFile = new File(file, DIRECTORY_SELFIE);
+                File fileJpg = new File(newFile, "Masks" + counter + ".avi");
+                videoWriter = new VideoWriter(fileJpg.getPath(), VideoWriter.fourcc('M', 'J', 'P', 'G'), 10, new Size(ret.width(), ret.height()));
                 Log.i(TAG, "onCameraFrame open video stream " + videoWriter.isOpened());
             }
         } else {
