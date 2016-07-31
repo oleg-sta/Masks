@@ -29,9 +29,9 @@
 									<listOptionValue builtIn="false" value="&quot;${NDKROOT}/sources/cxx-stl/gnu-libstdc++/4.6/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${NDKROOT}/sources/cxx-stl/gnu-libstdc++/4.6/libs/armeabi-v7a/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../sdk/native/jni/include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;F:\OpenCV-android-sdk\sdk\native\jni\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\android-ndk-r10e\sources\cxx-stl\stlport\stlport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\android-ndk-r10e\platforms\android-8\arch-arm\usr\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;F:\openCV-android-sdk-3.1.0\sdk\native\jni\include&quot;"/>
 								</option>
 								<option id="org.eclipse.cdt.build.core.settings.holder.symbols.1424359063" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="ANDROID=1"/>
@@ -46,7 +46,7 @@
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../sdk/native/jni/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\android-ndk-r10e\platforms\android-8\arch-arm\usr\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\android-ndk-r10e\sources\cxx-stl\stlport\stlport&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;F:\OpenCV-android-sdk\sdk\native\jni\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;F:\openCV-android-sdk-3.1.0\sdk\native\jni\include&quot;"/>
 								</option>
 								<option id="org.eclipse.cdt.build.core.settings.holder.symbols.719752707" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="ANDROID=1"/>

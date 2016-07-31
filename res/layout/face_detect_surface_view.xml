@@ -33,6 +33,15 @@
             android:layout_marginLeft="59dp"
             android:rotation="270"
             android:src="@drawable/ic_settings" />
+         
+         <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="9dp"
+            android:layout_marginLeft="109dp" />
         
         <ImageView
             android:id="@+id/sound_button"
@@ -65,7 +74,18 @@
             android:layout_marginRight="78dp"
             android:rotation="270"
             android:src="@drawable/ic_camera" />
-        <ImageView
+
+        <ImageView
+            android:id="@+id/video_button"
+            android:layout_width="78dp"
+            android:layout_height="78dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="63dp"
+            android:layout_marginRight="78dp"
+            android:rotation="270"
+            android:src="@drawable/ic_camera" />
+                <ImageView
             android:id="@+id/gallery_button"
             android:layout_width="52dp"
             android:layout_height="52dp"

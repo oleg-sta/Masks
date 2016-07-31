@@ -28,6 +28,7 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
+import org.opencv.videoio.VideoWriter;
 
 import ru.flightlabs.masks.model.ImgLabModel;
 import ru.flightlabs.masks.model.SimpleModel;
@@ -36,6 +37,7 @@ import ru.flightlabs.masks.model.primitives.Triangle;
 import ru.flightlabs.masks.totriangle.StupidTriangleModel;
 
 import android.app.Activity;
+import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -47,6 +49,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaActionSound;
 import android.media.MediaScannerConnection;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -60,6 +63,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 public class FdActivity extends Activity implements CvCameraViewListener2 {
 
@@ -120,6 +124,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     final boolean grad = false;
     
     ImageView noPerson;
+    ProgressBar progressBar;
     
     int frameCount;
     long timeStart;
@@ -145,6 +150,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     ru.flightlabs.masks.model.primitives.Point[] pointsWas;
     Line[] lines;
     Triangle[] trianlges;
+    VideoWriter videoWriter;
+    boolean videoWriterStart;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -165,7 +172,9 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                     final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
                     detectorName = prefs.getString(Settings.MODEL_PATH, Settings.MODEL_PATH_DEFAULT);
                     Log.e(TAG, "findEyes onManagerConnectedb " + detectorName);
-                    mNativeDetector = new DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0, detectorName);
+                    if (mNativeDetector == null) {
+                        mNativeDetector = new DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0, detectorName);
+                    }
                     
                     File fModel = new File(cascadeDir, "testing_with_face_landmarks.xml");
                     resourceToFile(getResources().openRawResource(R.raw.testing_with_face_landmarks), fModel);
@@ -201,6 +210,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             }
         }
     };
+    
     protected boolean drawMask;
     
     
@@ -303,6 +313,14 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             }
         });
         cameraButton.setSoundEffectsEnabled(false);
+        
+        findViewById(R.id.video_button).setOnClickListener(new OnClickListener() {
+            
+            @Override
+            public void onClick(View v) {
+                videoWriterStart = !videoWriterStart;
+            }
+        });
 
         findViewById(R.id.setting_button).setOnClickListener(new OnClickListener() {
             @Override
@@ -338,6 +356,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             }
         });
         noPerson = (ImageView) findViewById(R.id.no_person);
+        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         
         CheckBox c = (CheckBox)findViewById(R.id.rgbCheckBox);
         c.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -430,6 +449,12 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
         Log.i(TAG, "onCameraFrame " + new Date() + " count " + lastCount);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(mNativeDetector != null? View.INVISIBLE : View.VISIBLE);
+            }
+        });
         if (newIndexEye != currentIndexEye) {
             try {
                 loadNewEye(newIndexEye);
@@ -454,6 +479,23 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             }
         }
         Mat ret = inputFrame.rgba();
+        if (videoWriterStart) {
+            if (videoWriter == null) {
+                final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
+                int counter = prefs.getInt(Settings.COUNTER_PHOTO, 0);
+                counter++;
+                Editor editor = prefs.edit();
+                editor.putInt(Settings.COUNTER_PHOTO, counter);
+                editor.commit();
+                videoWriter = new VideoWriter("/storage/sdcard0/DCIM/Masks/Masks" + counter + ".avi", VideoWriter.fourcc('M', 'J', 'P', 'G'), 10, new Size(ret.width(), ret.height()));
+                Log.i(TAG, "onCameraFrame open video stream " + videoWriter.isOpened());
+            }
+        } else {
+            if (videoWriter != null) {
+                videoWriter.release();
+                videoWriter = null;
+            }
+        }
         Log.i(TAG, "onCameraFrame1");
         Mat mGrayTmp = inputFrame.gray();
         Log.i(TAG, "onCameraFrame2");
@@ -486,7 +528,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             if (Math.round(height * mRelativeFaceSize) > 0) {
                 mAbsoluteFaceSize = Math.round(height * mRelativeFaceSize);
             }
-            mNativeDetector.setMinFaceSize(mAbsoluteFaceSize);
+            //mNativeDetector.setMinFaceSize(mAbsoluteFaceSize);
         }
         
         int w = mRgba.cols();
@@ -569,14 +611,14 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 leftCorner = facesArray[i].tl();
                 rightCorner = facesArray[i].br();
             }
-            Core.rectangle(mRgba, orient(leftCorner, w, h), orient(rightCorner, w, h),
+            Imgproc.rectangle(mRgba, orient(leftCorner, w, h), orient(rightCorner, w, h),
                     FACE_RECT_COLOR, 3);
         }
         // поиск зрачков
         Point rEye = null;
         Point lEye = null;
         foundEyes = null;
-        if (leftCorner != null) {
+        if (leftCorner != null && mNativeDetector != null) {
             Log.i(TAG, "mNativeDetector.findEyes");
             Rect r = facesArray[0];
             if (true) {
@@ -602,7 +644,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         
         if (foundEyes != null) {
             for (Point p : foundEyes) {
-                Core.circle(mRgba, orient(p, w, h), 2, FACE_RECT_COLOR);
+                Imgproc.circle(mRgba, orient(p, w, h), 2, FACE_RECT_COLOR);
             }
             if (drawMask) {
                 int[] bases = getResources().getIntArray(R.array.eyes_center_y);
@@ -635,7 +677,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                         if (indexPo < foundEyes.length) {
                             Point pNew = orient(foundEyes[indexPo], w, h);
                             if (pPrev != null) {
-                                Core.line(mRgba, pPrev, pNew, FACE_RECT_COLOR);
+                                Imgproc.line(mRgba, pPrev, pNew, FACE_RECT_COLOR);
                             }
                             pPrev = pNew;
                         }
@@ -654,11 +696,11 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 
         Log.i(TAG, "onCameraFrame6");
         if (debugMode) {
-            Core.putText(mRgba, "frames " + String.format("%.3f", (1f / lastCount) * 10) + " in 1 second.", new Point(50, 50), Core.FONT_HERSHEY_SIMPLEX, 1,
+            Imgproc.putText(mRgba, "frames " + String.format("%.3f", (1f / lastCount) * 10) + " in 1 second.", new Point(50, 50), Core.FONT_HERSHEY_SIMPLEX, 1,
                     new Scalar(255, 255, 255), 2);
             String resource = getResources().getResourceName(resourceDetector[haarModel % resourceDetector.length]);
             resource = resource.substring(resource.indexOf("raw") + 3);
-            Core.putText(mRgba, "haarModel " + resource, new Point(50, 100), Core.FONT_HERSHEY_SIMPLEX, 1,
+            Imgproc.putText(mRgba, "haarModel " + resource, new Point(50, 100), Core.FONT_HERSHEY_SIMPLEX, 1,
                     new Scalar(255, 255, 255), 2);
         }
         Log.i(TAG, "onCameraFrame end " + new Date());
@@ -674,9 +716,9 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             Core.flip(mRgba.t(), mRgbaToSave, 1);
             String text = "eSelfie by FlightLabs.ru";
             int[] yOut = new int[1];
-            Size sizeText = Core.getTextSize(text, Core.FONT_HERSHEY_SIMPLEX, 1, 2, yOut);
-            Core.rectangle(mRgbaToSave, new Point(mRgbaToSave.width() - sizeText.width, mRgbaToSave.height() - sizeText.height - yOut[0]), new Point(mRgbaToSave.width(), mRgbaToSave.height()), new Scalar(0, 0, 0), -1);
-            Core.putText(mRgbaToSave, text, new Point(mRgbaToSave.width() - sizeText.width, mRgbaToSave.height() - yOut[0]), Core.FONT_HERSHEY_SIMPLEX, 1,
+            Size sizeText = Imgproc.getTextSize(text, Core.FONT_HERSHEY_SIMPLEX, 1, 2, yOut);
+            Imgproc.rectangle(mRgbaToSave, new Point(mRgbaToSave.width() - sizeText.width, mRgbaToSave.height() - sizeText.height - yOut[0]), new Point(mRgbaToSave.width(), mRgbaToSave.height()), new Scalar(0, 0, 0), -1);
+            Imgproc.putText(mRgbaToSave, text, new Point(mRgbaToSave.width() - sizeText.width, mRgbaToSave.height() - yOut[0]), Core.FONT_HERSHEY_SIMPLEX, 1,
                     new Scalar(255, 255, 255), 2);
             File fileJpg = new File(newFile, "eSelfie" + counter + ".jpg");
             
@@ -713,6 +755,10 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 }
             }
             Log.i(TAG, "saving end " + true);
+        }
+        if (videoWriter != null) {
+            Log.i(TAG, "onCameraFrame write to video");
+            videoWriter.write(mRgba);
         }
         fremaCounter++;
         return mRgba;
@@ -782,7 +828,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         Rect r = new Rect((int) (leftPoint.x), (int) (leftPoint.y),
                 newEyeWidth, newEyeHeight);
         
-        Core.rectangle(mRgba, r.tl(), r.br(), new Scalar(255, 0, 0), 3);
+        Imgproc.rectangle(mRgba, r.tl(), r.br(), new Scalar(255, 0, 0), 3);
         Mat rgbaInnerWindow = mRgba.submat(r.y, r.y + r.height, r.x, r.x + r.width);
         
         List<Mat> layers = new ArrayList<Mat>();
@@ -820,9 +866,9 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         // ------------------CHECK------------------------------
         
         if (debugMode) {
-            Core.rectangle(mRgba, new Point(r.x, r.y), new Point(r.x + r.width, r.y + r.height), FACE_RECT_COLOR, 3);
-            Core.circle(mRgba, lEye, 9, FACE_RECT_COLOR, 4);
-            Core.circle(mRgba, rEye, 9, FACE_RECT_COLOR, 4);
+            Imgproc.rectangle(mRgba, new Point(r.x, r.y), new Point(r.x + r.width, r.y + r.height), FACE_RECT_COLOR, 3);
+            Imgproc.circle(mRgba, lEye, 9, FACE_RECT_COLOR, 4);
+            Imgproc.circle(mRgba, rEye, 9, FACE_RECT_COLOR, 4);
         }
     }
     

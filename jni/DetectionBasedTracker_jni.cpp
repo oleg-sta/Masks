@@ -1,6 +1,6 @@
 #include <DetectionBasedTracker_jni.h>
 #include <opencv2/core/core.hpp>
-#include <opencv2/contrib/detection_based_tracker.hpp>
+#include <opencv2/objdetect/detection_based_tracker.hpp>
 #include "opencv2/imgproc/imgproc.hpp"
 
 #include <string>
@@ -32,10 +32,10 @@ using namespace cv;
 using namespace dlib;
 
 
-inline void vector_Rect_to_Mat(cv::vector<Rect>& v_rect, Mat& mat)
-{
-    mat = Mat(v_rect, true);
-}
+//inline void vector_Rect_to_Mat(cv::vector<Rect>& v_rect, Mat& mat)
+//{
+//    mat = Mat(v_rect, true);
+//}
 
 JNIEXPORT jlong JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeCreateObject
 (JNIEnv * jenv, jclass, jstring jFileName, jint faceSize)
@@ -47,10 +47,10 @@ JNIEXPORT jlong JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeCre
 
     try
     {
-        DetectionBasedTracker::Parameters DetectorParams;
-        if (faceSize > 0)
-            DetectorParams.minObjectSize = faceSize;
-        result = (jlong)new DetectionBasedTracker(stdFileName, DetectorParams);
+//        DetectionBasedTracker::Parameters DetectorParams;
+//        if (faceSize > 0)
+//            DetectorParams.minObjectSize = faceSize;
+//        result = (jlong)new DetectionBasedTracker(stdFileName, DetectorParams);
     }
     catch(cv::Exception& e)
     {
@@ -171,7 +171,7 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeSetF
         {
             DetectionBasedTracker::Parameters DetectorParams = \
             ((DetectionBasedTracker*)thiz)->getParameters();
-            DetectorParams.minObjectSize = faceSize;
+//            DetectorParams.minObjectSize = faceSize;
             ((DetectionBasedTracker*)thiz)->setParameters(DetectorParams);
         }
     }
@@ -443,10 +443,10 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDete
     LOGD("Java_org_opencv_samples_facedetect_DetectionBasedTracker_nativeDetect enter");
     try
     {
-        cv::vector<Rect> RectFaces;
-        ((DetectionBasedTracker*)thiz)->process(*((Mat*)imageGray));
-        ((DetectionBasedTracker*)thiz)->getObjects(RectFaces);
-        vector_Rect_to_Mat(RectFaces, *((Mat*)faces));
+//        cv::vector<Rect> RectFaces;
+//        ((DetectionBasedTracker*)thiz)->process(*((Mat*)imageGray));
+//        ((DetectionBasedTracker*)thiz)->getObjects(RectFaces);
+//        vector_Rect_to_Mat(RectFaces, *((Mat*)faces));
     }
     catch(cv::Exception& e)
     {
