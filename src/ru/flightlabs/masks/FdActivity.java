@@ -1,10 +1,12 @@
 package ru.flightlabs.masks;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
@@ -242,10 +244,46 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             Log.i(TAG, "LoadModel doInBackground3");
             lines = modelFrom.getLines();
             Log.i(TAG, "LoadModel doInBackground4");
-            Triangulation trianglation = new DelaunayTriangulation();
-            lines = trianglation.convertToTriangle(pointsWas, lines);
+            // load ready triangulation model from file
+            List<Line> linesArr = new ArrayList<Line>();
+            List<Triangle> triangleArr = new ArrayList<Triangle>();
+            AssetManager assetManager = getAssets();
+            try {
+                {
+                InputStream ims = assetManager.open("bear_lines.txt");
+                BufferedReader in = new BufferedReader(new InputStreamReader(ims));
+                String line = null;
+                while((line = in.readLine()) != null) {
+                    String[] spl = line.split(";");
+                    if (spl.length == 2) {
+                        linesArr.add(new Line(Integer.parseInt(spl[0]), Integer.parseInt(spl[1])));
+                    }
+                }
+                }
+                
+                {
+                InputStream ims = assetManager.open("bear_triangles.txt");
+                BufferedReader in = new BufferedReader(new InputStreamReader(ims));
+                String line = null;
+                while((line = in.readLine()) != null) {
+                    String[] spl = line.split(";");
+                    if (spl.length == 3) {
+                        triangleArr.add(new Triangle(Integer.parseInt(spl[0]), Integer.parseInt(spl[1]), Integer.parseInt(spl[2])));
+                    }
+                }
+                }
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            lines = linesArr.toArray(new Line[0]);
+//            Triangulation trianglation = new DelaunayTriangulation();
+//            lines = trianglation.convertToTriangle(pointsWas, lines);
+            
             Log.i(TAG, "LoadModel doInBackground5");
-            trianlges = StupidTriangleModel.getTriagles(pointsWas, lines);
+            // load triangles from model
+            trianlges = triangleArr.toArray(new Triangle[0]);
+            //trianlges = StupidTriangleModel.getTriagles(pointsWas, lines);
             Log.i(TAG, "LoadModel doInBackground6");
             
             mNativeDetector = new DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0, detectorName);
