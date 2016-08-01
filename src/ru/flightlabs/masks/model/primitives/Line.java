@@ -14,5 +14,12 @@ public class Line {
     public Line(int pointStart, int pointEnd) {
         this(pointStart, pointEnd, false);
     }
+    
+    public boolean same(Line line) {
+        if ((line.pointStart == pointStart && line.pointEnd == pointEnd) || (line.pointStart == pointEnd && line.pointEnd == pointStart)) {
+            return true;
+        }
+        return false;
+    }
 
 }

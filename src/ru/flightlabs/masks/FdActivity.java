@@ -34,7 +34,9 @@ import ru.flightlabs.masks.model.ImgLabModel;
 import ru.flightlabs.masks.model.SimpleModel;
 import ru.flightlabs.masks.model.primitives.Line;
 import ru.flightlabs.masks.model.primitives.Triangle;
+import ru.flightlabs.masks.totriangle.DelaunayTriangulation;
 import ru.flightlabs.masks.totriangle.StupidTriangleModel;
+import ru.flightlabs.masks.totriangle.Triangulation;
 
 import android.app.Activity;
 import android.app.IntentService;
@@ -240,7 +242,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             Log.i(TAG, "LoadModel doInBackground3");
             lines = modelFrom.getLines();
             Log.i(TAG, "LoadModel doInBackground4");
-            lines = StupidTriangleModel.convertToTriangle(pointsWas, lines);
+            Triangulation trianglation = new DelaunayTriangulation();
+            lines = trianglation.convertToTriangle(pointsWas, lines);
             Log.i(TAG, "LoadModel doInBackground5");
             trianlges = StupidTriangleModel.getTriagles(pointsWas, lines);
             Log.i(TAG, "LoadModel doInBackground6");
