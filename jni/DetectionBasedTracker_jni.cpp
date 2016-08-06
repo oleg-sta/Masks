@@ -323,14 +323,14 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDraw
 
 				// получаем пиксли из оригинального рисунка и куда накладываем
 				cv::Vec4b pixelFrom = imageFromMat.at<cv::Vec4b>(origY, origX);
-				cv::Vec4b pixelTo = imageToMat.at<cv::Vec4b>(width - i, j);
+				cv::Vec4b pixelTo = imageToMat.at<cv::Vec4b>(j, i);
 				int alpha = pixelFrom[3];
 				// смешиваем по трем каналам(RGB)
 				for (int ij = 0; ij < 3; ij++) {
 					pixelTo[ij] = (pixelTo[ij] * (255 - alpha)
 							+ pixelFrom[ij] * alpha) / 255;
 				}
-				imageToMat.at<cv::Vec4b>(width - i, j) = pixelTo;
+				imageToMat.at<cv::Vec4b>(j, i) = pixelTo;
 			}
 			} else {
 				LOGD("findEyes superError!!!");

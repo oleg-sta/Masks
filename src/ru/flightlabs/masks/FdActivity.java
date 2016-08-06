@@ -565,7 +565,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 frameCount = 0;
             }
         }
-        Mat ret = inputFrame.rgba();
+        Mat mRgba = inputFrame.rgba();
+        Mat ret = mRgba;
         if (videoWriterStart) {
             if (videoWriter == null) {
                 final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
@@ -590,30 +591,34 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             }
         }
         Log.i(TAG, "onCameraFrame1");
-        Mat mGrayTmp = inputFrame.gray();
-        Log.i(TAG, "onCameraFrame2");
-        if (mGray == null) {
-            mGray = mGrayTmp.t();
-        }
-        Log.i(TAG, "onCameraFrame3");
-        if (cameraFacing) {
-            Core.flip(mGrayTmp.t(), mGray, -1);
+//        Mat mGrayTmp = inputFrame.gray().t();
+//        Log.i(TAG, "onCameraFrame2");
+//        if (mGray == null) {
 //            mGray = mGrayTmp.t();
-        } else {
-            mGray = mGrayTmp.t();
-        }
+//        }
+//        Log.i(TAG, "onCameraFrame3");
+//        if (cameraFacing) {
+//            Core.flip(mGrayTmp.t(), mGray, -1);
+////            mGray = mGrayTmp.t();
+//        } else {
+//            mGray = mGrayTmp.t();
+//        }
+        mGray = inputFrame.gray();
         Log.i(TAG, "onCameraFrame4");
-
-        if (!cameraFacing) {
-            mRgba = ret;
-        } else {
-            if (mRgba == null) {
-                mRgba = new Mat((int) ret.size().height, (int) ret.size().width, ret.type());
-            }
-            Log.i(TAG, "onCameraFrame5");
-            Core.flip(ret, mRgba, 1);
-            Log.i(TAG, "onCameraFrame6");
+        if (mRgba.height() == 0 || mRgba.width() == 0) {
+            return mRgba;
         }
+
+//        if (!cameraFacing) {
+//            mRgba = ret;
+//        } else {
+//            if (mRgba == null) {
+//                mRgba = new Mat((int) ret.size().height, (int) ret.size().width, ret.type());
+//            }
+//            Log.i(TAG, "onCameraFrame5");
+//            Core.flip(ret, mRgba, 1);
+//            Log.i(TAG, "onCameraFrame6");
+//        }
 
         Log.e(TAG, "findEyes666 " + mRgba.type());
         if (mAbsoluteFaceSize == 0) {
@@ -670,6 +675,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         Mat mGrayToColor = new Mat(new Size(100, 100), mRgba.type());
         Imgproc.cvtColor(mGrayTo, mGrayToColor, Imgproc.COLOR_GRAY2RGBA);
         mGrayTo.release();
+        Log.e(TAG, "findEyes666 " + mRgba.height() + " " + mRgba.width());
         Mat rgbaInnerWindow = mRgba.submat(0, 100, 0, 100);
         mGrayToColor.copyTo(rgbaInnerWindow); // копируем повернутый глаз по
                                               // альфа-каналу(4-й слой)
@@ -866,6 +872,9 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     }
     
     private static Point orient(Point point, int orient, int width, int heigth) {
+        if (true) {
+            return point;
+        }
         if (orient == 3) {
             return point;
         } else if (orient == 0) {
