@@ -16,7 +16,7 @@
         <item>8</item><!-- lips inner -->
     </integer-array>
     
-        <integer-array name="eyes_center_boolean">
+     <integer-array name="eyes_center_boolean">
         <item>0</item><!-- chin -->
         <item>0</item><!-- eyebrow -->
         <item>0</item><!-- eyebrow -->
@@ -27,5 +27,29 @@
         <item>1</item><!-- lips outer -->
         <item>1</item><!-- lips inner -->
     </integer-array>
-
+    
+     <integer-array name="eyes_center_y_44">
+        <item>9</item><!-- chin -->
+        <item>3</item><!-- eyebrow -->
+        <item>3</item><!-- eyebrow -->
+        <item>2</item><!-- nose -->
+        <item>3</item><!-- nose lower -->
+        <item>6</item><!-- eye -->
+        <item>6</item><!-- eye -->
+        <item>6</item><!-- lips outer -->
+        <item>6</item><!-- lips inner -->
+    </integer-array>
+    
+     <integer-array name="eyes_center_boolean_44">
+        <item>0</item><!-- chin -->
+        <item>0</item><!-- eyebrow -->
+        <item>0</item><!-- eyebrow -->
+        <item>0</item><!-- nose -->
+        <item>0</item><!-- nose lower -->
+        <item>1</item><!-- eye -->
+        <item>1</item><!-- eye -->
+        <item>1</item><!-- lips outer -->
+        <item>1</item><!-- lips inner -->
+    </integer-array>
+    
 </resources>

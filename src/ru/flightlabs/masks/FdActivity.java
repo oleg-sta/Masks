@@ -229,7 +229,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
             File fModel = new File(cascadeDir, "testing_with_face_landmarks.xml");
             try {
-                resourceToFile(getResources().openRawResource(R.raw.testing_with_face_landmarks), fModel);
+                resourceToFile(getResources().openRawResource(R.raw.testing_with_face_landmarks_44), fModel);
             } catch (NotFoundException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -250,7 +250,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             AssetManager assetManager = getAssets();
             try {
                 {
-                InputStream ims = assetManager.open("bear_lines.txt");
+                InputStream ims = assetManager.open("bear_lines_44.txt");
                 BufferedReader in = new BufferedReader(new InputStreamReader(ims));
                 String line = null;
                 while((line = in.readLine()) != null) {
@@ -262,7 +262,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 }
                 
                 {
-                InputStream ims = assetManager.open("bear_triangles.txt");
+                InputStream ims = assetManager.open("bear_triangles_44.txt");
                 BufferedReader in = new BufferedReader(new InputStreamReader(ims));
                 String line = null;
                 while((line = in.readLine()) != null) {
@@ -743,7 +743,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 Imgproc.circle(mRgba, orient(p, w, h), 2, FACE_RECT_COLOR);
             }
             if (drawMask) {
-                int[] bases = getResources().getIntArray(R.array.eyes_center_y);
+                int[] bases = getResources().getIntArray(R.array.eyes_center_y_44);
                 int indexPo = 0;
                 Point leftEye = null;
                 Point rightEye = null;
