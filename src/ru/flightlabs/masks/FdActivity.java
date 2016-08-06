@@ -115,6 +115,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     private final static int maxSizeEyeWidth = 367;
 
     Mat currentMaskLandScaped; // рисунок хранится с альфа каналом для наложения, уже повернут для наложения в режиме landscape
+    private boolean makeNewFace;
     
     TypedArray eyesResources;
     int currentIndexEye = -1;
@@ -460,6 +461,13 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 loadHaarModel(resourceDetector[haarModel % resourceDetector.length]);
             }
         });
+        findViewById(R.id.make_face).setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                makeNewFace = true;
+            }
+        });
     }
     
     private void loadHaarModel(int resource) {
@@ -670,6 +678,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         }
         
         // выводим серый в направлении для поиска для дебага
+        {
         Mat mGrayTo = new Mat(new Size(100, 100), mGray.type());
         Imgproc.resize(mGray, mGrayTo, new Size(100, 100));
         Mat mGrayToColor = new Mat(new Size(100, 100), mRgba.type());
@@ -681,6 +690,21 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                                               // альфа-каналу(4-й слой)
         rgbaInnerWindow.release();
         mGrayToColor.release();
+        }
+        
+        if (currentMaskLandScaped != null) {
+            Mat mGrayTo = new Mat(new Size(100, 100), currentMaskLandScaped.type());
+            Imgproc.resize(currentMaskLandScaped, mGrayTo, new Size(100, 100));
+            //Mat mGrayToColor = new Mat(new Size(100, 100), mRgba.type());
+            //Imgproc.cvtColor(mGrayTo, mGrayToColor, Imgproc.COLOR_GRAY2RGBA);
+            //mGrayTo.release();
+            //Log.e(TAG, "findEyes666 " + mRgba.height() + " " + mRgba.width());
+            Mat rgbaInnerWindow = mRgba.submat(100, 200, 0, 100);
+            mGrayTo.copyTo(rgbaInnerWindow); // копируем повернутый глаз по
+                                                  // альфа-каналу(4-й слой)
+            rgbaInnerWindow.release();
+            mGrayTo.release();
+        }
                 
         faces = new MatOfRect();
 
@@ -745,6 +769,17 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         }
         
         if (foundEyes != null) {
+            if (makeNewFace) {
+                makeNewFace = false;
+                currentMaskLandScaped.release();
+                currentMaskLandScaped = new Mat();
+                mRgba.copyTo(currentMaskLandScaped);// = текущий экран + точки;
+                pointsWas = new ru.flightlabs.masks.model.primitives.Point[foundEyes.length];
+                for (int i = 0; i < foundEyes.length; i++) {
+                    pointsWas[i] = new ru.flightlabs.masks.model.primitives.Point(foundEyes[i].x, foundEyes[i].y);
+                }
+            }
+            
             for (Point p : foundEyes) {
                 Imgproc.circle(mRgba, orient(p, w, h), 2, FACE_RECT_COLOR);
             }
