@@ -485,6 +485,7 @@ void findEyes(cv::Mat frame_gray, cv::Rect face, std::vector<cv::Point> &pixels,
 	LOGD("findEyes1121 %i", frame_gray.type());
 
 //  assign_image(img, cv_image<uchar>(frame_gray));
+	// т.к. предыдущий метод cv_image не работает(может неправильно использую), то делаем преобразование кадра из opencv в dlib вручную
 	array2d<int> img;
 	img.set_size(frame_gray.rows, frame_gray.cols); // for grey
 	LOGD("findEyes1122");

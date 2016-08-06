@@ -229,7 +229,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
             File fModel = new File(cascadeDir, "testing_with_face_landmarks.xml");
             try {
-                resourceToFile(getResources().openRawResource(R.raw.testing_with_face_landmarks_44), fModel);
+                resourceToFile(getResources().openRawResource(R.raw.testing_with_face_landmarks_68), fModel);
             } catch (NotFoundException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -250,7 +250,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             AssetManager assetManager = getAssets();
             try {
                 {
-                InputStream ims = assetManager.open("bear_lines_44.txt");
+                InputStream ims = assetManager.open("bear_lines_68.txt");
                 BufferedReader in = new BufferedReader(new InputStreamReader(ims));
                 String line = null;
                 while((line = in.readLine()) != null) {
@@ -262,7 +262,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 }
                 
                 {
-                InputStream ims = assetManager.open("bear_triangles_44.txt");
+                InputStream ims = assetManager.open("bear_triangles_68.txt");
                 BufferedReader in = new BufferedReader(new InputStreamReader(ims));
                 String line = null;
                 while((line = in.readLine()) != null) {
