@@ -56,7 +56,9 @@ import android.media.MediaScannerConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
@@ -102,7 +104,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     private boolean loadModel = false; 
     private static final int[] resourceDetector = {R.raw.lbpcascade_frontalface, R.raw.haarcascade_frontalface_alt2, R.raw.my_detector};
 
-    private boolean debugMode = true;
+    private boolean debugMode = false;
     private boolean showEyes = true;
     private String[] mEysOnOff;
 
@@ -118,6 +120,9 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     private boolean makeNewFace;
     
     TypedArray eyesResources;
+    TypedArray eyesResourcesSmall;
+    TypedArray eyesResourcesLandmarks;
+    
     int currentIndexEye = -1;
     int newIndexEye = 0;
     
@@ -157,6 +162,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     Line[] lines;
     Triangle[] trianlges;
     VideoWriter videoWriter;
+    VideoWriter videoWriterOrig;
     boolean videoWriterStart;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
@@ -169,6 +175,11 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 // Load native library after(!) OpenCV initialization
                 System.loadLibrary("detection_based_tracker");
                 
+//                Display display = getWindowManager().getDefaultDisplay(); 
+//                int width = display.getWidth();
+//                int height = display.getHeight();
+//                mOpenCvCameraView.setMaxFrameSize(width, width);
+
                 mOpenCvCameraView.enableView();
 
                 try {
@@ -184,31 +195,13 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                         // mNativeDetector = new DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0, detectorName);
                     }
                     
-//                    File fModel = new File(cascadeDir, "testing_with_face_landmarks.xml");
-//                    resourceToFile(getResources().openRawResource(R.raw.testing_with_face_landmarks), fModel);
-//                    SimpleModel modelFrom = new ImgLabModel(fModel.getPath());
-//                    
-//                    pointsWas = modelFrom.getPointsWas();
-//                    lines = modelFrom.getLines();
-//                    lines = StupidTriangleModel.convertToTriangle(pointsWas, lines);
-//                    trianlges = StupidTriangleModel.getTriagles(pointsWas, lines);
-//                    Log.e(TAG, "findEyes sizes " + pointsWas.length + " " + lines.length + " " + trianlges.length);
-//                    Log.e(TAG, "findEyes firsts " + pointsWas[0].x + " " + pointsWas[0].y + " " + lines[0].pointStart + " " + lines[0].pointEnd + " " + trianlges[0].point1 + " " + trianlges[0].point2 + " " + trianlges[0].point3);
-
-                    throw new IOException();
-//                    AssetManager assetManager = getApplication().getAssets();
-//                    detectorName = getFilesDir() + File.separator + "sp.dat";
-//                    resourceToFile(assetManager.open("sp.dat"), new File(detectorName));
-                    
-                    //cascadeDir.delete();
-
+                    throw new IOException(); // ну выход такой:)
                 } catch (IOException e) {
                     e.printStackTrace();
                     Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
                 }
                 Runtime info = Runtime.getRuntime();
                 availableProcessors = info.availableProcessors();
-
                 
             }
                 break;
@@ -230,7 +223,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
             File fModel = new File(cascadeDir, "testing_with_face_landmarks.xml");
             try {
-                resourceToFile(getResources().openRawResource(R.raw.testing_with_face_landmarks_68), fModel);
+                resourceToFile(getResources().openRawResource(R.raw.monkey_face_landmarks_44), fModel);
             } catch (NotFoundException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -238,12 +231,12 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            Log.i(TAG, "LoadModel doInBackground1");
+            //Log.i(TAG, "LoadModel doInBackground1");
             SimpleModel modelFrom = new ImgLabModel(fModel.getPath());
             Log.i(TAG, "LoadModel doInBackground2");
-            pointsWas = modelFrom.getPointsWas();
+            //pointsWas = modelFrom.getPointsWas();
             Log.i(TAG, "LoadModel doInBackground3");
-            lines = modelFrom.getLines();
+            //lines = modelFrom.getLines();
             Log.i(TAG, "LoadModel doInBackground4");
             // load ready triangulation model from file
             List<Line> linesArr = new ArrayList<Line>();
@@ -251,7 +244,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             AssetManager assetManager = getAssets();
             try {
                 {
-                InputStream ims = assetManager.open("bear_lines_68.txt");
+                InputStream ims = assetManager.open("bear_lines_44.txt");
                 BufferedReader in = new BufferedReader(new InputStreamReader(ims));
                 String line = null;
                 while((line = in.readLine()) != null) {
@@ -263,7 +256,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 }
                 
                 {
-                InputStream ims = assetManager.open("bear_triangles_68.txt");
+                InputStream ims = assetManager.open("bear_triangles_44.txt");
                 BufferedReader in = new BufferedReader(new InputStreamReader(ims));
                 String line = null;
                 while((line = in.readLine()) != null) {
@@ -287,6 +280,19 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             //trianlges = StupidTriangleModel.getTriagles(pointsWas, lines);
             Log.i(TAG, "LoadModel doInBackground6");
             
+            if (!new File(detectorName).exists()) {
+                try {
+                    File ertModel = new File(cascadeDir, "ert_model.dat"); 
+                    resourceToFile(getResources().openRawResource(R.raw.sp77), ertModel);
+                    detectorName = ertModel.getAbsolutePath();
+                } catch (NotFoundException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
             mNativeDetector = new DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0, detectorName);
             Log.i(TAG, "LoadModel doInBackground7");
             return null;
@@ -309,6 +315,22 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 //        Mat newEyeTmp2 = new Mat(bmp.getHeight(), bmp.getWidth(), CvType.CV_8UC4);
         currentMaskLandScaped= new Mat();
         Utils.bitmapToMat(bmp, currentMaskLandScaped, true);
+        
+        
+        File fModel = new File(cascadeDir, "mask_landmarks.xml");
+        try {
+            resourceToFile(getResources().openRawResource(eyesResourcesLandmarks.getResourceId(index, 0)), fModel);
+        } catch (NotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        Log.i(TAG, "LoadModel doInBackground1");
+        SimpleModel modelFrom = new ImgLabModel(fModel.getPath());
+        Log.i(TAG, "LoadModel doInBackground2");
+        pointsWas = modelFrom.getPointsWas();
         
 //        Log.i(TAG, "loadNewEye2 " + index + " " + newEyeTmp2.type() + " " + newEyeTmp2.channels());
 //        Mat newEyeTmp = newEyeTmp2.t();
@@ -366,8 +388,10 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 
         ListView itemsList = (ListView) findViewById(R.id.list_effects);
         TypedArray icons = getResources().obtainTypedArray(R.array.effects_array);
-        eyesResources = getResources().obtainTypedArray(R.array.eyes);
-        newIndexEye = eyesResources.length() - 1;
+        eyesResources = getResources().obtainTypedArray(R.array.masks_png);
+        eyesResourcesSmall = getResources().obtainTypedArray(R.array.masks_small_png);
+        eyesResourcesLandmarks = getResources().obtainTypedArray(R.array.masks_points);
+        newIndexEye = 0;
         itemsList.setAdapter(new EffectItemsAdapter(this, icons));
         itemsList.setOnItemClickListener(new OnItemClickListener() {
 
@@ -436,6 +460,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 } else {
                     soundButton.setImageResource(R.drawable.ic_nosound);
                 }
+                debugMode = playSound;
             }
         });
         noPerson = (ImageView) findViewById(R.id.no_person);
@@ -468,6 +493,14 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 makeNewFace = true;
             }
         });
+        
+        ViewPager viewPager = (ViewPager) findViewById(R.id.photo_pager);
+        MasksPagerAdapter pager = new MasksPagerAdapter(this, eyesResourcesSmall);
+        viewPager.setAdapter(pager);
+    }
+    
+    void changeMask(int newMask) {
+        newIndexEye = newMask;
     }
     
     private void loadHaarModel(int resource) {
@@ -589,13 +622,17 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                     newFile.mkdirs();
                 }
                 File fileJpg = new File(newFile, "Masks" + counter + ".avi");
+                File fileJpgOrig = new File(newFile, "MasksOrig" + counter + ".avi");
                 videoWriter = new VideoWriter(fileJpg.getPath(), VideoWriter.fourcc('M', 'J', 'P', 'G'), 10, new Size(ret.width(), ret.height()));
+                videoWriterOrig = new VideoWriter(fileJpgOrig.getPath(), VideoWriter.fourcc('M', 'J', 'P', 'G'), 10, new Size(ret.width(), ret.height()));
                 Log.i(TAG, "onCameraFrame open video stream " + videoWriter.isOpened());
             }
         } else {
             if (videoWriter != null) {
                 videoWriter.release();
+                videoWriterOrig.release();
                 videoWriter = null;
+                videoWriterOrig = null;
             }
         }
         Log.i(TAG, "onCameraFrame1");
@@ -640,6 +677,11 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         int w = mRgba.cols();
         int h = mRgba.rows();
         
+        if (videoWriterOrig != null) {
+            Log.i(TAG, "onCameraFrame write to video");
+            videoWriterOrig.write(mRgba);
+        }
+        
         int counter = 0;
         // save original pic
         if (makePhoto) {
@@ -678,21 +720,21 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         }
         
         // выводим серый в направлении для поиска для дебага
-        {
-        Mat mGrayTo = new Mat(new Size(100, 100), mGray.type());
-        Imgproc.resize(mGray, mGrayTo, new Size(100, 100));
-        Mat mGrayToColor = new Mat(new Size(100, 100), mRgba.type());
-        Imgproc.cvtColor(mGrayTo, mGrayToColor, Imgproc.COLOR_GRAY2RGBA);
-        mGrayTo.release();
-        Log.e(TAG, "findEyes666 " + mRgba.height() + " " + mRgba.width());
-        Mat rgbaInnerWindow = mRgba.submat(0, 100, 0, 100);
-        mGrayToColor.copyTo(rgbaInnerWindow); // копируем повернутый глаз по
-                                              // альфа-каналу(4-й слой)
-        rgbaInnerWindow.release();
-        mGrayToColor.release();
+        if (debugMode) {
+            Mat mGrayTo = new Mat(new Size(100, 100), mGray.type());
+            Imgproc.resize(mGray, mGrayTo, new Size(100, 100));
+            Mat mGrayToColor = new Mat(new Size(100, 100), mRgba.type());
+            Imgproc.cvtColor(mGrayTo, mGrayToColor, Imgproc.COLOR_GRAY2RGBA);
+            mGrayTo.release();
+            Log.e(TAG, "findEyes666 " + mRgba.height() + " " + mRgba.width());
+            Mat rgbaInnerWindow = mRgba.submat(0, 100, 0, 100);
+            mGrayToColor.copyTo(rgbaInnerWindow); // копируем повернутый глаз по
+                                                  // альфа-каналу(4-й слой)
+            rgbaInnerWindow.release();
+            mGrayToColor.release();
         }
         
-        if (currentMaskLandScaped != null) {
+        if (currentMaskLandScaped != null && debugMode) {
             Mat mGrayTo = new Mat(new Size(100, 100), currentMaskLandScaped.type());
             Imgproc.resize(currentMaskLandScaped, mGrayTo, new Size(100, 100));
             //Mat mGrayToColor = new Mat(new Size(100, 100), mRgba.type());
@@ -731,14 +773,18 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         });
         Point leftCorner = null;
         Point rightCorner = null;
+        int size = -1;
         for (int i = 0; i < facesArray.length; i++) {
             //facesArray[i].height = (int)(facesArray[i].height * 1.2f);
-            if (i == 0) {
+            int newSize = facesArray[i].width;
+            if (newSize > size) {
                 leftCorner = facesArray[i].tl();
                 rightCorner = facesArray[i].br();
+                size = newSize;
             }
-            Imgproc.rectangle(mRgba, orient(leftCorner, w, h), orient(rightCorner, w, h),
-                    FACE_RECT_COLOR, 3);
+            if (debugMode) {
+                Imgproc.rectangle(mRgba, orient(leftCorner, w, h), orient(rightCorner, w, h), FACE_RECT_COLOR, 3);
+            }
         }
         // поиск зрачков
         Point rEye = null;
@@ -780,8 +826,10 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 }
             }
             
-            for (Point p : foundEyes) {
-                Imgproc.circle(mRgba, orient(p, w, h), 2, FACE_RECT_COLOR);
+            if (debugMode) {
+                for (Point p : foundEyes) {
+                    Imgproc.circle(mRgba, orient(p, w, h), 2, FACE_RECT_COLOR);
+                }
             }
             if (drawMask) {
                 int[] bases = getResources().getIntArray(R.array.eyes_center_y_44);
@@ -813,7 +861,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                         }
                         if (indexPo < foundEyes.length) {
                             Point pNew = orient(foundEyes[indexPo], w, h);
-                            if (pPrev != null) {
+                            if (pPrev != null && debugMode) {
                                 Imgproc.line(mRgba, pPrev, pNew, FACE_RECT_COLOR);
                             }
                             pPrev = pNew;
@@ -846,7 +894,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             Log.i(TAG, "saving start " + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
             File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
             File newFile=new File(file, DIRECTORY_SELFIE);
-            if(!newFile.exists()){
+            if (!newFile.exists()) {
                 newFile.mkdirs();
             }
             Mat mRgbaToSave = mRgba.t();
@@ -918,97 +966,6 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             return new Point(width - point.x, heigth - point.y);
         } else {
             return new Point(width - point.y, point.x);
-        }
-    }
-    
-    private void drawEye(Mat mRgba, Point rEye, Point lEye) {
-        Point centerEye = new Point((rEye.x + lEye.x) / 2, (rEye.y + lEye.y) / 2);
-        double distanceEye = Math.sqrt(Math.pow(rEye.x - lEye.x, 2) +  Math.pow(rEye.y - lEye.y, 2));
-        double scale = distanceEye / maxSizeEyeWidth;
-        double angle = -angleOfYx(lEye, rEye); // угол поворота глаз от горизонта
-        
-        
-//        Point centerEyePic = new Point(currentEye.cols() / 2, currentEye.rows() / 2);
-        Point centerEyePic = new Point(378, currentMaskLandScaped.rows() / 2);
-        Rect bbox = new RotatedRect(centerEyePic, new Size(currentMaskLandScaped.size().width * scale, currentMaskLandScaped.size().height * scale), angle).boundingRect();
-        
-        Mat affineMat = Imgproc.getRotationMatrix2D(centerEyePic, angle, scale);
-        double[] x1 = affineMat.get(0, 2);
-        double[] y1 = affineMat.get(1, 2);
-        x1[0] = x1[0] + bbox.width * centerEyePic.x / currentMaskLandScaped.cols() - centerEyePic.x;
-        y1[0] = y1[0] + bbox.height / 2.0 - centerEyePic.y;
-        Point leftPoint = new Point(centerEye.x - bbox.width * centerEyePic.x / currentMaskLandScaped.cols(), centerEye.y - bbox.height / 2.0);
-        if (leftPoint.y < 0) {
-            bbox.height = (int)(bbox.height + leftPoint.y);
-            y1[0] = y1[0] + leftPoint.y;
-            leftPoint.y = 0;
-        }
-        if (leftPoint.x < 0) {
-            bbox.width = (int)(bbox.width + leftPoint.x);
-            x1[0] = x1[0] + leftPoint.x;
-            leftPoint.x = 0;
-        }
-        if ((leftPoint.y + bbox.height) > mRgba.height()) {
-            int delta = (int)(leftPoint.y + bbox.height - mRgba.height());
-            bbox.height = bbox.height - delta;
-        }
-        if ((leftPoint.x + bbox.width) > mRgba.width()) {
-            int delta = (int)(leftPoint.x + bbox.width - mRgba.width());
-            bbox.width = bbox.width - delta;
-        }
-        affineMat.put(0, 2, x1);
-        affineMat.put(1, 2, y1);
-        
-        Size newSize = new Size(bbox.size().width, bbox.size().height);
-        Mat sizedRotatedEye = new Mat(newSize, currentMaskLandScaped.type());
-        Imgproc.warpAffine(currentMaskLandScaped, sizedRotatedEye, affineMat, newSize);
-        
-        int newEyeHeight = sizedRotatedEye.height();
-        int newEyeWidth = sizedRotatedEye.width();
-        Rect r = new Rect((int) (leftPoint.x), (int) (leftPoint.y),
-                newEyeWidth, newEyeHeight);
-        
-        Imgproc.rectangle(mRgba, r.tl(), r.br(), new Scalar(255, 0, 0), 3);
-        Mat rgbaInnerWindow = mRgba.submat(r.y, r.y + r.height, r.x, r.x + r.width);
-        
-        List<Mat> layers = new ArrayList<Mat>();
-        Core.split(sizedRotatedEye, layers);
-//        sizedRotatedEye.copyTo(rgbaInnerWindow, layers.get(3)); // копируем повернутый глаз по альфа-каналу(4-й слой)
-//        mNativeDetector.mergeAlpha(sizedRotatedEye, mRgba);
-        mNativeDetector.mergeAlpha(sizedRotatedEye, rgbaInnerWindow);
-//        for(int i = 0; i < sizedRotatedEye.cols(); i++) {
-//            for(int j = 0; j < sizedRotatedEye.rows(); j++) {
-//                double[] pixel = sizedRotatedEye.get(j, i);
-//                double aplha = pixel[3];
-//                double[] pixelOld = rgbaInnerWindow.get(j, i);
-//                for (int ij = 0; ij < 3; ij++) {
-//                    pixelOld[ij] = (pixelOld[ij] * (255 - aplha) + pixel[ij] * aplha) / 255;
-//                }
-//                
-//                rgbaInnerWindow.put(j, i, pixelOld);
-//            }
-//        }
-        rgbaInnerWindow.release();
-        sizedRotatedEye.release();
-        
-        // ------------------CHECK------------------------------
-//        int ij = 0;
-//        Mat alpha = layers.get(3);
-//        for(int i = 0; i < alpha.cols(); i++) {
-//            for(int j = 0; j < alpha.rows(); j++) {
-//                double jee = alpha.get(j, i)[0];
-//                if (jee > 0) {
-//                    Log.i(TAG, "loadNewEye2 dc " + ij + " " + jee);
-//                }
-//                ij++;
-//            }
-//        }
-        // ------------------CHECK------------------------------
-        
-        if (debugMode) {
-            Imgproc.rectangle(mRgba, new Point(r.x, r.y), new Point(r.x + r.width, r.y + r.height), FACE_RECT_COLOR, 3);
-            Imgproc.circle(mRgba, lEye, 9, FACE_RECT_COLOR, 4);
-            Imgproc.circle(mRgba, rEye, 9, FACE_RECT_COLOR, 4);
         }
     }
     

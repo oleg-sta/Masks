@@ -130,5 +130,13 @@
              android:src="@drawable/ic_gallery_large" />
         
     </RelativeLayout>
+    
+    <android.support.v4.view.ViewPager
+        android:id="@+id/photo_pager"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="100dp" >
+    </android.support.v4.view.ViewPager>
 
 </FrameLayout>

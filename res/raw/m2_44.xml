@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<?xml-stylesheet type='text/xsl' href='image_metadata_stylesheet.xsl'?>
+<dataset>
+<name>Testing faces</name>
+<comment>These are images from the PASCAL VOC 2011 dataset.
+   The face landmarks are from dlib's shape_predictor_68_face_landmarks.dat
+   landmarking model.  The model uses the 68 landmark scheme used by the iBUG
+   300-W dataset.</comment>
+<images>
+  <image file='m2.png'>
+    <box top='104' left='19' width='731' height='873'>
+      <part name='00' x='86' y='241'/>
+      <part name='01' x='103' y='330'/>
+      <part name='02' x='127' y='388'/>
+      <part name='03' x='169' y='444'/>
+      <part name='04' x='259' y='489'/>
+      <part name='05' x='341' y='450'/>
+      <part name='06' x='378' y='396'/>
+      <part name='07' x='406' y='318'/>
+      <part name='08' x='415' y='236'/>
+      <part name='09' x='128' y='182'/>
+      <part name='10' x='156' y='171'/>
+      <part name='11' x='199' y='184'/>
+      <part name='12' x='280' y='197'/>
+      <part name='13' x='317' y='183'/>
+      <part name='14' x='366' y='182'/>
+      <part name='15' x='257' y='222'/>
+      <part name='16' x='258' y='290'/>
+      <part name='17' x='226' y='313'/>
+      <part name='18' x='261' y='322'/>
+      <part name='19' x='293' y='311'/>
+      <part name='20' x='156' y='210'/>
+      <part name='21' x='167' y='202'/>
+      <part name='22' x='186' y='202'/>
+      <part name='23' x='199' y='210'/>
+      <part name='24' x='183' y='217'/>
+      <part name='25' x='170' y='216'/>
+      <part name='26' x='306' y='212'/>
+      <part name='27' x='320' y='203'/>
+      <part name='28' x='338' y='204'/>
+      <part name='29' x='346' y='211'/>
+      <part name='30' x='334' y='219'/>
+      <part name='31' x='321' y='217'/>
+      <part name='32' x='187' y='375'/>
+      <part name='33' x='234' y='354'/>
+      <part name='34' x='279' y='355'/>
+      <part name='35' x='328' y='378'/>
+      <part name='36' x='282' y='396'/>
+      <part name='37' x='227' y='392'/>
+      <part name='38' x='244' y='369'/>
+      <part name='39' x='264' y='369'/>
+      <part name='40' x='292' y='374'/>
+      <part name='41' x='276' y='380'/>
+      <part name='42' x='242' y='378'/>
+      <part name='43' x='220' y='374'/>
+    </box>
+    <box top='267' left='335' width='3' height='1'/>
+  </image>
+</images>
+</dataset>

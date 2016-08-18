@@ -1,7 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <array name="eyes">
+    
+    <array name="masks_small_png">
+        <item>@drawable/monkey</item>
+        <item>@drawable/m1_2</item>
+        <item>@drawable/m2</item>
+        <item>@drawable/m3_1</item>
+        <item>@drawable/m4_2</item>
+        <item>@drawable/m5_2</item>
+        <item>@drawable/bear</item>
+    </array>
+    
+    <array name="masks_png">
+        <item>@raw/monkey</item>
+        <item>@raw/m1_2</item>
+        <item>@raw/m2</item>
+        <item>@raw/m3_1</item>
+        <item>@raw/m4_2</item>
+        <item>@raw/m5_2</item>
         <item>@raw/bear</item>
+    </array>
+    
+    <array name="masks_points">
+        <item>@raw/monkey_face_landmarks_44</item>
+        <item>@raw/m1_2_44</item>
+        <item>@raw/m2_44</item>
+        <item>@raw/m3_1_44</item>
+        <item>@raw/m4_2_44</item>
+        <item>@raw/m5_2_44</item>
+        <item>@raw/testing_with_face_landmarks_44</item>
     </array>
 
     <integer-array name="eyes_center_y">

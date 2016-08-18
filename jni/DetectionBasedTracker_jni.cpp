@@ -321,16 +321,23 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDraw
 				double origY = affine.at<double>(1, 0) * i
 						+ affine.at<double>(1, 1) * j + affine.at<double>(1, 2);
 
-				// получаем пиксли из оригинального рисунка и куда накладываем
-				cv::Vec4b pixelFrom = imageFromMat.at<cv::Vec4b>(origY, origX);
-				cv::Vec4b pixelTo = imageToMat.at<cv::Vec4b>(j, i);
-				int alpha = pixelFrom[3];
-				// смешиваем по трем каналам(RGB)
-				for (int ij = 0; ij < 3; ij++) {
-					pixelTo[ij] = (pixelTo[ij] * (255 - alpha)
-							+ pixelFrom[ij] * alpha) / 255;
+				// FIXME здесь может быть страгшная бага, необходимо проверять, что x,y не вышли за диапазоны рамок оригинального и конечного окна
+				if (origX >= 0 && origX < imageFromMat.cols && origY >= 0
+						&& origY < imageFromMat.rows && i > 0
+						&& i < imageToMat.cols && j > 0
+						&& j < imageToMat.rows) {
+					// получаем пиксли из оригинального рисунка и куда накладываем
+					cv::Vec4b pixelFrom = imageFromMat.at<cv::Vec4b>(origY,
+							origX);
+					cv::Vec4b pixelTo = imageToMat.at<cv::Vec4b>(j, i);
+					int alpha = pixelFrom[3];
+					// смешиваем по трем каналам(RGB)
+					for (int ij = 0; ij < 3; ij++) {
+						pixelTo[ij] = (pixelTo[ij] * (255 - alpha)
+								+ pixelFrom[ij] * alpha) / 255;
+					}
+					imageToMat.at<cv::Vec4b>(j, i) = pixelTo;
 				}
-				imageToMat.at<cv::Vec4b>(j, i) = pixelTo;
 			}
 			} else {
 				LOGD("findEyes superError!!!");
