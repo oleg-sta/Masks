@@ -100,7 +100,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     private Mat mGray;
     private File mCascadeFile;
     private CascadeClassifier mJavaDetector;
-    private DetectionBasedTracker mNativeDetector;
+    private volatile DetectionBasedTracker mNativeDetector;
     private boolean loadModel = false; 
     private static final int[] resourceDetector = {R.raw.lbpcascade_frontalface, R.raw.haarcascade_frontalface_alt2, R.raw.my_detector};
 
@@ -223,7 +223,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
             File fModel = new File(cascadeDir, "testing_with_face_landmarks.xml");
             try {
-                resourceToFile(getResources().openRawResource(R.raw.monkey_face_landmarks_44), fModel);
+                int res = resourceToFile(getResources().openRawResource(R.raw.monkey_face_landmarks_44), fModel);
+                Log.i(TAG, "LoadModel doInBackground111" + res + " " + fModel.length());
             } catch (NotFoundException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -244,27 +245,29 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             AssetManager assetManager = getAssets();
             try {
                 {
-                InputStream ims = assetManager.open("bear_lines_44.txt");
-                BufferedReader in = new BufferedReader(new InputStreamReader(ims));
-                String line = null;
-                while((line = in.readLine()) != null) {
-                    String[] spl = line.split(";");
-                    if (spl.length == 2) {
-                        linesArr.add(new Line(Integer.parseInt(spl[0]), Integer.parseInt(spl[1])));
+                    InputStream ims = assetManager.open("bear_lines_44.txt");
+                    BufferedReader in = new BufferedReader(new InputStreamReader(ims));
+                    String line = null;
+                    while ((line = in.readLine()) != null) {
+                        String[] spl = line.split(";");
+                        if (spl.length == 2) {
+                            linesArr.add(new Line(Integer.parseInt(spl[0]), Integer.parseInt(spl[1])));
+                        }
                     }
+                    ims.close();
                 }
-                }
-                
                 {
-                InputStream ims = assetManager.open("bear_triangles_44.txt");
-                BufferedReader in = new BufferedReader(new InputStreamReader(ims));
-                String line = null;
-                while((line = in.readLine()) != null) {
-                    String[] spl = line.split(";");
-                    if (spl.length == 3) {
-                        triangleArr.add(new Triangle(Integer.parseInt(spl[0]), Integer.parseInt(spl[1]), Integer.parseInt(spl[2])));
+                    InputStream ims = assetManager.open("bear_triangles_44.txt");
+                    BufferedReader in = new BufferedReader(new InputStreamReader(ims));
+                    String line = null;
+                    while ((line = in.readLine()) != null) {
+                        String[] spl = line.split(";");
+                        if (spl.length == 3) {
+                            triangleArr.add(new Triangle(Integer.parseInt(spl[0]), Integer.parseInt(spl[1]), Integer
+                                    .parseInt(spl[2])));
+                        }
                     }
-                }
+                    ims.close();
                 }
             } catch (IOException e) {
                 // TODO Auto-generated catch block
@@ -281,16 +284,22 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             Log.i(TAG, "LoadModel doInBackground6");
             
             if (!new File(detectorName).exists()) {
+                Log.i(TAG, "LoadModel doInBackground66");
                 try {
                     File ertModel = new File(cascadeDir, "ert_model.dat"); 
-                    resourceToFile(getResources().openRawResource(R.raw.sp77), ertModel);
+                    InputStream ims = assetManager.open("sp77.dat");
+                    int bytes = resourceToFile(ims, ertModel);
+                    ims.close();
                     detectorName = ertModel.getAbsolutePath();
+                    Log.i(TAG, "LoadModel doInBackground66 " + detectorName + " " + ertModel.exists() + " " + ertModel.length() + " " + bytes);
                 } catch (NotFoundException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
+                    Log.i(TAG, "LoadModel doInBackground667", e);
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
+                    Log.i(TAG, "LoadModel doInBackground667", e);
                 }
             }
             mNativeDetector = new DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0, detectorName);
@@ -341,16 +350,20 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         Log.i(TAG, "loadNewEye " + currentMaskLandScaped.type() + " " + currentMaskLandScaped.channels());
     }
 
-    public static void resourceToFile(InputStream is, File toFile) throws IOException {
+    public static int resourceToFile(InputStream is, File toFile) throws IOException {
         FileOutputStream os = new FileOutputStream(toFile);
 
+        int res = 0;
         byte[] buffer = new byte[4096];
         int bytesRead;
         while ((bytesRead = is.read(buffer)) != -1) {
             os.write(buffer, 0, bytesRead);
+            res += bytesRead;
         }
+        os.flush();
         is.close();
         os.close();
+        return res;
     }
 
     public FdActivity() {
@@ -757,8 +770,10 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                         new Size(mAbsoluteFaceSize, mAbsoluteFaceSize), new Size());
             }
         } else if (mDetectorType == NATIVE_DETECTOR) {
-            if (mNativeDetector != null)
+            if (mNativeDetector != null) {
+                Log.e(TAG, "findEyes666 start detect");
                 mNativeDetector.detect(mGray, faces);
+            }
         } else {
             Log.e(TAG, "Detection method is not selected!");
         }
