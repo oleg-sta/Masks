@@ -21,14 +21,24 @@
         <item>@raw/bear</item>
     </array>
     
-    <array name="masks_points">
-        <item>@raw/monkey_face_landmarks_44</item>
+    <array name="masks_points_44">
+        <item>@raw/monkey_44</item>
         <item>@raw/m1_2_44</item>
         <item>@raw/m2_44</item>
         <item>@raw/m3_1_44</item>
         <item>@raw/m4_2_44</item>
         <item>@raw/m5_2_44</item>
-        <item>@raw/testing_with_face_landmarks_44</item>
+        <item>@raw/bear_44</item>
+    </array>
+    
+    <array name="masks_points_68">
+        <item>@raw/monkey_68</item>
+        <item>@raw/m1_2_68</item>
+        <item>@raw/m2_68</item>
+        <item>@raw/m3_1_68</item>
+        <item>@raw/m4_2_68</item>
+        <item>@raw/m5_2_68</item>
+        <item>@raw/bear_68</item>
     </array>
 
     <integer-array name="eyes_center_y">

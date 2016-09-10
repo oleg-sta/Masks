@@ -223,7 +223,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
             File fModel = new File(cascadeDir, "testing_with_face_landmarks.xml");
             try {
-                int res = resourceToFile(getResources().openRawResource(R.raw.monkey_face_landmarks_44), fModel);
+                int res = resourceToFile(getResources().openRawResource(R.raw.monkey_68), fModel);
                 Log.i(TAG, "LoadModel doInBackground111" + res + " " + fModel.length());
             } catch (NotFoundException e) {
                 // TODO Auto-generated catch block
@@ -245,7 +245,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             AssetManager assetManager = getAssets();
             try {
                 {
-                    InputStream ims = assetManager.open("bear_lines_44.txt");
+                    InputStream ims = assetManager.open("bear_lines_68.txt");
                     BufferedReader in = new BufferedReader(new InputStreamReader(ims));
                     String line = null;
                     while ((line = in.readLine()) != null) {
@@ -257,7 +257,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                     ims.close();
                 }
                 {
-                    InputStream ims = assetManager.open("bear_triangles_44.txt");
+                    InputStream ims = assetManager.open("bear_triangles_68.txt");
                     BufferedReader in = new BufferedReader(new InputStreamReader(ims));
                     String line = null;
                     while ((line = in.readLine()) != null) {
@@ -287,7 +287,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 Log.i(TAG, "LoadModel doInBackground66");
                 try {
                     File ertModel = new File(cascadeDir, "ert_model.dat"); 
-                    InputStream ims = assetManager.open("sp77.dat");
+                    InputStream ims = assetManager.open("sp68.dat");
                     int bytes = resourceToFile(ims, ertModel);
                     ims.close();
                     detectorName = ertModel.getAbsolutePath();
@@ -403,7 +403,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         TypedArray icons = getResources().obtainTypedArray(R.array.effects_array);
         eyesResources = getResources().obtainTypedArray(R.array.masks_png);
         eyesResourcesSmall = getResources().obtainTypedArray(R.array.masks_small_png);
-        eyesResourcesLandmarks = getResources().obtainTypedArray(R.array.masks_points);
+        eyesResourcesLandmarks = getResources().obtainTypedArray(R.array.masks_points_68);
         newIndexEye = 0;
         itemsList.setAdapter(new EffectItemsAdapter(this, icons));
         itemsList.setOnItemClickListener(new OnItemClickListener() {

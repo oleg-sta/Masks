@@ -101,6 +101,7 @@ protected boolean initializeCamera(int width, int height) {
                 params.setPreviewFormat(ImageFormat.NV21);
                 Log.d(TAG, "Set preview size to " + Integer.valueOf((int)frameSize.width) + "x" + Integer.valueOf((int)frameSize.height));
                 params.setPreviewSize((int)frameSize.width, (int)frameSize.height);
+                //params.setPreviewSize((int)frameSize.width, (int)frameSize.width);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH)
                     params.setRecordingHint(true);
