@@ -8,6 +8,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <android.opengl.GLSurfaceView
+        android:id="@+id/fd_glsurface"
+        android:layout_gravity="top"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent" >

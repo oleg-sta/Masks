@@ -13,7 +13,7 @@ import ru.flightlabs.masks.model.primitives.Point;
 public class DelaunayTriangulation implements Triangulation {
     
     
-    // FIXME  в процессе реализации
+    // FIXME
     public Line[] convertToTriangle(Point[] points, Line[] lines) {
         List<Line> res = new ArrayList<Line>(); 
         Subdiv2D dc = new Subdiv2D(new Rect(0, 0, 1024, 1024));

@@ -36,6 +36,8 @@ import ru.flightlabs.masks.model.ImgLabModel;
 import ru.flightlabs.masks.model.SimpleModel;
 import ru.flightlabs.masks.model.primitives.Line;
 import ru.flightlabs.masks.model.primitives.Triangle;
+import ru.flightlabs.masks.renderer.MyGLRenderer;
+import ru.flightlabs.masks.renderer.MyGLRenderer2;
 import ru.flightlabs.masks.totriangle.DelaunayTriangulation;
 import ru.flightlabs.masks.totriangle.StupidTriangleModel;
 import ru.flightlabs.masks.totriangle.Triangulation;
@@ -51,8 +53,10 @@ import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PixelFormat;
 import android.media.MediaActionSound;
 import android.media.MediaScannerConnection;
+import android.opengl.GLSurfaceView;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -72,6 +76,8 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 
 public class FdActivity extends Activity implements CvCameraViewListener2 {
+
+    private GLSurfaceView gLSurfaceView;
 
     public static final String DIRECTORY_SELFIE = "Masks";
     //public static int counter;
@@ -510,6 +516,15 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         ViewPager viewPager = (ViewPager) findViewById(R.id.photo_pager);
         MasksPagerAdapter pager = new MasksPagerAdapter(this, eyesResourcesSmall);
         viewPager.setAdapter(pager);
+
+        gLSurfaceView = (GLSurfaceView)findViewById(R.id.fd_glsurface);
+//        gLSurfaceView.setEGLContextClientVersion(2);         // Create an OpenGL ES 2.0 context.
+        gLSurfaceView.getHolder().setFormat(PixelFormat.TRANSPARENT);
+        gLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+        gLSurfaceView.setZOrderOnTop(true);
+        gLSurfaceView.setRenderer(new MyGLRenderer2(this));
+//        gLSurfaceView.setRenderer(new MyGLRenderer());
+
     }
     
     void changeMask(int newMask) {

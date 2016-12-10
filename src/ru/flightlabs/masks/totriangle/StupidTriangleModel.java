@@ -10,20 +10,14 @@ import ru.flightlabs.masks.model.primitives.Point;
 import ru.flightlabs.masks.model.primitives.Triangle;
 
 /**
- * Простейший способ. построение треугольной модели. разделяет область на
- * треугольники. Ищем ближайшую точку, не пересекающую другие линии и сначала те
- * линии, которые дает угол более 10 градусов
- * 
+ *
  * @author sov
  * 
  */
 public class StupidTriangleModel implements Triangulation {
 
     /**
-     * Соединяем точки все подряд, чтобы не было пересечений линий
-     * TODO: исключить острые углы
-     * TODO: добавить промежуточные точки, т.е. ввести параметр размера треугольника
-     * 
+     *
      * @param points
      * @param lines
      */
@@ -39,7 +33,6 @@ public class StupidTriangleModel implements Triangulation {
                     if (i != j) {
                         boolean needJoin = true;
                         for (Line line : lines) {
-                            // проверям что точки уже не соединены
                             if ((line.pointStart == i && line.pointEnd == j)
                                     || (line.pointStart == j && line.pointEnd == i)) {
                                 needJoin = false;
@@ -91,7 +84,6 @@ public class StupidTriangleModel implements Triangulation {
         return lines;
     }
     
-    // неправильно работает, надо учитывать, чтобы внутри треугольника не было точек\линий
     public static Triangle[] getTriagles(Point[] points, Line[] lines) {
         List<Triangle> triangles = new ArrayList<Triangle>();
         for (int i = 0; i < lines.length; i++) {
