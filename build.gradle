@@ -2,9 +2,10 @@ buildscript {
     repositories {
         maven { url 'http://repo1.maven.org/maven2' }
         maven { url "http://dl.bintray.com/populov/maven" }
+
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.3.0'
+        classpath 'com.android.tools.build:gradle:2.2.1'
     }
 }
 
@@ -37,7 +38,7 @@ android {
             keyPassword KEY_PASSWORD
         }
         debug {
-            storeFile file("j:\\androidKey\\mysign1")
+            storeFile file("i:\\androidKey\\mysign1")
             storePassword "Fyfyfc"
             keyAlias "111"
             keyPassword "Fyfyfc"
@@ -94,6 +95,18 @@ android {
 
     tasks.withType(JavaCompile) {
         compileTask -> compileTask.dependsOn ndkBuild
+    }
+
+    defaultConfig {
+        ndk {
+            abiFilters "armeabi-v7a"
+        }
+    }
+
+    externalNativeBuild {
+        ndkBuild {
+            path 'jni/Android.mk'
+        }
     }
 
 
