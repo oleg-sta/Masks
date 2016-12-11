@@ -17,6 +17,7 @@ import java.util.ArrayList;
  * Created by sov on 10.12.2016.
  */
 // FIXME to many errrors
+// FIXME textures loaded incorrectly, case format obj is slightlu different then we excect, whe should create new vertices
 public class Model {
 
     // Constants

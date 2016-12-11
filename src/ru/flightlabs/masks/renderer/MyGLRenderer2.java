@@ -23,6 +23,7 @@ import ru.flightlabs.masks.R;
 
 public class MyGLRenderer2 implements GLSurfaceView.Renderer {
 
+    private int[] textures = new int[1];
     FloatBuffer mVertexBuffer;
     FloatBuffer mTextureBuffer;
     FloatBuffer mColorBuffer;
@@ -62,9 +63,24 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
         mNormalBuffer = model.getNormals();
         mIndices = model.getIndices();
 
+        //Generate one texture pointer...
+        gl.glGenTextures(1, textures, 0);
+        //...and bind it to our array
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
+
+        //Create Nearest Filtered Texture
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
+
+        //Different possible texture parameters, e.g. GL10.GL_CLAMP_TO_EDGE
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_REPEAT);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_REPEAT);
 
         Bitmap mBitmap = BitmapFactory.decodeResource(activity.getResources(), R.raw.m1_2);
         GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap, 0);
+        mBitmap.recycle();
+
+        gl.glEnable(GL10.GL_TEXTURE_2D);
     }
 
     public void onDrawFrame(GL10 gl) {
@@ -87,8 +103,11 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
         gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, mVertexBuffer.limit());
 */
 
+
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
         gl.glLoadIdentity();
+
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
 
         gl.glTranslatef(0.0f, 0.0f, -10.0f);
         gl.glRotatef(mCubeRotation, 1.0f, 1.0f, 1.0f);
@@ -96,9 +115,11 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
         gl.glFrontFace(GL10.GL_CW);
 
         gl.glVertexPointer(3, GL10.GL_FLOAT, 0, mVertexBuffer);
-        gl.glColor4f(0.0f, 1.0f, 0.0f, 0.25f);
+        gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTextureBuffer);
+//        gl.glColor4f(0.0f, 1.0f, 0.0f, 0.25f);
 
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
+        gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 
         gl.glDrawElements(GL10.GL_TRIANGLES, 36, GL10.GL_UNSIGNED_SHORT,
                 mIndices);
