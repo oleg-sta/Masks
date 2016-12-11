@@ -1,8 +1,11 @@
 package ru.flightlabs.masks.renderer;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
+import android.opengl.GLUtils;
 import android.util.Log;
 
 import java.nio.ByteBuffer;
@@ -21,7 +24,7 @@ import ru.flightlabs.masks.R;
 public class MyGLRenderer2 implements GLSurfaceView.Renderer {
 
     FloatBuffer mVertexBuffer;
-    //FloatBuffer mTextureBuffer;
+    FloatBuffer mTextureBuffer;
     FloatBuffer mColorBuffer;
 
     FloatBuffer mNormalBuffer;
@@ -30,15 +33,12 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
     private float mCubeRotation;
 
     Activity activity;
-    Cube c;
 
 
     private static final String TAG = "MyGLRenderer2_class";
 
     public MyGLRenderer2(Activity activity) {
         this.activity = activity;
-        c = new Cube();
-
     }
 
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
@@ -58,9 +58,13 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
                 activity);
 
         mVertexBuffer = model.getVertices();
-        //mTextureBuffer = model.getTexCoords();
+        mTextureBuffer = model.getTexCoords();
         mNormalBuffer = model.getNormals();
         mIndices = model.getIndices();
+
+
+        Bitmap mBitmap = BitmapFactory.decodeResource(activity.getResources(), R.raw.m1_2);
+        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap, 0);
     }
 
     public void onDrawFrame(GL10 gl) {
@@ -92,11 +96,9 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
         gl.glFrontFace(GL10.GL_CW);
 
         gl.glVertexPointer(3, GL10.GL_FLOAT, 0, mVertexBuffer);
-        gl.glColorPointer(4, GL10.GL_FLOAT, 0, c.mColorBuffer);
-//        gl.glColor4f(1, 1, 1, 0.5f);
+        gl.glColor4f(0.0f, 1.0f, 0.0f, 0.25f);
 
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-        gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
 
         gl.glDrawElements(GL10.GL_TRIANGLES, 36, GL10.GL_UNSIGNED_SHORT,
                 mIndices);

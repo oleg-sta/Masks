@@ -16,7 +16,7 @@ import java.util.ArrayList;
 /**
  * Created by sov on 10.12.2016.
  */
-
+// FIXME to many errrors
 public class Model {
 
     // Constants
@@ -74,6 +74,7 @@ public class Model {
     class Face {
 
         public ArrayList<Integer> indices = new ArrayList<Integer>();
+        public ArrayList<Integer> textures = new ArrayList<Integer>();
 
         public ArrayList<Vector3D> getVertices() {
 
@@ -220,9 +221,13 @@ public class Model {
 
                     if ("".equals(faceParams[1])) {
                     } else {
-                        face.getUvws().add(
-                                this.vertexTexture.get(Integer
-                                        .parseInt(faceParams[1]) - 1));
+                        face.textures.add(Integer
+                                .parseInt(faceParams[1]) - 1);
+
+                        // some bug
+//                        face.getUvws().add(
+//                                this.vertexTexture.get(Integer
+//                                        .parseInt(faceParams[1]) - 1));
                         face.getNormals().add(
                                 this.vertexNormal.get(Integer
                                         .parseInt(faceParams[2]) - 1));
@@ -246,7 +251,7 @@ public class Model {
         vertexCount = facesSize * 3;
 
         tempV = new float[vertices.size() * 3];
-        tempVt = new float[facesSize * 2 * 3];
+        tempVt = new float[vertexTexture.size() * 2];
         indices = new short[facesSize * 3];
 
         for (int i = 0; i < vertices.size(); i++) {
@@ -254,6 +259,11 @@ public class Model {
             tempV[i * 3 + 1] = vertices.get(i).getY();
             tempV[i * 3 + 2] = vertices.get(i).getZ();
         }
+        for (int i = 0; i < vertexTexture.size(); i++) {
+            tempVt[i * 2] = vertexTexture.get(i).getX();
+            tempVt[i * 2 + 1] = vertexTexture.get(i).getY();
+        }
+
         for (int i = 0; i < facesSize; i++) {
             Log.d("OBJ OBJECT DATA", "fillInBuffers" + i);
             Face face = faces.get(i);
