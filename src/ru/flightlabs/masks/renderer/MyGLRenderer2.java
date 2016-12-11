@@ -30,6 +30,7 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
 
     FloatBuffer mNormalBuffer;
     ShortBuffer mIndices;
+    int indicesCount;
 
     private float mCubeRotation;
 
@@ -55,13 +56,14 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
         gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT,
                 GL10.GL_NICEST);
 
-        Model model = new Model(R.raw.untitled,
+        Model model = new Model(R.raw.head12,
                 activity);
 
         mVertexBuffer = model.getVertices();
         mTextureBuffer = model.getTexCoords();
         mNormalBuffer = model.getNormals();
         mIndices = model.getIndices();
+        indicesCount = model.getIndicesCount();
 
         //Generate one texture pointer...
         gl.glGenTextures(1, textures, 0);
@@ -85,24 +87,6 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
 
     public void onDrawFrame(GL10 gl) {
         Log.i(TAG, "onDrawFrame");
-        /*
-        // Redraw background color
-        gl.glVertexPointer(3, GL10.GL_FIXED, 0, mVertexBuffer);
-        gl.glColor4f(1, 1, 1, 0.5f);
-        //gl.glColorPointer(4, GL10.GL_FLOAT, 0, mColorBuffer);
-
-        gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-        gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
-
-        //gl.glEnable(GL10.GL_TEXTURE_2D); // workaround bug 3623
-        //gl.glTexCoordPointer(2, GL10.GL_FIXED, 0, mTextureBuffer);
-        //gl.glNormalPointer(1, GL10.GL_FIXED, mNormalBuffer);
-        //gl.glColor4f(1, 1, 1, 0.5f);
-        // gl.glColor4f(1, 1, 1, 1);
-        // gl.glNormal3f(0, 0, 1);
-        gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, mVertexBuffer.limit());
-*/
-
 
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
         gl.glLoadIdentity();
@@ -121,7 +105,7 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
         gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 
-        gl.glDrawElements(GL10.GL_TRIANGLES, 36, GL10.GL_UNSIGNED_SHORT,
+        gl.glDrawElements(GL10.GL_TRIANGLES, indicesCount, GL10.GL_UNSIGNED_SHORT,
                 mIndices);
 
         gl.glDisableClientState(GL10.GL_VERTEX_ARRAY);

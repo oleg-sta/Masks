@@ -397,6 +397,10 @@ public class Model {
         return _ib;
     }
 
+    public int getIndicesCount() {
+        return indices.length;
+    }
+
     public FloatBuffer getNormals() {
         return _nb;
     }
