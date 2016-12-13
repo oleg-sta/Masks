@@ -8,6 +8,8 @@ import android.opengl.GLU;
 import android.opengl.GLUtils;
 import android.util.Log;
 
+import org.opencv.core.Mat;
+
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
@@ -15,6 +17,7 @@ import java.nio.ShortBuffer;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import ru.flightlabs.masks.FdActivity;
 import ru.flightlabs.masks.R;
 
 /**
@@ -86,15 +89,32 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
     }
 
     public void onDrawFrame(GL10 gl) {
+        //if (true) return;
         Log.i(TAG, "onDrawFrame");
 
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
         gl.glLoadIdentity();
 
+
+        if (FdActivity.glViewMatrix2 != null) {
+            Mat s = FdActivity.glViewMatrix2;
+            float[] matrixArray = new float[16];
+            for(int row=0; row<4; ++row)
+            {
+                for(int col=0; col<4; ++col)
+                {
+                    matrixArray[row * 4 + col] = (float)s.get(row, col)[0];
+                }
+            }
+            gl.glMatrixMode(GL10.GL_MODELVIEW);
+            gl.glLoadMatrixf(matrixArray, 0);
+        }
+        //GLU.gluLookAt(gl, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+
         gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
 
-        gl.glTranslatef(0.0f, 0.0f, -10.0f);
-        gl.glRotatef(mCubeRotation, 1.0f, 1.0f, 1.0f);
+//        gl.glTranslatef(0.0f, 0.0f, -10.0f);
+        //gl.glRotatef(mCubeRotation, 1.0f, 1.0f, 1.0f);
 
         gl.glFrontFace(GL10.GL_CW);
 

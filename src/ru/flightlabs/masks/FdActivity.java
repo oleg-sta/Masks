@@ -19,11 +19,16 @@ import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
+import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfDouble;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.MatOfPoint3f;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
+import org.opencv.core.Point3;
 import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
@@ -76,6 +81,8 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 
 public class FdActivity extends Activity implements CvCameraViewListener2 {
+
+    public static Mat glViewMatrix2;
 
     private GLSurfaceView gLSurfaceView;
 
@@ -845,6 +852,86 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         }
         
         if (foundEyes != null) {
+
+            // FIXME you know what i mean
+            MatOfPoint3f objectPoints = new MatOfPoint3f();
+            MatOfPoint2f imagePoints  = new MatOfPoint2f();
+
+            Mat intrinsics = Mat.eye(3, 3, CvType.CV_32F);
+            intrinsics.put(0, 0,  mGray.width()); // ?
+            intrinsics.put(1, 1,  mGray.width()); // ?
+            intrinsics.put(0, 2, mGray.width() / 2);
+            intrinsics.put(1, 2, mGray.height() / 2);
+            intrinsics.put(2, 2, 1);
+
+            Mat cameraMatrix = new Mat();
+            MatOfDouble distCoeffs = new MatOfDouble();
+            Mat rvec = new Mat();
+            Mat tvec = new Mat();
+            java.util.List<Point3> pointsList = new ArrayList<Point3>();
+            String[] p3d = getResources().getStringArray(R.array.pointsToPnP3D);
+            for (String p : p3d) {
+                String[] w2 = p.split(";");
+                pointsList.add(new Point3(Double.parseDouble(w2[0]), Double.parseDouble(w2[1]), Double.parseDouble(w2[2])));
+            }
+            objectPoints.fromList(pointsList);
+
+            int[] bases2 = getResources().getIntArray(R.array.pointsToPnP);
+            java.util.List<Point> pointsList2 = new ArrayList<Point>();
+            for (int base : bases2) {
+                pointsList2.add(foundEyes[base]);
+            }
+            imagePoints.fromList(pointsList2);
+            //Calib3d.calibrate(List<Mat> objectPoints, List<Mat> imagePoints, Size image_size, Mat K, Mat D, List<Mat> rvecs, List<Mat> tvecs);
+            Calib3d.solvePnP(objectPoints, imagePoints, intrinsics, distCoeffs, rvec, tvec);
+
+            Log.i("www", "rvec");
+            for (int i = 0; i < rvec.height(); i++) {
+                for (int j = 0; j < rvec.width(); j++) {
+                    Log.i("www", "" + rvec.get(i, j)[0]);
+                }
+            }
+            Log.i("www", "tvec");
+
+            for (int i = 0; i < tvec.height(); i++) {
+                for (int j = 0; j < tvec.width(); j++) {
+                    Log.i("www", "" + tvec.get(i, j)[0]);
+                }
+            }
+            Log.i("www", "tve0.02");
+            MatOfPoint3f objectPoints3 = new MatOfPoint3f();
+
+            MatOfPoint2f imagePoints3  = new MatOfPoint2f();
+            java.util.List<Point3> pointsList3 = new ArrayList<Point3>();
+            pointsList3.add(new Point3(0, -0.24, -1.57));
+            pointsList3.add(new Point3(0, -0.24, -3));
+            pointsList3.add(new Point3(0, -1, -1.57));
+            pointsList3.add(new Point3(1, -0.24, -1.57));
+            objectPoints3.fromList(pointsList3);
+            Calib3d.projectPoints(objectPoints3, rvec, tvec, intrinsics, distCoeffs, imagePoints3);
+            Point[] pp = imagePoints3.toArray();
+            Imgproc.line(mRgba, pp[0], pp[1], FACE_RECT_COLOR);
+            Imgproc.line(mRgba, pp[0], pp[2], FACE_RECT_COLOR);
+            Imgproc.line(mRgba, pp[0], pp[3], FACE_RECT_COLOR);
+
+
+            Mat rotation = new Mat(4, 4, CvType.CV_64F);
+            Mat viewMatrix = new Mat(4, 4, CvType.CV_64F);//, new Scalar(0));
+            Calib3d.Rodrigues(rvec, rotation);
+
+            for(int row=0; row<3; ++row)
+            {
+                for(int col=0; col<3; ++col)
+                {
+                    viewMatrix.put(row, col, rotation.get(row, col));
+                }
+                viewMatrix.put(row, 3, tvec.get(row, 0));
+            }
+            viewMatrix.put(3, 3, 1);
+            Mat glViewMatrix = new Mat(4, 4, CvType.CV_64F, new Scalar(0));
+            Core.transpose(viewMatrix , glViewMatrix);
+            glViewMatrix2 = glViewMatrix;
+
             if (makeNewFace) {
                 makeNewFace = false;
                 currentMaskLandScaped.release();
