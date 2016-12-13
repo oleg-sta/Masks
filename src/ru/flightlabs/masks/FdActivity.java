@@ -83,6 +83,7 @@ import android.widget.ProgressBar;
 public class FdActivity extends Activity implements CvCameraViewListener2 {
 
     public static Mat glViewMatrix2;
+    MyGLRenderer2 meRender;
 
     private GLSurfaceView gLSurfaceView;
 
@@ -117,7 +118,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     private boolean loadModel = false; 
     private static final int[] resourceDetector = {R.raw.lbpcascade_frontalface, R.raw.haarcascade_frontalface_alt2, R.raw.my_detector};
 
-    private boolean debugMode = false;
+    public static boolean debugMode = false;
     private boolean showEyes = true;
     private String[] mEysOnOff;
 
@@ -529,7 +530,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
         gLSurfaceView.getHolder().setFormat(PixelFormat.TRANSPARENT);
         gLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         gLSurfaceView.setZOrderOnTop(true);
-        gLSurfaceView.setRenderer(new MyGLRenderer2(this));
+        meRender = new MyGLRenderer2(this);
+        gLSurfaceView.setRenderer(meRender);
 //        gLSurfaceView.setRenderer(new MyGLRenderer());
 
     }
@@ -879,7 +881,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             int[] bases2 = getResources().getIntArray(R.array.pointsToPnP);
             java.util.List<Point> pointsList2 = new ArrayList<Point>();
             for (int base : bases2) {
-                pointsList2.add(foundEyes[base]);
+                pointsList2.add(orient(foundEyes[base], w, h));
+//                pointsList2.add(foundEyes[base]);
             }
             imagePoints.fromList(pointsList2);
             //Calib3d.calibrate(List<Mat> objectPoints, List<Mat> imagePoints, Size image_size, Mat K, Mat D, List<Mat> rvecs, List<Mat> tvecs);
@@ -903,30 +906,53 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 
             MatOfPoint2f imagePoints3  = new MatOfPoint2f();
             java.util.List<Point3> pointsList3 = new ArrayList<Point3>();
-            pointsList3.add(new Point3(0, -0.24, -1.57));
-            pointsList3.add(new Point3(0, -0.24, -3));
-            pointsList3.add(new Point3(0, -1, -1.57));
-            pointsList3.add(new Point3(1, -0.24, -1.57));
+            pointsList3.add(new Point3(0, 0.00018, -0.51769));
+            pointsList3.add(new Point3(0, 0.00018, -1.517693));
+            pointsList3.add(new Point3(0, 1.00018, -0.51769));
+            pointsList3.add(new Point3(1, 0.00018, -0.51769));
             objectPoints3.fromList(pointsList3);
             Calib3d.projectPoints(objectPoints3, rvec, tvec, intrinsics, distCoeffs, imagePoints3);
             Point[] pp = imagePoints3.toArray();
-            Imgproc.line(mRgba, pp[0], pp[1], FACE_RECT_COLOR);
-            Imgproc.line(mRgba, pp[0], pp[2], FACE_RECT_COLOR);
-            Imgproc.line(mRgba, pp[0], pp[3], FACE_RECT_COLOR);
+            Imgproc.line(mRgba, pp[0], pp[1], new Scalar(0, 255, 0, 255));
+            Imgproc.line(mRgba, pp[0], pp[2], new Scalar(255, 0, 0, 255));
+            Imgproc.line(mRgba, pp[0], pp[3], new Scalar(0, 0, 255, 255));
+
+            pointsList3 = new ArrayList<Point3>();
+            for (int i = 0; i < meRender.model.tempV.length / 3; i++) {
+                pointsList3.add(new Point3(meRender.model.tempV[i * 3],meRender.model.tempV[i * 3 + 1], meRender.model.tempV[i * 3 + 2]));
+            }
+            objectPoints3.fromList(pointsList3);
+            Calib3d.projectPoints(objectPoints3, rvec, tvec, intrinsics, distCoeffs, imagePoints3);
+            Point[] pp2 = imagePoints3.toArray();
+            for (Point pp22 : pp2) {
+                Imgproc.circle(mRgba, pp22, 1, new Scalar(0, 0, 255, 255));
+            }
+            for (int i = 0; i < meRender.model.indices.length / 3; i++) {
+                Imgproc.line(mRgba, pp2[meRender.model.indices[i * 3]], pp2[meRender.model.indices[i * 3 + 1]], new Scalar(0, 0, 255, 255));
+                Imgproc.line(mRgba, pp2[meRender.model.indices[i * 3 + 1]], pp2[meRender.model.indices[i * 3 + 2]], new Scalar(0, 0, 255, 255));
+                Imgproc.line(mRgba, pp2[meRender.model.indices[i * 3 + 2]], pp2[meRender.model.indices[i * 3]], new Scalar(0, 0, 255, 255));
+            }
+
+
 
 
             Mat rotation = new Mat(4, 4, CvType.CV_64F);
-            Mat viewMatrix = new Mat(4, 4, CvType.CV_64F);//, new Scalar(0));
+            Mat viewMatrix = new Mat(4, 4, CvType.CV_64F, new Scalar(0));
             Calib3d.Rodrigues(rvec, rotation);
 
             for(int row=0; row<3; ++row)
             {
                 for(int col=0; col<3; ++col)
                 {
-                    viewMatrix.put(row, col, rotation.get(row, col));
+                    viewMatrix.put(row, col, rotation.get(row, col)[0]);
                 }
-                viewMatrix.put(row, 3, tvec.get(row, 0));
+                viewMatrix.put(row, 3, tvec.get(row, 0)[0]);
             }
+            // FIXME
+//            viewMatrix.put(0, 0, -viewMatrix.get(0, 0)[0]);
+//            viewMatrix.put(1, 0, -viewMatrix.get(1, 0)[0]);
+//            viewMatrix.put(2, 0, -viewMatrix.get(2, 0)[0]);
+
             viewMatrix.put(3, 3, 1);
             Mat glViewMatrix = new Mat(4, 4, CvType.CV_64F, new Scalar(0));
             Core.transpose(viewMatrix , glViewMatrix);

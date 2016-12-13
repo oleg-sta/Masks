@@ -29,9 +29,9 @@ public class Model {
     private ShortBuffer _ib;
     private FloatBuffer _tcb;
 
-    private short[] indices;
+    public short[] indices;
 
-    private float[] tempV;
+    public float[] tempV;
     private float[] tempVt;
     private float[] tempVn;
 

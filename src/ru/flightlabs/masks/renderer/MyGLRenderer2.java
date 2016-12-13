@@ -36,6 +36,7 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
     int indicesCount;
 
     private float mCubeRotation;
+    public Model model;
 
     Activity activity;
 
@@ -59,7 +60,7 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
         gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT,
                 GL10.GL_NICEST);
 
-        Model model = new Model(R.raw.head12,
+        model = new Model(R.raw.head12,
                 activity);
 
         mVertexBuffer = model.getVertices();
@@ -89,7 +90,8 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
     }
 
     public void onDrawFrame(GL10 gl) {
-        //if (true) return;
+        if (FdActivity.glViewMatrix2 == null) return;
+        if (!FdActivity.debugMode) return;
         Log.i(TAG, "onDrawFrame");
 
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
@@ -142,7 +144,7 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
         gl.glViewport(0, 0, width, height);
         gl.glMatrixMode(GL10.GL_PROJECTION);
         gl.glLoadIdentity();
-        GLU.gluPerspective(gl, 45.0f, (float)width / (float)height, 0.1f, 100.0f);
+        GLU.gluPerspective(gl, -45.0f, (float)width / (float)height, 0.001f, 100.0f);
         gl.glViewport(0, 0, width, height);
 
         gl.glMatrixMode(GL10.GL_MODELVIEW);
