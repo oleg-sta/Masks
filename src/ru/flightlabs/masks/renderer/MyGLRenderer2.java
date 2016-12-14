@@ -92,6 +92,7 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 gl) {
         if (FdActivity.glViewMatrix2 == null) return;
         if (!FdActivity.debugMode) return;
+        if (true) return;
         Log.i(TAG, "onDrawFrame");
 
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);

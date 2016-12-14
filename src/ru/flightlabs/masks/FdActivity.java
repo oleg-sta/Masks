@@ -913,9 +913,9 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             objectPoints3.fromList(pointsList3);
             Calib3d.projectPoints(objectPoints3, rvec, tvec, intrinsics, distCoeffs, imagePoints3);
             Point[] pp = imagePoints3.toArray();
-            Imgproc.line(mRgba, pp[0], pp[1], new Scalar(0, 255, 0, 255));
-            Imgproc.line(mRgba, pp[0], pp[2], new Scalar(255, 0, 0, 255));
-            Imgproc.line(mRgba, pp[0], pp[3], new Scalar(0, 0, 255, 255));
+            Imgproc.line(mRgba, pp[0], pp[1], new Scalar(0, 255, 0, 255), 3);
+            Imgproc.line(mRgba, pp[0], pp[2], new Scalar(255, 0, 0, 255), 3);
+            Imgproc.line(mRgba, pp[0], pp[3], new Scalar(0, 0, 255, 255), 3);
 
             pointsList3 = new ArrayList<Point3>();
             for (int i = 0; i < meRender.model.tempV.length / 3; i++) {

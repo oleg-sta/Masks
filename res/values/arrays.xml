@@ -97,6 +97,8 @@
         <item>27</item><!-- nose upper -->
         <item>30</item><!-- nose lower -->
         <item>8</item><!-- chin -->
+        <item>48</item><!-- chin -->
+        <item>54</item><!-- chin -->
     </integer-array>
 
     <string-array translatable="false" name="pointsToPnP3D">
@@ -107,6 +109,8 @@
         <item>0.0;0.55586;-0.22152</item><!-- nose upper -->
         <item>0.00;0.00018;-0.51769</item><!-- nose lower -->
         <item>0.00;-1.10403;0.00546</item><!-- chin -->
+        <item>0.41217;-0.56719;0.08206</item><!-- chin -->
+        <item>-0.41217;-0.56719;0.08206</item><!-- chin -->
     </string-array>
 
 
