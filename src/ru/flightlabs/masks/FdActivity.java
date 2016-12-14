@@ -933,29 +933,54 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 Imgproc.line(mRgba, pp2[meRender.model.indices[i * 3 + 2]], pp2[meRender.model.indices[i * 3]], new Scalar(0, 0, 255, 255));
             }
 
-
-
-
             Mat rotation = new Mat(4, 4, CvType.CV_64F);
             Mat viewMatrix = new Mat(4, 4, CvType.CV_64F, new Scalar(0));
             Calib3d.Rodrigues(rvec, rotation);
 
-            for(int row=0; row<3; ++row)
-            {
-                for(int col=0; col<3; ++col)
-                {
+            for (int row = 0; row < 3; ++row) {
+                for(int col = 0; col < 3; ++col) {
                     viewMatrix.put(row, col, rotation.get(row, col)[0]);
                 }
                 viewMatrix.put(row, 3, tvec.get(row, 0)[0]);
             }
-            // FIXME
-//            viewMatrix.put(0, 0, -viewMatrix.get(0, 0)[0]);
-//            viewMatrix.put(1, 0, -viewMatrix.get(1, 0)[0]);
-//            viewMatrix.put(2, 0, -viewMatrix.get(2, 0)[0]);
-
             viewMatrix.put(3, 3, 1);
+
+            for (int i = 0; i < tvec.height(); i++) {
+                for (int j = 0; j < tvec.width(); j++) {
+                    Log.i("wwwglViewMatrixtvec", i + " " + j + " " + tvec.get(i, j)[0]);
+                }
+            }
+
+            for (int i = 0; i < viewMatrix.height(); i++) {
+                for (int j = 0; j < viewMatrix.width(); j++) {
+                    Log.i("wwwglViewMatrixt222", i + " " + j + " " + viewMatrix.get(i, j)[0]);
+                }
+            }
+
+            Mat viewMatrix2 = new Mat(4, 4, CvType.CV_64F, new Scalar(0));
+
+            Mat cvToGl = new Mat(4, 4, CvType.CV_64F, new Scalar(0));
+            cvToGl.put(0, 0, 1.0f);
+            cvToGl.put(1, 1, -1.0f);
+            cvToGl.put(2, 2, -1.0f);
+            cvToGl.put(3, 3, 1.0f);
+            Core.gemm(cvToGl, viewMatrix, 1, new Mat(), 0, viewMatrix2);
+
+            for (int i = 0; i < viewMatrix2.height(); i++) {
+                for (int j = 0; j < viewMatrix2.width(); j++) {
+                    Log.i("wwwglViewMatrixt222mu", i + " " + j + " " + viewMatrix2.get(i, j)[0]);
+                }
+            }
+
+
             Mat glViewMatrix = new Mat(4, 4, CvType.CV_64F, new Scalar(0));
-            Core.transpose(viewMatrix , glViewMatrix);
+            Core.transpose(viewMatrix2 , glViewMatrix);
+            for (int i = 0; i < glViewMatrix.height(); i++) {
+                for (int j = 0; j < glViewMatrix.width(); j++) {
+                    Log.i("wwwglViewMatrix", i + " " + j + " " + glViewMatrix.get(i, j)[0]);
+                }
+            }
+            Log.i("www", "tve0.02");
             glViewMatrix2 = glViewMatrix;
 
             if (makeNewFace) {

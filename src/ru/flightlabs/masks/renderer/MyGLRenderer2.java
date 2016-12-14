@@ -92,7 +92,7 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 gl) {
         if (FdActivity.glViewMatrix2 == null) return;
         if (!FdActivity.debugMode) return;
-        if (true) return;
+//        if (true) return;
         Log.i(TAG, "onDrawFrame");
 
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
@@ -145,7 +145,8 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
         gl.glViewport(0, 0, width, height);
         gl.glMatrixMode(GL10.GL_PROJECTION);
         gl.glLoadIdentity();
-        GLU.gluPerspective(gl, -45.0f, (float)width / (float)height, 0.001f, 100.0f);
+        // FIXME angle need to be calculated
+        GLU.gluPerspective(gl, 80.0f, (float)width / (float)height, 0.01f, 100.0f);
         gl.glViewport(0, 0, width, height);
 
         gl.glMatrixMode(GL10.GL_MODELVIEW);
