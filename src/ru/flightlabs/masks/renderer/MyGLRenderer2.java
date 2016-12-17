@@ -8,6 +8,8 @@ import android.opengl.GLU;
 import android.opengl.GLUtils;
 import android.os.Environment;
 import android.util.Log;
+import android.view.Display;
+import android.view.WindowManager;
 
 import org.opencv.core.Mat;
 
@@ -159,6 +161,14 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
 
         gl.glLoadIdentity();
 
+        if (FdActivity.makePhoto2) {
+            FdActivity.makePhoto2 = false;
+            WindowManager w = activity.getWindowManager();
+            Display d = w.getDefaultDisplay();
+            int width = d.getWidth();
+            int height = d.getHeight();
+            saveScreenshot(gl, width, height);
+        }
 
         mCubeRotation -= 0.15f;
     }

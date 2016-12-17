@@ -90,6 +90,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     public static final String DIRECTORY_SELFIE = "Masks";
     //public static int counter;
     public static boolean makePhoto;
+    public static boolean makePhoto2;
     public static boolean preMakePhoto;
     // Size constants of eye
     int kEyePercentTop = 25;
@@ -437,6 +438,7 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 Log.i(TAG, "saving true");
                 if (!makePhoto) {
                     makePhoto = true;
+                    makePhoto2 = true;
                     // MediaActionSound sound = new MediaActionSound();
                     cameraButton.setImageResource(R.drawable.ic_camera_r);
                     borderCam.setVisibility(View.VISIBLE);
@@ -914,17 +916,8 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 
             MatOfPoint2f imagePoints3  = new MatOfPoint2f();
             java.util.List<Point3> pointsList3 = new ArrayList<Point3>();
-            pointsList3.add(new Point3(0, 0.00018, -0.51769));
-            pointsList3.add(new Point3(0, 0.00018, -1.517693));
-            pointsList3.add(new Point3(0, 1.00018, -0.51769));
-            pointsList3.add(new Point3(1, 0.00018, -0.51769));
-            objectPoints3.fromList(pointsList3);
-            Calib3d.projectPoints(objectPoints3, rvec, tvec, intrinsics, distCoeffs, imagePoints3);
+            Calib3d.projectPoints(objectPoints, rvec, tvec, intrinsics, distCoeffs, imagePoints3);
             Point[] pp = imagePoints3.toArray();
-            Imgproc.line(mRgba, pp[0], pp[1], new Scalar(0, 255, 0, 255), 3);
-            Imgproc.line(mRgba, pp[0], pp[2], new Scalar(255, 0, 0, 255), 3);
-            Imgproc.line(mRgba, pp[0], pp[3], new Scalar(0, 0, 255, 255), 3);
-
             pointsList3 = new ArrayList<Point3>();
             for (int i = 0; i < meRender.model.tempV.length / 3; i++) {
                 pointsList3.add(new Point3(meRender.model.tempV[i * 3],meRender.model.tempV[i * 3 + 1], meRender.model.tempV[i * 3 + 2]));
@@ -932,13 +925,13 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             objectPoints3.fromList(pointsList3);
             Calib3d.projectPoints(objectPoints3, rvec, tvec, intrinsics, distCoeffs, imagePoints3);
             Point[] pp2 = imagePoints3.toArray();
-            for (Point pp22 : pp2) {
-                Imgproc.circle(mRgba, pp22, 1, new Scalar(0, 0, 255, 255));
-            }
             for (int i = 0; i < meRender.model.indices.length / 3; i++) {
                 Imgproc.line(mRgba, pp2[meRender.model.indices[i * 3]], pp2[meRender.model.indices[i * 3 + 1]], new Scalar(0, 0, 255, 255));
                 Imgproc.line(mRgba, pp2[meRender.model.indices[i * 3 + 1]], pp2[meRender.model.indices[i * 3 + 2]], new Scalar(0, 0, 255, 255));
                 Imgproc.line(mRgba, pp2[meRender.model.indices[i * 3 + 2]], pp2[meRender.model.indices[i * 3]], new Scalar(0, 0, 255, 255));
+            }
+            for (Point pp22 : pp) {
+                Imgproc.circle(mRgba, pp22, 3, new Scalar(0, 255, 255, 255), -1);
             }
 
             Mat rotation = new Mat(4, 4, CvType.CV_64F);

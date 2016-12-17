@@ -90,15 +90,54 @@
     </integer-array>
 
     <string-array name="points2DTo3D" translatable="false">
-        <item>36;179</item>
-        <item>39;168</item>
-        <item>42;600</item>
-        <item>45;612</item>
-        <item>27;284</item>
-        <item>30;109</item>
-        <item>8;34</item>
-        <item>48;398</item>
-        <item>54;812</item>
+        <item>8;269</item>
+        <item>17;61</item>
+        <item>18;60</item>
+        <item>19;65</item>
+        <item>20;67</item>
+        <item>21;69</item>
+        <item>22;476</item>
+        <item>23;474</item>
+        <item>24;472</item>
+        <item>25;469</item>
+        <item>26;468</item>
+        <item>27;406</item>
+        <item>28;403</item>
+        <item>29;401</item>
+        <item>30;400</item>
+        <item>36;331</item>
+        <item>37;154</item>
+        <item>38;148</item>
+        <item>39;140</item>
+        <item>40;145</item>
+        <item>41;152</item>
+        <item>42;547</item>
+        <item>43;551</item>
+        <item>44;555</item>
+        <item>45;725</item>
+        <item>46;559</item>
+        <item>47;553</item>
+        <item>48;223</item>
+        <item>49;186</item>
+        <item>50;182</item>
+        <item>51;181</item>
+        <item>52;586</item>
+        <item>53;588</item>
+        <item>54;622</item>
+        <item>55;615</item>
+        <item>56;617</item>
+        <item>57;217</item>
+        <item>58;215</item>
+        <item>59;214</item>
+        <item>60;210</item>
+        <item>61;192</item>
+        <item>62;195</item>
+        <item>63;597</item>
+        <item>64;611</item>
+        <item>65;606</item>
+        <item>66;207</item>
+        <item>67;204</item>
     </string-array>
+
     
 </resources>
