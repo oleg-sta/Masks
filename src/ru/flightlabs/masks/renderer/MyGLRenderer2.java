@@ -35,6 +35,7 @@ import ru.flightlabs.masks.R;
 
 public class MyGLRenderer2 implements GLSurfaceView.Renderer {
 
+    public int currText = -1;
     private int[] textures = new int[1];
     FloatBuffer mVertexBuffer;
     FloatBuffer mTextureBuffer;
@@ -91,11 +92,20 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_REPEAT);
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_REPEAT);
 
-        Bitmap mBitmap = BitmapFactory.decodeResource(activity.getResources(), R.raw.m1_2);
+        Bitmap mBitmap = BitmapFactory.decodeResource(activity.getResources(), FdActivity.eyesResources.getResourceId(FdActivity.newIndexEye, 0));
+        currText = FdActivity.newIndexEye;
         GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap, 0);
         mBitmap.recycle();
 
         gl.glEnable(GL10.GL_TEXTURE_2D);
+    }
+
+    private void changeTexture(GL10 gl, int resourceID) {
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
+        // Load the bitmap into the bound texture.
+        Bitmap bitmap = BitmapFactory.decodeResource(activity.getResources(), resourceID);
+        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bitmap, 0);
+        bitmap.recycle();
     }
 
     public void onDrawFrame(GL10 gl) {
@@ -107,6 +117,10 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
         if (!FdActivity.debugMode) return;
         Mat s = FdActivity.glViewMatrix2;
         if (s == null) return;
+        if (FdActivity.newIndexEye != currText) {
+            currText = FdActivity.newIndexEye;
+            changeTexture(gl, FdActivity.eyesResources.getResourceId(FdActivity.newIndexEye, 0));
+        }
 
 
         if (s != null) {

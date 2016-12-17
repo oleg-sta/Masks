@@ -133,12 +133,12 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
     Mat currentMaskLandScaped; // рисунок хранится с альфа каналом для наложения, уже повернут для наложения в режиме landscape
     private boolean makeNewFace;
     
-    TypedArray eyesResources;
+    public static TypedArray eyesResources;
     TypedArray eyesResourcesSmall;
     TypedArray eyesResourcesLandmarks;
     
     int currentIndexEye = -1;
-    int newIndexEye = 0;
+    public static int newIndexEye = 0;
     
     MatOfRect faces;
     Point[] foundEyes = null;
@@ -892,12 +892,6 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
                 pointsList2.add(orient(foundEyes[p2di], w, h));
             }
             objectPoints.fromList(pointsList);
-
-            int[] bases2 = getResources().getIntArray(R.array.pointsToPnP);
-            for (int base : bases2) {
-//                pointsList2.add(orient(foundEyes[base], w, h));
-//                pointsList2.add(foundEyes[base]);
-            }
             imagePoints.fromList(pointsList2);
             //Calib3d.calibrate(List<Mat> objectPoints, List<Mat> imagePoints, Size image_size, Mat K, Mat D, List<Mat> rvecs, List<Mat> tvecs);
             Calib3d.solvePnP(objectPoints, imagePoints, intrinsics, distCoeffs, rvec, tvec);
