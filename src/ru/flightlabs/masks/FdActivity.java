@@ -852,7 +852,9 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
 //                }
 //            }
         }
-        
+        if (foundEyes == null) {
+            glViewMatrix2 = null;
+        }
         if (foundEyes != null) {
 
             // FIXME you know what i mean
@@ -870,18 +872,30 @@ public class FdActivity extends Activity implements CvCameraViewListener2 {
             MatOfDouble distCoeffs = new MatOfDouble();
             Mat rvec = new Mat();
             Mat tvec = new Mat();
-            java.util.List<Point3> pointsList = new ArrayList<Point3>();
-            String[] p3d = getResources().getStringArray(R.array.pointsToPnP3D);
+
+            java.util.List<Integer> p3d1 = new ArrayList<>();
+            java.util.List<Integer> p2d1 = new ArrayList<>();
+            String[] p3d = getResources().getStringArray(R.array.points2DTo3D);
             for (String p : p3d) {
                 String[] w2 = p.split(";");
-                pointsList.add(new Point3(Double.parseDouble(w2[0]), Double.parseDouble(w2[1]), Double.parseDouble(w2[2])));
+                p2d1.add(Integer.parseInt(w2[0]));
+                p3d1.add(Integer.parseInt(w2[1]));
+            }
+
+            java.util.List<Point3> pointsList = new ArrayList<Point3>();
+            java.util.List<Point> pointsList2 = new ArrayList<Point>();
+//            String[] p3d = getResources().getStringArray(R.array.pointsToPnP3D);
+            for (int i = 0; i < p3d1.size(); i++) {
+                int p3di = p3d1.get(i);
+                int p2di = p2d1.get(i);
+                pointsList.add(new Point3(meRender.model.tempV[p3di * 3], meRender.model.tempV[p3di * 3 + 1], meRender.model.tempV[p3di * 3 + 2]));
+                pointsList2.add(orient(foundEyes[p2di], w, h));
             }
             objectPoints.fromList(pointsList);
 
             int[] bases2 = getResources().getIntArray(R.array.pointsToPnP);
-            java.util.List<Point> pointsList2 = new ArrayList<Point>();
             for (int base : bases2) {
-                pointsList2.add(orient(foundEyes[base], w, h));
+//                pointsList2.add(orient(foundEyes[base], w, h));
 //                pointsList2.add(foundEyes[base]);
             }
             imagePoints.fromList(pointsList2);

@@ -190,7 +190,7 @@ public class Model {
 
             if (CommandBlock.equals("vt")) {
                 Vector3D vertexTex = new Vector3D(Float.parseFloat(Blocks[1]),
-                        Float.parseFloat(Blocks[2]), 0.0f);
+                        1 - Float.parseFloat(Blocks[2]), 0.0f);
                 this.vertexTexture.add(vertexTex);
                 // Log.d("TEXTURE DATA", " " + vertexTex.getX() + ", " +
                 // vertexTex.getY() + ", " + vertexTex.getZ());
