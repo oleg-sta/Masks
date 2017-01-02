@@ -252,7 +252,7 @@ public class Model {
         vertexCount = facesSize * 3;
 
         tempV = new float[vertices.size() * 3];
-        tempVt = new float[vertexTexture.size() * 2];
+        tempVt = new float[vertices.size() * 2]; // FIXME textured coordinates should have their own size
         indices = new short[facesSize * 3];
 
         for (int i = 0; i < vertices.size(); i++) {
@@ -271,6 +271,14 @@ public class Model {
             indices[i * 3] = (short) (face.indices.get(0).intValue());
             indices[i * 3 + 1] = (short) (face.indices.get(1).intValue());
             indices[i * 3 + 2] = (short) (face.indices.get(2).intValue());
+
+            // FIXME fix texture
+            tempVt[indices[i * 3] * 2] = vertexTexture.get(face.textures.get(0).intValue()).getX();
+            tempVt[indices[i * 3] * 2 + 1] = vertexTexture.get(face.textures.get(0).intValue()).getY();
+            tempVt[indices[i * 3 + 1] * 2] = vertexTexture.get(face.textures.get(1).intValue()).getX();
+            tempVt[indices[i * 3 + 1] * 2 + 1] = vertexTexture.get(face.textures.get(1).intValue()).getY();
+            tempVt[indices[i * 3 + 2] * 2] = vertexTexture.get(face.textures.get(2).intValue()).getX();
+            tempVt[indices[i * 3 + 2] * 2 + 1] = vertexTexture.get(face.textures.get(2).intValue()).getY();
         }
 
         for (int i = 0; i < facesSize && false; i++) {

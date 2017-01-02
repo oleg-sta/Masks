@@ -72,7 +72,7 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
         gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT,
                 GL10.GL_NICEST);
 
-        model = new Model(R.raw.head12,
+        model = new Model(R.raw.for_android_test,
                 activity);
 
         mVertexBuffer = model.getVertices();
