@@ -48,6 +48,7 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
     int indicesCount;
 
     private float mCubeRotation;
+    private int frameIndex;
     public Model model;
 
     Activity activity;
@@ -112,6 +113,7 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
 
     public void onDrawFrame(GL10 gl) {
 //        if (true) return;
+        frameIndex++;
         Log.i(TAG, "onDrawFrame");
 
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
@@ -145,6 +147,10 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
         //gl.glRotatef(mCubeRotation, 1.0f, 1.0f, 1.0f);
 
         gl.glFrontFace(GL10.GL_CW);
+
+        // FIXME lamers hardcoded animation
+        mVertexBuffer.put(113 * 3 + 2, (frameIndex % 10) * 0.04f);
+        mVertexBuffer.put(114 * 3 + 2, 0.4f - (frameIndex % 10) * 0.04f);
 
         gl.glVertexPointer(3, GL10.GL_FLOAT, 0, mVertexBuffer);
         gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, mTextureBuffer);
