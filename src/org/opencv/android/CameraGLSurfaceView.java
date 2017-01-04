@@ -50,7 +50,7 @@ public class CameraGLSurfaceView extends GLSurfaceView {
         styledAttrs.recycle();
 
         if(android.os.Build.VERSION.SDK_INT >= 21)
-            mRenderer = null;//new Camera2Renderer(this);
+            mRenderer = new Camera2Renderer(this);
         else
             mRenderer = new CameraRenderer(this);
 
