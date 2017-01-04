@@ -36,7 +36,7 @@ public abstract class CameraGLRendererBase implements GLSurfaceView.Renderer, Su
             + "uniform samplerExternalOES sTexture;\n"
             + "varying vec2 texCoord;\n"
             + "void main() {\n"
-            + "  gl_FragColor = texture2D(sTexture,texCoord);\n" + "}";
+            + "  gl_FragColor = texture2D(sTexture, vec2(1.0 - texCoord.y, 1.0 - texCoord.x));\n" + "}";
 
     private final String fss2D = ""
             + "precision mediump float;\n"
@@ -405,7 +405,8 @@ public abstract class CameraGLRendererBase implements GLSurfaceView.Renderer, Su
             mCameraWidth  = width;
             mCameraHeight = height;
             setCameraPreviewSize(width, height); // can change mCameraWidth & mCameraHeight
-            initFBO(mCameraWidth, mCameraHeight);
+//            initFBO(mCameraWidth, mCameraHeight);
+            initFBO(540, 960);
             mHaveFBO = true;
         }
 
