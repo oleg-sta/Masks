@@ -571,12 +571,12 @@ public class FdActivity2 extends Activity implements CvCameraViewListener2, Came
 
     public void onCameraViewStarted(int width, int height) {
 
-        //int vertexShaderId = ShaderUtils.createShader(this, GLES20.GL_VERTEX_SHADER, R.raw.vertex_shader);
-        int vertexShaderId = ShaderUtils.createShader(GLES20.GL_VERTEX_SHADER, "uniform mat4 uMVPMatrix;" +
-                "attribute vec4 vPosition;" +
-                "void main() {" +
-                "  gl_Position = uMVPMatrix * vPosition;" +
-                "}");
+        int vertexShaderId = ShaderUtils.createShader(this, GLES20.GL_VERTEX_SHADER, R.raw.vertex_shader);
+//        int vertexShaderId = ShaderUtils.createShader(GLES20.GL_VERTEX_SHADER, "uniform mat4 uMVPMatrix;" +
+//                "attribute vec4 vPosition;" +
+//                "void main() {" +
+//                "  gl_Position = uMVPMatrix * vPosition;" +
+//                "}");
         int fragmentShaderId = ShaderUtils.createShader(this, GLES20.GL_FRAGMENT_SHADER, R.raw.fragment_shader);
         programId = ShaderUtils.createProgram(vertexShaderId, fragmentShaderId);
 
