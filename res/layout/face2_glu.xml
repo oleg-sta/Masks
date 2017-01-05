@@ -14,13 +14,6 @@
         android:layout_height="match_parent" >
 
 
-        <ImageView
-            android:id="@+id/no_person"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
-            android:layout_centerInParent="true"
-            android:src="@drawable/ic_noperson" />
-
         <ListView
             android:visibility="gone"
             android:id="@+id/list_effects"

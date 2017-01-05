@@ -322,18 +322,35 @@ public class FdActivity2 extends Activity implements CvCameraViewListener2, Came
         int vertexShaderId = ShaderUtils.createShader(this, GLES20.GL_VERTEX_SHADER, R.raw.vss);
         int fragmentShaderId = ShaderUtils.createShader(this, GLES20.GL_FRAGMENT_SHADER, R.raw.fss2);
         programId = ShaderUtils.createProgram(vertexShaderId, fragmentShaderId);
-        bindData();
+        bindData(height, width);
 
         Log.i(TAG, "onCameraViewStarted");
         //mGray = new Mat();
         //mRgba = new Mat();
     }
 
-    private void bindData() {
+    private void bindData(int width, int height) {
         vPos = GLES20.glGetAttribLocation(programId, "vPosition");
         vTex  = GLES20.glGetAttribLocation(programId, "vTexCoord");
         GLES20.glEnableVertexAttribArray(vPos);
         GLES20.glEnableVertexAttribArray(vTex);
+
+        int matrixMvp = GLES20.glGetUniformLocation(programId, "uMVP");
+        float[] matrix = new float[16];
+//        matrix[0] = 1;
+//        matrix[3] = - 1;
+//        matrix[5] = 1;
+//        matrix[7] = - 1;
+//        matrix[10] = - 1;
+//        matrix[7] = - 1;
+//        matrix[15] = 1;
+
+        matrix[0] = 1;
+        matrix[5] = 1;
+        matrix[10] = 1;
+        matrix[15] = 1;
+
+        GLES20.glUniformMatrix4fv(matrixMvp, 1, false, matrix, 0);
     }
 
 
@@ -380,8 +397,11 @@ public class FdActivity2 extends Activity implements CvCameraViewListener2, Came
         Rect[] facesArray = faces.toArray();
         final boolean haveFace = facesArray.length > 0;
         Log.i(TAG, "onCameraTexture5 " + haveFace);
+        Point center = new Point(0.5, 0.5);
         if (haveFace) {
             Imgproc.rectangle(pic, facesArray[0].tl(), facesArray[0].br(), new Scalar(255, 10 ,10), 3);
+            center.x  = (2 * facesArray[0].x + facesArray[0].width) / 2.0 / width;
+            center.y  = 1 - (2 * facesArray[0].y + facesArray[0].height) / 2.0 / height;
         }
 
         // temporary for debug purposes or maby for simple effects
@@ -425,6 +445,10 @@ public class FdActivity2 extends Activity implements CvCameraViewListener2, Came
         GLES20.glUseProgram(programId);
         int uColorLocation = GLES20.glGetUniformLocation(programId, "u_Color");
         GLES20.glUniform4f(uColorLocation, 0.0f, 0.0f, 1.0f, 1.0f);
+
+        int uCenter = GLES20.glGetUniformLocation(programId, "uCenter");
+        GLES20.glUniform2f(uCenter, (float)center.x, (float)center.y);
+
         FloatBuffer vertexData;
         float[] vertices = {
                 -1, -1,
@@ -432,6 +456,12 @@ public class FdActivity2 extends Activity implements CvCameraViewListener2, Came
                 1, -1,
                 1,  1
         };
+//        vertices = new float[]{
+//                0, 0,
+//                width,  0,
+//                width, height,
+//                0,  height
+//        };
         vertexData = ByteBuffer
                 .allocateDirect(vertices.length * 4)
                 .order(ByteOrder.nativeOrder())
