@@ -50,6 +50,7 @@ import java.nio.FloatBuffer;
 
 public class FdActivity2 extends Activity implements CvCameraViewListener2, CameraGLSurfaceView.CameraTextureListener {
 
+    private volatile DetectionBasedTracker mNativeDetector;
     private int vPos;
     private int vTex;
 
@@ -359,9 +360,27 @@ public class FdActivity2 extends Activity implements CvCameraViewListener2, Came
         mGray.release();
     }
 
+    private Point convertToGl(Point old, int width, int height) {
+        return new Point(old.x / width, 1 - old.y / height);
+    }
     private int[] iFBO = null;//{0};
     @Override
     public boolean onCameraTexture(int texIn, int texOut, int width, int height) {
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(mNativeDetector != null? View.INVISIBLE : View.VISIBLE);
+            }
+        });
+        if (!loadModel) {
+            Log.i(TAG, "onCameraFrame loadModel start");
+            loadModel = true;
+            new LoadModel().execute(compModel);
+        }
+        if (compModel.mNativeDetector != null) {
+            mNativeDetector = compModel.mNativeDetector;
+        }
         // FIXME CameraRenderer and CameraGl... should bi fixed by of sizes of camera and FBO
         int t = width;
         width = height;
@@ -398,11 +417,23 @@ public class FdActivity2 extends Activity implements CvCameraViewListener2, Came
         final boolean haveFace = facesArray.length > 0;
         Log.i(TAG, "onCameraTexture5 " + haveFace);
         Point center = new Point(0.5, 0.5);
+        Point[] foundEyes = null;
         if (haveFace) {
-            Imgproc.rectangle(pic, facesArray[0].tl(), facesArray[0].br(), new Scalar(255, 10 ,10), 3);
-            center.x  = (2 * facesArray[0].x + facesArray[0].width) / 2.0 / width;
-            center.y  = 1 - (2 * facesArray[0].y + facesArray[0].height) / 2.0 / height;
+            if (debugMode) {
+                Imgproc.rectangle(pic, facesArray[0].tl(), facesArray[0].br(), new Scalar(255, 10 ,10), 3);
+            }
+            center = convertToGl(new Point((2 * facesArray[0].x + facesArray[0].width) / 2.0, (2 * facesArray[0].y + facesArray[0].height) / 2.0), width, height);
+            if (mNativeDetector != null) {
+                foundEyes = mNativeDetector.findEyes(mGray, facesArray[0]);
+                if (debugMode) {
+                    for (Point p : foundEyes) {
+                        Imgproc.circle(pic, p, 2, new Scalar(255, 10, 10));
+                    }
+                }
+                center = convertToGl(new Point((foundEyes[36].x + foundEyes[39].x) / 2.0, (foundEyes[36].y + foundEyes[39].y) / 2.0), width, height);
+            }
         }
+
 
         // temporary for debug purposes or maby for simple effects
         Core.flip(pic, pic, 0);
