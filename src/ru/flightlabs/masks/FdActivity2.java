@@ -37,6 +37,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoWriter;
 
@@ -377,6 +378,22 @@ public class FdActivity2 extends Activity implements CvCameraViewListener2, Came
         MatOfRect faces = compModel.findFaces(mGray, mAbsoluteFaceSize);
         Rect[] facesArray = faces.toArray();
         final boolean haveFace = facesArray.length > 0;
+        if (haveFace) {
+            Imgproc.rectangle(pic, facesArray[0].tl(), facesArray[0].br(), new Scalar(255, 10 ,10), 3);
+        }
+
+        // temporary for debug purposes or maby for simple effects
+        Core.flip(pic, pic, 0);
+        pic.get(0, 0, m_bbPixels.array());
+        GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D,         // Type of texture
+                0,                   // Pyramid level (for mip-mapping) - 0 is the top level
+                GLES20.GL_RGBA,              // Internal colour format to convert to
+                width,          // Image width  i.e. 640 for Kinect in standard mode
+                height,          // Image height i.e. 480 for Kinect in standard mode
+                0,                   // Border width in pixels (can either be 1 or 0)
+                GLES20.GL_RGBA,              // Input image format (i.e. GL_RGB, GL_RGBA, GL_BGR etc.)
+                GLES20.GL_UNSIGNED_BYTE,    // Image data type
+                m_bbPixels);        // The actual image data itself
 
 
         if (makePhoto) {
@@ -406,9 +423,9 @@ public class FdActivity2 extends Activity implements CvCameraViewListener2, Came
 
         FloatBuffer texData;
         float[] tex = {
-                0.0f, 0.3f,
-                0.5f, 0.7f,
-                1.0f, 0.3f,
+                0.0f, 0.0f,
+                1.0f, 0.0f,
+                1.0f, 1.0f,
         };
         texData = ByteBuffer
                 .allocateDirect(tex.length * 4)
