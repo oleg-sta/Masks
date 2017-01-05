@@ -320,7 +320,7 @@ public class FdActivity2 extends Activity implements CvCameraViewListener2, Came
 //        int vertexShaderId = ShaderUtils.createShader(this, GLES20.GL_VERTEX_SHADER, R.raw.vertex_shader);
 //        int fragmentShaderId = ShaderUtils.createShader(this, GLES20.GL_FRAGMENT_SHADER, R.raw.fragment_shader);
         int vertexShaderId = ShaderUtils.createShader(this, GLES20.GL_VERTEX_SHADER, R.raw.vss);
-        int fragmentShaderId = ShaderUtils.createShader(this, GLES20.GL_FRAGMENT_SHADER, R.raw.fss);
+        int fragmentShaderId = ShaderUtils.createShader(this, GLES20.GL_FRAGMENT_SHADER, R.raw.fss2);
         programId = ShaderUtils.createProgram(vertexShaderId, fragmentShaderId);
         bindData();
 
@@ -342,6 +342,7 @@ public class FdActivity2 extends Activity implements CvCameraViewListener2, Came
         mGray.release();
     }
 
+    private int[] iFBO = null;//{0};
     @Override
     public boolean onCameraTexture(int texIn, int texOut, int width, int height) {
         // FIXME CameraRenderer and CameraGl... should bi fixed by of sizes of camera and FBO
@@ -378,6 +379,7 @@ public class FdActivity2 extends Activity implements CvCameraViewListener2, Came
         MatOfRect faces = compModel.findFaces(mGray, mAbsoluteFaceSize);
         Rect[] facesArray = faces.toArray();
         final boolean haveFace = facesArray.length > 0;
+        Log.i(TAG, "onCameraTexture5 " + haveFace);
         if (haveFace) {
             Imgproc.rectangle(pic, facesArray[0].tl(), facesArray[0].br(), new Scalar(255, 10 ,10), 3);
         }
@@ -385,6 +387,8 @@ public class FdActivity2 extends Activity implements CvCameraViewListener2, Came
         // temporary for debug purposes or maby for simple effects
         Core.flip(pic, pic, 0);
         pic.get(0, 0, m_bbPixels.array());
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texIn);
         GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D,         // Type of texture
                 0,                   // Pyramid level (for mip-mapping) - 0 is the top level
                 GLES20.GL_RGBA,              // Internal colour format to convert to
@@ -395,6 +399,18 @@ public class FdActivity2 extends Activity implements CvCameraViewListener2, Came
                 GLES20.GL_UNSIGNED_BYTE,    // Image data type
                 m_bbPixels);        // The actual image data itself
 
+        GLES20.glFlush();
+        GLES20.glFinish();
+        if (iFBO == null) {
+            //int hFBO;
+            iFBO = new int[]{0};
+            GLES20.glGenFramebuffers(1, iFBO, 0);
+            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, iFBO[0]);
+            GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER, GLES20.GL_COLOR_ATTACHMENT0, GLES20.GL_TEXTURE_2D, texOut, 0);
+        } else {
+            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, iFBO[0]);
+        }
+        GLES20.glViewport(0, 0, width, height);
 
         if (makePhoto) {
             makePhoto = false;
@@ -411,9 +427,10 @@ public class FdActivity2 extends Activity implements CvCameraViewListener2, Came
         GLES20.glUniform4f(uColorLocation, 0.0f, 0.0f, 1.0f, 1.0f);
         FloatBuffer vertexData;
         float[] vertices = {
-                -0.5f, -0.2f,
-                0.0f, 0.2f,
-                0.5f, -0.2f,
+                -1, -1,
+                -1,  1,
+                1, -1,
+                1,  1
         };
         vertexData = ByteBuffer
                 .allocateDirect(vertices.length * 4)
@@ -423,9 +440,10 @@ public class FdActivity2 extends Activity implements CvCameraViewListener2, Came
 
         FloatBuffer texData;
         float[] tex = {
-                0.0f, 0.0f,
-                1.0f, 0.0f,
-                1.0f, 1.0f,
+                0,  0,
+                0,  1,
+                1,  0,
+                1,  1
         };
         texData = ByteBuffer
                 .allocateDirect(tex.length * 4)
@@ -442,13 +460,16 @@ public class FdActivity2 extends Activity implements CvCameraViewListener2, Came
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texIn);
         GLES20.glUniform1i(GLES20.glGetUniformLocation(programId, "sTexture"), 0);
 
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
+        //GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        //GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texOut); //?
+
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
         GLES20.glFlush(); //?
 
         Log.i(TAG, "onCameraTexture " + pic.height() + " " + facesArray.length);
 
 
-        return false;
+        return true;
     }
 
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
