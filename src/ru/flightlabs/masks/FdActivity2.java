@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.media.MediaActionSound;
+import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.os.Bundle;
 import android.os.Environment;
@@ -47,6 +48,9 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 public class FdActivity2 extends Activity implements CvCameraViewListener2, CameraGLSurfaceView.CameraTextureListener {
+
+    private int vPos;
+    private int vTex;
 
     CompModel compModel;
     int programId;// shader program
@@ -97,10 +101,6 @@ public class FdActivity2 extends Activity implements CvCameraViewListener2, Came
 
     int availableProcessors = 1;
 
-    String detectorName;
-
-    VideoWriter videoWriter;
-    VideoWriter videoWriterOrig;
     boolean videoWriterStart;
 
     ByteBuffer m_bbPixels;
@@ -316,19 +316,25 @@ public class FdActivity2 extends Activity implements CvCameraViewListener2, Came
 
     public void onCameraViewStarted(int width, int height) {
 
-        int vertexShaderId = ShaderUtils.createShader(this, GLES20.GL_VERTEX_SHADER, R.raw.vertex_shader);
-//        int vertexShaderId = ShaderUtils.createShader(GLES20.GL_VERTEX_SHADER, "uniform mat4 uMVPMatrix;" +
-//                "attribute vec4 vPosition;" +
-//                "void main() {" +
-//                "  gl_Position = uMVPMatrix * vPosition;" +
-//                "}");
-        int fragmentShaderId = ShaderUtils.createShader(this, GLES20.GL_FRAGMENT_SHADER, R.raw.fragment_shader);
+//        int vertexShaderId = ShaderUtils.createShader(this, GLES20.GL_VERTEX_SHADER, R.raw.vertex_shader);
+//        int fragmentShaderId = ShaderUtils.createShader(this, GLES20.GL_FRAGMENT_SHADER, R.raw.fragment_shader);
+        int vertexShaderId = ShaderUtils.createShader(this, GLES20.GL_VERTEX_SHADER, R.raw.vss);
+        int fragmentShaderId = ShaderUtils.createShader(this, GLES20.GL_FRAGMENT_SHADER, R.raw.fss);
         programId = ShaderUtils.createProgram(vertexShaderId, fragmentShaderId);
+        bindData();
 
         Log.i(TAG, "onCameraViewStarted");
         //mGray = new Mat();
         //mRgba = new Mat();
     }
+
+    private void bindData() {
+        vPos = GLES20.glGetAttribLocation(programId, "vPosition");
+        vTex  = GLES20.glGetAttribLocation(programId, "vTexCoord");
+        GLES20.glEnableVertexAttribArray(vPos);
+        GLES20.glEnableVertexAttribArray(vTex);
+    }
+
 
     public void onCameraViewStopped() {
         Log.i(TAG, "onCameraViewStopped");
@@ -392,19 +398,32 @@ public class FdActivity2 extends Activity implements CvCameraViewListener2, Came
                 0.0f, 0.2f,
                 0.5f, -0.2f,
         };
-
         vertexData = ByteBuffer
                 .allocateDirect(vertices.length * 4)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer();
         vertexData.put(vertices);
 
+        FloatBuffer texData;
+        float[] tex = {
+                0.0f, 0.3f,
+                0.5f, 0.7f,
+                1.0f, 0.3f,
+        };
+        texData = ByteBuffer
+                .allocateDirect(tex.length * 4)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer();
+        texData.put(tex);
 
-        int aPositionLocation = GLES20.glGetAttribLocation(programId, "a_Position");
         vertexData.position(0);
-        GLES20.glVertexAttribPointer(aPositionLocation, 2, GLES20.GL_FLOAT,
-                false, 0, vertexData);
-        GLES20.glEnableVertexAttribArray(aPositionLocation);
+        GLES20.glVertexAttribPointer(vPos, 2, GLES20.GL_FLOAT, false, 0, vertexData);
+        texData.position(0);
+        GLES20.glVertexAttribPointer(vTex,  2, GLES20.GL_FLOAT, false, 0, texData);
+
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texIn);
+        GLES20.glUniform1i(GLES20.glGetUniformLocation(programId, "sTexture"), 0);
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
         GLES20.glFlush(); //?
