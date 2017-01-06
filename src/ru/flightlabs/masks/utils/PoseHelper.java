@@ -19,6 +19,7 @@ import org.opencv.imgproc.Imgproc;
 import java.util.ArrayList;
 
 import ru.flightlabs.masks.R;
+import ru.flightlabs.masks.activity.Settings;
 import ru.flightlabs.masks.renderer.Model;
 
 /**
@@ -85,9 +86,7 @@ public class PoseHelper {
 
         Mat rotation = new Mat(4, 4, CvType.CV_64F);
         Mat viewMatrix = new Mat(4, 4, CvType.CV_64F, new Scalar(0));
-        Log.i("wwww222", rvec.width() + " " + rvec.height());
         Calib3d.Rodrigues(rvec, rotation);
-        Log.i("wwww222", rotation.width() + " " + rotation.height());
 
         for (int row = 0; row < 3; ++row) {
             for(int col = 0; col < 3; ++col) {
@@ -96,7 +95,9 @@ public class PoseHelper {
             viewMatrix.put(row, 3, tvec.get(row, 0)[0]);
         }
         viewMatrix.put(3, 3, 1);
-        drawDebug(mRgba, model, viewMatrix, intrinsics);
+        if (Settings.debugMode) {
+            drawDebug(mRgba, model, viewMatrix, intrinsics);
+        }
 
         Mat viewMatrix2 = new Mat(4, 4, CvType.CV_64F, new Scalar(0));
 

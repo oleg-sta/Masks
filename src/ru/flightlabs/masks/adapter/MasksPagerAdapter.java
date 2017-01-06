@@ -12,15 +12,16 @@ import android.widget.LinearLayout;
 
 import ru.flightlabs.masks.R;
 import ru.flightlabs.masks.activity.FdActivity;
+import ru.flightlabs.masks.activity.FdActivity2;
 
 public class MasksPagerAdapter extends PagerAdapter {
 
-    FdActivity fdAct;
+    FdActivity2 fdAct;
     Context mContext;
     TypedArray images;
     LayoutInflater mLayoutInflater;
 
-    public MasksPagerAdapter(FdActivity context, TypedArray images) {
+    public MasksPagerAdapter(FdActivity2 context, TypedArray images) {
         mContext = context;
         mLayoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.images = images;
@@ -49,7 +50,6 @@ public class MasksPagerAdapter extends PagerAdapter {
             @Override
             public void onClick(View v) {
                 fdAct.changeMask(position);
-                
             }
         });
 

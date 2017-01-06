@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.media.MediaActionSound;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -28,6 +29,7 @@ import org.opencv.core.Mat;
 
 import java.io.IOException;
 
+import ru.flightlabs.masks.adapter.MasksPagerAdapter;
 import ru.flightlabs.masks.camera.CameraTextureListenerImpl;
 import ru.flightlabs.masks.CompModel;
 import ru.flightlabs.masks.adapter.EffectItemsAdapter;
@@ -50,7 +52,7 @@ public class FdActivity2 extends Activity {
     TypedArray eyesResourcesSmall;
     TypedArray eyesResourcesLandmarks;
 
-    int currentIndexEye = -1;
+    public static int currentIndexEye = -1;
     public static int newIndexEye = 0;
 
     ImageView noPerson;
@@ -246,9 +248,13 @@ public class FdActivity2 extends Activity {
             public void onClick(View v) {
             }
         });
+
+        ViewPager viewPager = (ViewPager) findViewById(R.id.photo_pager);
+        MasksPagerAdapter pager = new MasksPagerAdapter(this, eyesResourcesSmall);
+        viewPager.setAdapter(pager);
     }
 
-    void changeMask(int newMask) {
+    public void changeMask(int newMask) {
         newIndexEye = newMask;
     }
 

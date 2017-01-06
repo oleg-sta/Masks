@@ -28,6 +28,7 @@ import ru.flightlabs.masks.CompModel;
 import ru.flightlabs.masks.DetectionBasedTracker;
 import ru.flightlabs.masks.R;
 import ru.flightlabs.masks.Static;
+import ru.flightlabs.masks.activity.FdActivity2;
 import ru.flightlabs.masks.activity.Settings;
 import ru.flightlabs.masks.renderer.Model;
 import ru.flightlabs.masks.utils.FileUtils;
@@ -152,6 +153,11 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
                 frameCount = 0;
             }
         }
+        // TODO do in background
+        if (FdActivity2.newIndexEye != FdActivity2.currentIndexEye) {
+            FdActivity2.currentIndexEye = FdActivity2.newIndexEye;
+            OpenGlHelper.changeTexture(act, FdActivity2.eyesResources.getResourceId(FdActivity2.newIndexEye, 0),maskTextureid);
+        }
 
         if (compModel.mNativeDetector != null) {
             mNativeDetector = compModel.mNativeDetector;
@@ -206,7 +212,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         }
         Mat glMatrix = null;
         PoseHelper.bindMatrix(100, 100);
-        if (Settings.debugMode && foundEyes != null) {
+        if (foundEyes != null) {
             glMatrix = PoseHelper.findPose(model, width, act, foundEyes, mRgba);
             //PoseHelper.drawDebug(mRgba, model, glMatrix);
         }
@@ -257,7 +263,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         shaderEfffect2d(center, texIn);
         // TODO change buffer to draw
         if (foundEyes != null) {
-            shaderEfffect3d(glMatrix);
+            shaderEfffect3d(glMatrix, texIn);
         } else {
             shaderEfffect3dStub();
         }
@@ -268,7 +274,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         return true;
     }
 
-    private void shaderEfffect3d(Mat glMatrix) {
+    private void shaderEfffect3d(Mat glMatrix, int texIn) {
         GLES20.glUseProgram(program3dId);
         int matrixMvp = GLES20.glGetUniformLocation(program3dId, "u_MVPMatrix");
 
@@ -282,9 +288,14 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
 
         mTextureBuffer.position(0);
         GLES20.glVertexAttribPointer(vTexFor3d,  2, GLES20.GL_FLOAT, false, 0, mTextureBuffer);
+
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, maskTextureid);
         GLES20.glUniform1i(GLES20.glGetUniformLocation(program3dId, "u_Texture"), 0);
+
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texIn);
+        GLES20.glUniform1i(GLES20.glGetUniformLocation(program3dId, "u_TextureOrig"), 1);
 
 
         mIndices.position(0);

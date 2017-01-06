@@ -48,4 +48,12 @@ public class OpenGlHelper {
 
         return textureHandle[0];
     }
+
+    public static void changeTexture(final Context context, int resourceID, int texId) {
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texId);
+        // Load the bitmap into the bound texture.
+        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), resourceID);
+        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+        bitmap.recycle();
+    }
 }

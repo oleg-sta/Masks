@@ -304,9 +304,9 @@ public class FdActivity extends Activity {
             }
         });
         
-        ViewPager viewPager = (ViewPager) findViewById(R.id.photo_pager);
-        MasksPagerAdapter pager = new MasksPagerAdapter(this, eyesResourcesSmall);
-        viewPager.setAdapter(pager);
+        //ViewPager viewPager = (ViewPager) findViewById(R.id.photo_pager);
+        //MasksPagerAdapter pager = new MasksPagerAdapter(this, eyesResourcesSmall);
+        //viewPager.setAdapter(pager);
 
         gLSurfaceView = (GLSurfaceView)findViewById(R.id.fd_glsurface);
         gLSurfaceView.getHolder().setFormat(PixelFormat.TRANSPARENT);
