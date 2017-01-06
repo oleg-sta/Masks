@@ -31,6 +31,7 @@ import ru.flightlabs.masks.Static;
 import ru.flightlabs.masks.activity.Settings;
 import ru.flightlabs.masks.renderer.Model;
 import ru.flightlabs.masks.utils.FileUtils;
+import ru.flightlabs.masks.utils.OpenGlHelper;
 import ru.flightlabs.masks.utils.OpencvUtils;
 import ru.flightlabs.masks.utils.PoseHelper;
 import ru.flightlabs.masks.utils.ShaderUtils;
@@ -47,9 +48,17 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
     CompModel compModel;
     Activity act;
 
+    // 2d
     private int vPos;
-    private int vPos3d;
     private int vTex;
+
+    // 3d
+    private int vPos3d;
+    private int vTexFor3d;
+
+    private int maskTextureid;
+    /** This will be used to pass in the texture. */
+    private int mTextureUniformHandle;
 
     ByteBuffer m_bbPixels;
     Mat mRgba;
@@ -109,6 +118,8 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         mNormalBuffer = model.getNormals();
         mIndices = model.getIndices();
         indicesCount = model.getIndicesCount();
+
+        maskTextureid = OpenGlHelper.loadTexture(act, R.raw.m1_2);
     }
 
     private void bindData(int width, int height) {
@@ -119,7 +130,8 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
 
         vPos3d = GLES20.glGetAttribLocation(program3dId, "vPosition");
         GLES20.glEnableVertexAttribArray(vPos3d);
-
+        vTexFor3d = GLES20.glGetAttribLocation(program3dId, "a_TexCoordinate");
+        GLES20.glEnableVertexAttribArray(vTexFor3d);
     }
 
 
@@ -258,25 +270,23 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
 
     private void shaderEfffect3d(Mat glMatrix) {
         GLES20.glUseProgram(program3dId);
-        //GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         int matrixMvp = GLES20.glGetUniformLocation(program3dId, "u_MVPMatrix");
 
         float[] matrixView = PoseHelper.convertToArray(glMatrix);
         float[] mMatrix = new float[16];
         Matrix.multiplyMM(mMatrix, 0, PoseHelper.createProjectionMatrixThroughPerspective(540, 960), 0, matrixView, 0);
 
-//        matrix = new float[16];
-//        matrix[0] = 1;
-//        matrix[5] = (float)0.5;
-//        matrix[10] = 0;
-//        matrix[15] = 1;
-//        matrix = PoseHelper.bindMatrix(540, 960);
-
         GLES20.glUniformMatrix4fv(matrixMvp, 1, false, mMatrix, 0);
         mVertexBuffer.position(0);
         GLES20.glVertexAttribPointer(vPos3d, 3, GLES20.GL_FLOAT, false, 0, mVertexBuffer);
 
-//        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
+        mTextureBuffer.position(0);
+        GLES20.glVertexAttribPointer(vTexFor3d,  2, GLES20.GL_FLOAT, false, 0, mTextureBuffer);
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, maskTextureid);
+        GLES20.glUniform1i(GLES20.glGetUniformLocation(program3dId, "u_Texture"), 0);
+
+
         mIndices.position(0);
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, indicesCount, GLES20.GL_UNSIGNED_SHORT, mIndices);
         GLES20.glFlush();
