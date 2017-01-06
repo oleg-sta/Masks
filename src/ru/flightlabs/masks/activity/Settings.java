@@ -1,4 +1,4 @@
-package ru.flightlabs.masks;
+package ru.flightlabs.masks.activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -14,7 +14,12 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import ru.flightlabs.masks.R;
+
 public class Settings extends Activity {
+
+    public static boolean debugMode = true;
+    public static final String DIRECTORY_SELFIE = "Masks";
     
     public static final String PREFS = "eselfie";
     public static final String DEBUG_MODE = "debugMode";

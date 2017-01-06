@@ -1,4 +1,4 @@
-package ru.flightlabs.masks;
+package ru.flightlabs.masks.adapter;
 
 import java.util.List;
 

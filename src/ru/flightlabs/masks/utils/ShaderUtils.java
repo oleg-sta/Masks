@@ -1,4 +1,4 @@
-package ru.flightlabs.masks;
+package ru.flightlabs.masks.utils;
 
 /**
  * Created by sov on 04.01.2017.
@@ -43,13 +43,13 @@ public class ShaderUtils {
 
     }
 
-    static int createShader(Context context, int type, int shaderRawId) {
+    public static int createShader(Context context, int type, int shaderRawId) {
         String shaderText = FileUtils
                 .readTextFromRaw(context, shaderRawId);
         return ShaderUtils.createShader(type, shaderText);
     }
 
-    static int createShader(int type, String shaderText) {
+    public static int createShader(int type, String shaderText) {
         final int shaderId = glCreateShader(type);
         if (shaderId == 0) {
             return 0;

@@ -1,4 +1,4 @@
-package ru.flightlabs.masks;
+package ru.flightlabs.masks.adapter;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -9,6 +9,9 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+
+import ru.flightlabs.masks.R;
+import ru.flightlabs.masks.activity.FdActivity;
 
 public class MasksPagerAdapter extends PagerAdapter {
 

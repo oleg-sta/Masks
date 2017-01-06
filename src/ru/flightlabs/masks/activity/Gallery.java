@@ -1,4 +1,4 @@
-package ru.flightlabs.masks;
+package ru.flightlabs.masks.activity;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -18,6 +18,9 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 
+import ru.flightlabs.masks.adapter.PhotoPagerAdapter;
+import ru.flightlabs.masks.R;
+
 public class Gallery extends Activity {
     
     private static final String TAG = "Gallery_class";
@@ -32,7 +35,7 @@ public class Gallery extends Activity {
         final ViewPager pager = (ViewPager)findViewById(R.id.pager);
         // TODO список
         File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-        File newFile = new File(file, FdActivity.DIRECTORY_SELFIE);
+        File newFile = new File(file, Settings.DIRECTORY_SELFIE);
         if(!newFile.exists()){
             newFile.mkdirs();
         }

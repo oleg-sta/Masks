@@ -6,6 +6,8 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,28 +17,34 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import ru.flightlabs.masks.activity.Settings;
 import ru.flightlabs.masks.model.ImgLabModel;
 import ru.flightlabs.masks.model.SimpleModel;
 import ru.flightlabs.masks.model.primitives.Line;
 import ru.flightlabs.masks.model.primitives.Triangle;
+import ru.flightlabs.masks.utils.FileUtils;
 
 /**
  * Loads ert model in background
  */
-public class LoadModel extends AsyncTask<CompModel, Void, Void> {
+public class ModelLoaderTask extends AsyncTask<CompModel, Void, Void> {
 
     CompModel compModel;
     private static final String TAG = "LoadModel_class";
+    ProgressBar pb;
 
+    public ModelLoaderTask(ProgressBar pb) {
+        this.pb = pb;
+    }
     @Override
     protected Void doInBackground(CompModel... params) {
         compModel = params[0];
-        Log.i(TAG, "LoadModel doInBackground");
+        Log.i(TAG, "ModelLoaderTask doInBackground");
         File cascadeDir = compModel.context.getDir("cascade", Context.MODE_PRIVATE);
         File fModel = new File(cascadeDir, "testing_with_face_landmarks.xml");
         try {
             int res = FileUtils.resourceToFile(compModel.context.getResources().openRawResource(R.raw.monkey_68), fModel);
-            Log.i(TAG, "LoadModel doInBackground111" + res + " " + fModel.length());
+            Log.i(TAG, "ModelLoaderTask doInBackground111" + res + " " + fModel.length());
         } catch (Resources.NotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -44,13 +52,13 @@ public class LoadModel extends AsyncTask<CompModel, Void, Void> {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        //Log.i(TAG, "LoadModel doInBackground1");
+        //Log.i(TAG, "ModelLoaderTask doInBackground1");
         SimpleModel modelFrom = new ImgLabModel(fModel.getPath());
-        Log.i(TAG, "LoadModel doInBackground2");
+        Log.i(TAG, "ModelLoaderTask doInBackground2");
         //pointsWas = modelFrom.getPointsWas();
-        Log.i(TAG, "LoadModel doInBackground3");
+        Log.i(TAG, "ModelLoaderTask doInBackground3");
         //lines = modelFrom.getLines();
-        Log.i(TAG, "LoadModel doInBackground4");
+        Log.i(TAG, "ModelLoaderTask doInBackground4");
         // load ready triangulation model from file
         List<Line> linesArr = new ArrayList<Line>();
         List<Triangle> triangleArr = new ArrayList<Triangle>();
@@ -89,37 +97,46 @@ public class LoadModel extends AsyncTask<CompModel, Void, Void> {
 //            Triangulation trianglation = new DelaunayTriangulation();
 //            lines = trianglation.convertToTriangle(pointsWas, lines);
 
-        Log.i(TAG, "LoadModel doInBackground5");
+        Log.i(TAG, "ModelLoaderTask doInBackground5");
         // load triangles from model
         compModel.trianlges = triangleArr.toArray(new Triangle[0]);
         //trianlges = StupidTriangleModel.getTriagles(pointsWas, lines);
-        Log.i(TAG, "LoadModel doInBackground6");
+        Log.i(TAG, "ModelLoaderTask doInBackground6");
 
         final SharedPreferences prefs = compModel.context.getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
         String detectorName = prefs.getString(Settings.MODEL_PATH, Settings.MODEL_PATH_DEFAULT);
 
         if (!new File(detectorName).exists()) {
-            Log.i(TAG, "LoadModel doInBackground66");
+            Log.i(TAG, "ModelLoaderTask doInBackground66");
             try {
                 File ertModel = new File(cascadeDir, "ert_model.dat");
                 InputStream ims = assetManager.open("sp68.dat");
                 int bytes = FileUtils.resourceToFile(ims, ertModel);
                 ims.close();
                 detectorName = ertModel.getAbsolutePath();
-                Log.i(TAG, "LoadModel doInBackground66 " + detectorName + " " + ertModel.exists() + " " + ertModel.length() + " " + bytes);
+                Log.i(TAG, "ModelLoaderTask doInBackground66 " + detectorName + " " + ertModel.exists() + " " + ertModel.length() + " " + bytes);
             } catch (Resources.NotFoundException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-                Log.i(TAG, "LoadModel doInBackground667", e);
+                Log.i(TAG, "ModelLoaderTask doInBackground667", e);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-                Log.i(TAG, "LoadModel doInBackground667", e);
+                Log.i(TAG, "ModelLoaderTask doInBackground667", e);
             }
         }
         compModel.mNativeDetector = new DetectionBasedTracker(compModel.mCascadeFile.getAbsolutePath(), 0, detectorName);
-        Log.i(TAG, "LoadModel doInBackground7");
+        Log.i(TAG, "ModelLoaderTask doInBackground7");
         return null;
+    }
+
+    protected void onPreExecute() {
+        pb.setVisibility(View.VISIBLE);
+    }
+    @Override
+    protected void onPostExecute(Void result) {
+        super.onPostExecute(result);
+        pb.setVisibility(View.INVISIBLE);
     }
 
 

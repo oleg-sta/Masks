@@ -21,15 +21,17 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.Random;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import ru.flightlabs.masks.FdActivity;
+import ru.flightlabs.masks.activity.FdActivity;
 import ru.flightlabs.masks.R;
+import ru.flightlabs.masks.activity.Settings;
+import ru.flightlabs.masks.Static;
+import ru.flightlabs.masks.utils.PoseHelper;
 
 /**
  * Created by sov on 10.12.2016.
@@ -118,7 +120,7 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
 
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
         gl.glLoadIdentity();
-        if (!FdActivity.debugMode) return;
+        if (!Settings.debugMode) return;
         Mat s = FdActivity.glViewMatrix2;
         if (s == null) return;
         if (FdActivity.newIndexEye != currText) {
@@ -128,14 +130,7 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
 
 
         if (s != null) {
-            float[] matrixArray = new float[16];
-            for(int row=0; row<4; ++row)
-            {
-                for(int col=0; col<4; ++col)
-                {
-                    matrixArray[row * 4 + col] = (float)s.get(row, col)[0];
-                }
-            }
+            float[] matrixArray = PoseHelper.convertToArray(s);
             gl.glMatrixMode(GL10.GL_MODELVIEW);
             gl.glLoadMatrixf(matrixArray, 0);
         }
@@ -167,8 +162,8 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
 
         gl.glLoadIdentity();
 
-        if (FdActivity.makePhoto2) {
-            FdActivity.makePhoto2 = false;
+        if (Static.makePhoto2) {
+            Static.makePhoto2 = false;
             WindowManager w = activity.getWindowManager();
             Display d = w.getDefaultDisplay();
             int width = d.getWidth();
@@ -196,7 +191,7 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
     private void saveScreenshot(GL10 gl, int width, int height) {
         Log.i(TAG, "saving start ");
         File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-        File newFile = new File(file, FdActivity.DIRECTORY_SELFIE);
+        File newFile = new File(file, Settings.DIRECTORY_SELFIE);
         File fileJpg = new File(newFile, "eSelfie" + new Random().nextInt(1000) + ".png");
 
 

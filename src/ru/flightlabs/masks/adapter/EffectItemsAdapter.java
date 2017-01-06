@@ -1,4 +1,4 @@
-package ru.flightlabs.masks;
+package ru.flightlabs.masks.adapter;
 
 import android.app.Activity;
 import android.content.res.TypedArray;
@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+
+import ru.flightlabs.masks.R;
 
 public class EffectItemsAdapter extends BaseAdapter {
     

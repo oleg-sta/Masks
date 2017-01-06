@@ -14,6 +14,7 @@ import java.io.IOException;
 
 import ru.flightlabs.masks.model.primitives.Line;
 import ru.flightlabs.masks.model.primitives.Triangle;
+import ru.flightlabs.masks.utils.FileUtils;
 
 /**
  * Created by sov on 04.01.2017.

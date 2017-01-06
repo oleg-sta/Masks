@@ -1,4 +1,4 @@
-package ru.flightlabs.masks;
+package ru.flightlabs.masks.utils;
 
 import android.content.Context;
 import android.content.res.Resources;

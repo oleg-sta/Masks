@@ -1,4 +1,4 @@
-package ru.flightlabs.masks;
+package ru.flightlabs.masks.utils;
 
 import org.opencv.core.Point;
 
@@ -6,7 +6,7 @@ import org.opencv.core.Point;
  * Created by sov on 04.01.2017.
  */
 
-public class Helper {
+public class OpencvUtils {
 
     public static Point orient(Point point, int width, int heigth) {
         return orient(point, 0, width, heigth);
@@ -35,5 +35,9 @@ public class Helper {
         final double deltaY = (p2.x - p1.x);
         final double result = Math.toDegrees(Math.atan2(deltaY, deltaX));
         return (result < 0) ? (360d + result) : result;
+    }
+
+    public static Point convertToGl(Point old, int width, int height) {
+        return new Point(old.x / width, 1 - old.y / height);
     }
 }
