@@ -80,8 +80,10 @@ public class PoseHelper {
         Calib3d.projectPoints(objectPoints3, rvec, tvec, intrinsics, distCoeffs, imagePoints3);
         Point[] sss = imagePoints3.toArray();
         // debug
-        for (Point e :sss) {
-            Imgproc.circle(mRgba, e, 3, new Scalar(0, 255, 255), -1);
+        if (Settings.debugMode) {
+            for (Point e : sss) {
+                Imgproc.circle(mRgba, e, 3, new Scalar(0, 255, 255), -1);
+            }
         }
 
         Mat rotation = new Mat(4, 4, CvType.CV_64F);

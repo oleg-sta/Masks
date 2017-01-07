@@ -97,7 +97,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
 //        int vertexShaderId = ShaderUtils.createShader(this, GLES20.GL_VERTEX_SHADER, R.raw.vertex_shader);
 //        int fragmentShaderId = ShaderUtils.createShader(this, GLES20.GL_FRAGMENT_SHADER, R.raw.fragment_shader);
         int vertexShaderId = ShaderUtils.createShader(act, GLES20.GL_VERTEX_SHADER, R.raw.vss);
-        int fragmentShaderId = ShaderUtils.createShader(act, GLES20.GL_FRAGMENT_SHADER, R.raw.fss2);
+        int fragmentShaderId = ShaderUtils.createShader(act, GLES20.GL_FRAGMENT_SHADER, R.raw.fss4);
         program2dEffectId = ShaderUtils.createProgram(vertexShaderId, fragmentShaderId);
 
         int vertexShader3dId = ShaderUtils.createShader(act, GLES20.GL_VERTEX_SHADER, R.raw.vss3d);
@@ -189,6 +189,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         final boolean haveFace = facesArray.length > 0;
         Log.i(TAG, "onCameraTexture5 " + haveFace);
         Point center = new Point(0.5, 0.5);
+        Point center2 = new Point(0.5, 0.5);
         Point[] foundEyes = null;
         if (haveFace) {
             if (Settings.debugMode) {
@@ -203,6 +204,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
                     }
                 }
                 center = OpencvUtils.convertToGl(new Point((foundEyes[36].x + foundEyes[39].x) / 2.0, (foundEyes[36].y + foundEyes[39].y) / 2.0), width, height);
+                center2 = OpencvUtils.convertToGl(new Point((foundEyes[42].x + foundEyes[45].x) / 2.0, (foundEyes[42].y + foundEyes[45].y) / 2.0), width, height);
             }
         }
 
@@ -260,12 +262,14 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         }
 
         // shader effect
-        shaderEfffect2d(center, texIn);
+        shaderEfffect2d(center, center2, texIn);
         // TODO change buffer to draw
-        if (foundEyes != null) {
-            shaderEfffect3d(glMatrix, texIn);
-        } else {
-            shaderEfffect3dStub();
+        if (FdActivity2.currentIndexEye != 0) {
+            if (foundEyes != null) {
+                shaderEfffect3d(glMatrix, texIn);
+            } else {
+                shaderEfffect3dStub();
+            }
         }
         // shader effect
 
@@ -348,13 +352,16 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         GLES20.glFlush();
 
     }
-    private void shaderEfffect2d(Point center,  int texIn) {
+    private void shaderEfffect2d(Point center, Point center2, int texIn) {
         GLES20.glUseProgram(program2dEffectId);
         int uColorLocation = GLES20.glGetUniformLocation(program2dEffectId, "u_Color");
         GLES20.glUniform4f(uColorLocation, 0.0f, 0.0f, 1.0f, 1.0f);
 
         int uCenter = GLES20.glGetUniformLocation(program2dEffectId, "uCenter");
         GLES20.glUniform2f(uCenter, (float)center.x, (float)center.y);
+
+        int uCenter2 = GLES20.glGetUniformLocation(program2dEffectId, "uCenter2");
+        GLES20.glUniform2f(uCenter2, (float)center2.x, (float)center2.y);
 
         FloatBuffer vertexData;
         float[] vertices = {
