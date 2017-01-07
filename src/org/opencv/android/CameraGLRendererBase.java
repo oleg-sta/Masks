@@ -69,10 +69,12 @@ public abstract class CameraGLRendererBase implements GLSurfaceView.Renderer, Su
 
     private FloatBuffer vert, texOES, tex2D;
 
-    protected int mCameraWidth = -1, mCameraHeight = -1;
-    protected int mFBOWidth = -1, mFBOHeight = -1;
+    protected int mCameraWidth = -1, mCameraHeight = -1; // size of camera
+    protected int mFBOWidth = -1, mFBOHeight = -1; // size of FBO
     protected int mMaxCameraWidth = -1, mMaxCameraHeight = -1;
     protected int mCameraIndex = CameraBridgeViewBase.CAMERA_ID_ANY;
+
+    protected boolean flagRotated = false;
 
     protected SurfaceTexture mSTexture;
 
@@ -86,6 +88,7 @@ public abstract class CameraGLRendererBase implements GLSurfaceView.Renderer, Su
 
     protected abstract void openCamera(int id);
     protected abstract void closeCamera();
+    // TODO cnange algorithm to more appropriate size
     protected abstract void setCameraPreviewSize(int width, int height); // updates mCameraWidth & mCameraHeight
 
     public CameraGLRendererBase(CameraGLSurfaceView view) {
@@ -128,7 +131,7 @@ public abstract class CameraGLRendererBase implements GLSurfaceView.Renderer, Su
                 drawTex(texCamera[0], true, FBO[0]);
 
                 // call user code (texFBO -> texDraw)
-                boolean modified = texListener.onCameraTexture(texFBO[0], texDraw[0], mCameraWidth, mCameraHeight);
+                boolean modified = texListener.onCameraTexture(texFBO[0], texDraw[0], mFBOWidth, mFBOHeight);
 
                 if(modified) {
                     // texDraw -> screen
@@ -404,14 +407,22 @@ public abstract class CameraGLRendererBase implements GLSurfaceView.Renderer, Su
             mHaveFBO = false;
             mCameraWidth  = width;
             mCameraHeight = height;
-            setCameraPreviewSize(width, height); // can change mCameraWidth & mCameraHeight
+            if (flagRotated) {
+                mCameraWidth  = height;
+                mCameraHeight = width;
+                setCameraPreviewSize(height, width); // can change mCameraWidth & mCameraHeight
+            } else {
+                mCameraWidth  = width;
+                mCameraHeight = height;
+                setCameraPreviewSize(height, width);
+            }
 //            initFBO(mCameraWidth, mCameraHeight);
-            initFBO(540, 960);
+            initFBO(width, height);
             mHaveFBO = true;
         }
 
         CameraTextureListener listener = mView.getCameraTextureListener();
-        if(listener != null) listener.onCameraViewStarted(mCameraWidth, mCameraHeight);
+        if(listener != null) listener.onCameraViewStarted(mFBOWidth, mFBOHeight);
     }
 
     public void setCameraIndex(int cameraIndex) {
@@ -425,6 +436,10 @@ public abstract class CameraGLRendererBase implements GLSurfaceView.Renderer, Su
         mMaxCameraWidth  = maxWidth;
         mMaxCameraHeight = maxHeight;
         enableView();
+    }
+
+    public void setRotated(boolean flag) {
+        flagRotated = flag;
     }
 
     public void onResume() {

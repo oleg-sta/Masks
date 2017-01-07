@@ -27,7 +27,7 @@ public class Settings extends Activity {
     public static final String PUPILS_MODE = "pupilsMode";
     public static final String COUNTER_PHOTO = "photoCounter";
     public static final String MODEL_PATH = "modelPath";
-    public static final String MODEL_PATH_DEFAULT = "/storage/extSdCard/sp.dat";
+    public static final String MODEL_PATH_DEFAULT = "/storage/extSdCard/sp_s2.dat";
     private static final String TAG = "Settings_class";
 
     

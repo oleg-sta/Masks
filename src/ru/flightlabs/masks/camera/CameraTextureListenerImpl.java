@@ -89,9 +89,11 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
 
     public void onCameraViewStarted(int width, int height) {
 
-        mRgba = new Mat(width, height, CvType.CV_8UC4);
+        mRgba = new Mat(height, width, CvType.CV_8UC4);
         mGray = new Mat();
-        m_bbPixels = ByteBuffer.allocateDirect(width * height * 4);
+        //m_bbPixels = ByteBuffer.allocateDirect(width * height * 4);
+        // workaround due to https://code.google.com/p/android/issues/detail?id=80064
+        m_bbPixels = ByteBuffer.wrap(new byte[width * height * 4]);
         m_bbPixels.order(ByteOrder.LITTLE_ENDIAN);
 
 //        int vertexShaderId = ShaderUtils.createShader(this, GLES20.GL_VERTEX_SHADER, R.raw.vertex_shader);
@@ -104,7 +106,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         int fragmentShader3dId = ShaderUtils.createShader(act, GLES20.GL_FRAGMENT_SHADER, R.raw.fss3d);
         program3dId = ShaderUtils.createProgram(vertexShader3dId, fragmentShader3dId);
         load3dModel();
-        bindData(height, width);
+        bindData(width, height);
 
         Log.i(TAG, "onCameraViewStarted");
         //mGray = new Mat();
@@ -162,11 +164,6 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         if (compModel.mNativeDetector != null) {
             mNativeDetector = compModel.mNativeDetector;
         }
-        // FIXME CameraRenderer and CameraGl... should be fixed by of sizes of camera and FBO
-        int t = width;
-        width = height;
-        height = t;
-
         Log.i(TAG, "onCameraTexture " + width + " " + height);
         Log.i(TAG, "onCameraTexture2");
         GLES20.glReadPixels(0, 0, width, height, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, m_bbPixels);
@@ -217,7 +214,13 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         if (foundEyes != null) {
             glMatrix = PoseHelper.findPose(model, width, act, foundEyes, mRgba);
             //PoseHelper.drawDebug(mRgba, model, glMatrix);
+            if (Settings.debugMode) {
+                for (Point e : foundEyes) {
+                    Imgproc.circle(mRgba, e, 3, new Scalar(255, 255, 255), -1);
+                }
+            }
         }
+
 
 
 
@@ -266,7 +269,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         // TODO change buffer to draw
         if (FdActivity2.currentIndexEye != 0) {
             if (foundEyes != null) {
-                shaderEfffect3d(glMatrix, texIn);
+                shaderEfffect3d(glMatrix, texIn, width, height);
             } else {
                 shaderEfffect3dStub();
             }
@@ -278,13 +281,13 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         return true;
     }
 
-    private void shaderEfffect3d(Mat glMatrix, int texIn) {
+    private void shaderEfffect3d(Mat glMatrix, int texIn, int width, int height) {
         GLES20.glUseProgram(program3dId);
         int matrixMvp = GLES20.glGetUniformLocation(program3dId, "u_MVPMatrix");
 
         float[] matrixView = PoseHelper.convertToArray(glMatrix);
         float[] mMatrix = new float[16];
-        Matrix.multiplyMM(mMatrix, 0, PoseHelper.createProjectionMatrixThroughPerspective(540, 960), 0, matrixView, 0);
+        Matrix.multiplyMM(mMatrix, 0, PoseHelper.createProjectionMatrixThroughPerspective(width, height), 0, matrixView, 0);
 
         GLES20.glUniformMatrix4fv(matrixMvp, 1, false, mMatrix, 0);
         mVertexBuffer.position(0);

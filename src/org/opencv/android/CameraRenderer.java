@@ -118,9 +118,6 @@ public class CameraRenderer extends CameraGLRendererBase {
 
     @Override
     public synchronized void setCameraPreviewSize(int width, int height) {
-        int t = height;
-        height = width;
-        width = t;
         Log.i(LOGTAG, "setCameraPreviewSize: "+width+"x"+height);
         if(mCamera == null) {
             Log.e(LOGTAG, "Camera isn't initialized!");
@@ -157,8 +154,8 @@ public class CameraRenderer extends CameraGLRendererBase {
                 mCamera.stopPreview();
                 mPreviewStarted = false;
             }
-            bestWidth = 960;
-            bestHeight = 540;
+//            bestWidth = 960;
+//            bestHeight = 540;
             mCameraWidth  = bestWidth;
             mCameraHeight = bestHeight;
             param.setPreviewSize(bestWidth, bestHeight);

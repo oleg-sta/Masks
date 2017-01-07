@@ -5,6 +5,7 @@ package ru.flightlabs.masks.utils;
  */
 
 import android.content.Context;
+import android.util.Log;
 
 import static android.opengl.GLES20.GL_COMPILE_STATUS;
 import static android.opengl.GLES20.GL_LINK_STATUS;
@@ -60,6 +61,7 @@ public class ShaderUtils {
         glGetShaderiv(shaderId, GL_COMPILE_STATUS, compileStatus, 0);
         if (compileStatus[0] == 0) {
             glDeleteShader(shaderId);
+            Log.i("ShaderUtils", "error compie shader " + shaderText);
             return 0;
         }
         return shaderId;

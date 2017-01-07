@@ -29,6 +29,7 @@ import org.opencv.core.Mat;
 
 import java.io.IOException;
 
+import ru.flightlabs.masks.Static;
 import ru.flightlabs.masks.adapter.MasksPagerAdapter;
 import ru.flightlabs.masks.camera.CameraTextureListenerImpl;
 import ru.flightlabs.masks.CompModel;
@@ -39,10 +40,6 @@ import ru.flightlabs.masks.R;
 public class FdActivity2 extends Activity {
 
     CompModel compModel;
-
-    public static boolean makePhoto;
-    public static boolean makePhoto2;
-    public static boolean preMakePhoto;
 
     private static final String TAG = "FdActivity2_class";
 
@@ -85,15 +82,9 @@ public class FdActivity2 extends Activity {
                     System.loadLibrary("detection_based_tracker");
 
                     mOpenCvCameraView.enableView();
-                    try {
-                        // load cascade file from application resources
-                        Log.e(TAG, "findEyes onManagerConnected");
-                        compModel.loadHaarModel(resourceDetector[0]);
-                        throw new IOException(); // ну выход такой:)
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
-                    }
+                    // load cascade file from application resources
+                    Log.e(TAG, "findEyes onManagerConnected");
+                    compModel.loadHaarModel(resourceDetector[0]);
                 }
                 break;
                 default: {
@@ -139,6 +130,7 @@ public class FdActivity2 extends Activity {
         compModel.context = getApplicationContext();
 
         mOpenCvCameraView.setCameraIndex(cameraIndex);
+        mOpenCvCameraView.setRotated(true);
         mOpenCvCameraView.setCameraTextureListener(new CameraTextureListenerImpl(this, compModel));
 
         ListView itemsList = (ListView) findViewById(R.id.list_effects);
@@ -163,9 +155,9 @@ public class FdActivity2 extends Activity {
             @Override
             public void onClick(View v) {
                 Log.i(TAG, "saving true");
-                if (!makePhoto) {
-                    makePhoto = true;
-                    makePhoto2 = true;
+                if (!Static.makePhoto) {
+                    Static.makePhoto = true;
+                    Static.makePhoto2 = true;
                     // MediaActionSound sound = new MediaActionSound();
                     cameraButton.setImageResource(R.drawable.ic_camera_r);
                     borderCam.setVisibility(View.VISIBLE);
