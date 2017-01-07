@@ -261,24 +261,24 @@ public class Model {
             tempV[i * 3 + 2] = vertices.get(i).getZ();
         }
         for (int i = 0; i < vertexTexture.size(); i++) {
-            tempVt[i * 2] = vertexTexture.get(i).getX();
-            tempVt[i * 2 + 1] = vertexTexture.get(i).getY();
+            // FIXME textures are not the same number as vertices
+//            tempVt[i * 2] = vertexTexture.get(i).getX();
+//            tempVt[i * 2 + 1] = vertexTexture.get(i).getY();
         }
 
         for (int i = 0; i < facesSize; i++) {
-            Log.d("OBJ OBJECT DATA", "fillInBuffers" + i);
             Face face = faces.get(i);
             indices[i * 3] = (short) (face.indices.get(0).intValue());
             indices[i * 3 + 1] = (short) (face.indices.get(1).intValue());
             indices[i * 3 + 2] = (short) (face.indices.get(2).intValue());
 
-            // FIXME fix texture
-            tempVt[indices[i * 3] * 2] = vertexTexture.get(face.textures.get(0).intValue()).getX();
-            tempVt[indices[i * 3] * 2 + 1] = vertexTexture.get(face.textures.get(0).intValue()).getY();
-            tempVt[indices[i * 3 + 1] * 2] = vertexTexture.get(face.textures.get(1).intValue()).getX();
-            tempVt[indices[i * 3 + 1] * 2 + 1] = vertexTexture.get(face.textures.get(1).intValue()).getY();
-            tempVt[indices[i * 3 + 2] * 2] = vertexTexture.get(face.textures.get(2).intValue()).getX();
-            tempVt[indices[i * 3 + 2] * 2 + 1] = vertexTexture.get(face.textures.get(2).intValue()).getY();
+            // FIXME fix textures coordinates
+            tempVt[indices[i * 3] * 2] = getX(vertexTexture, face.textures.get(0).intValue());
+            tempVt[indices[i * 3] * 2 + 1] = getY(vertexTexture, face.textures.get(0).intValue());
+            tempVt[indices[i * 3 + 1] * 2] = getX(vertexTexture, face.textures.get(1).intValue());
+            tempVt[indices[i * 3 + 1] * 2 + 1] = getY(vertexTexture, face.textures.get(1).intValue());
+            tempVt[indices[i * 3 + 2] * 2] = getX(vertexTexture, face.textures.get(2).intValue());
+            tempVt[indices[i * 3 + 2] * 2 + 1] = getY(vertexTexture, face.textures.get(2).intValue());
         }
 
         for (int i = 0; i < facesSize && false; i++) {
@@ -318,6 +318,22 @@ public class Model {
                 .order(ByteOrder.nativeOrder()).asShortBuffer();
         _ib.put(indices);
         _ib.position(0);
+    }
+
+    // little hack while textures not fixed
+    private float getX(ArrayList<Vector3D> vertexes, int faceNum) {
+        Vector3D e = vertexTexture.get(faceNum);
+        if (e != null) {
+            return e.getX();
+        }
+        return 0;
+    }
+    private float getY(ArrayList<Vector3D> vertexes, int faceNum) {
+        Vector3D e = vertexTexture.get(faceNum);
+        if (e != null) {
+            return e.getY();
+        }
+        return 0;
     }
 
     private void fillInBuffersWithNormals() {
