@@ -8,4 +8,6 @@ public class Static {
 
     public static boolean makePhoto;
     public static boolean makePhoto2;
+
+    public static boolean drawOrigTexture;
 }

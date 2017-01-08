@@ -1,14 +1,11 @@
 package ru.flightlabs.masks.camera;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
-import android.os.Environment;
 import android.util.Log;
 
 import org.opencv.android.CameraGLSurfaceView;
-import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -18,7 +15,6 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -31,9 +27,9 @@ import ru.flightlabs.masks.Static;
 import ru.flightlabs.masks.activity.FdActivity2;
 import ru.flightlabs.masks.activity.Settings;
 import ru.flightlabs.masks.renderer.Model;
-import ru.flightlabs.masks.utils.FileUtils;
 import ru.flightlabs.masks.utils.OpenGlHelper;
 import ru.flightlabs.masks.utils.OpencvUtils;
+import ru.flightlabs.masks.utils.PhotoMaker;
 import ru.flightlabs.masks.utils.PoseHelper;
 import ru.flightlabs.masks.utils.ShaderUtils;
 
@@ -227,6 +223,13 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
 
 
 
+        boolean makeAfterPhoto = false;
+        // this photo for debug purpose
+        if (Static.makePhoto) {
+            Static.makePhoto = false;
+            makeAfterPhoto= true;
+            PhotoMaker.makePhoto(mRgba, act);
+        }
 
         // temporary for debug purposes or maby for simple effects
         Core.flip(mRgba, mRgba, 0);
@@ -257,17 +260,6 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         }
         GLES20.glViewport(0, 0, width, height);
 
-        if (Static.makePhoto) {
-            Static.makePhoto = false;
-            File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-            File newFile = new File(file, Settings.DIRECTORY_SELFIE);
-            File fileJpg = new File(newFile, "eSelfie666.jpg");
-            Bitmap bitmap = Bitmap.createBitmap(mRgba.cols(), mRgba.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(mRgba, bitmap);
-            FileUtils.saveBitmap(fileJpg.getPath(), bitmap);
-            bitmap.recycle();
-        }
-
         // shader effect
         shaderEfffect2d(center, center2, texIn);
         // TODO change buffer to draw
@@ -295,9 +287,18 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         }
         // shader effect
 
+        if (makeAfterPhoto) {
+            GLES20.glReadPixels(0, 0, width, height, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, m_bbPixels);
+            m_bbPixels.rewind();
+            //mRgba.get(width, height, pixelValues);
+            mRgba.put(0, 0, m_bbPixels.array());
+            Core.flip(mRgba, mRgba, 0);
+            PhotoMaker.makePhoto(mRgba, act);
+        }
+
         Log.i(TAG, "onCameraTexture " + mRgba.height() + " " + facesArray.length);
 
-        return true;
+        return !Static.drawOrigTexture;
     }
 
     private void shaderEfffect3d(Mat glMatrix, int texIn, int width, int height, final Model modelToDraw, int modelTextureId, float alpha) {
