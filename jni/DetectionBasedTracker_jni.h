@@ -3,6 +3,13 @@
 #include <opencv2/core/core.hpp>
 #include "ModelClass.h"
 #include "Triangle.h"
+
+#include "3DFaceModel.h"
+#include "Shape2D.h"
+#include "ObjectiveFunctionHelper.h"
+#include "ObjectiveFunction.h"
+#include "TestObjectiveFunction.h"
+#include "OrthogonalProjectionModel.h"
 /* Header for class org_opencv_samples_fd_DetectionBasedTracker */
 
 #ifndef _Included_org_opencv_samples_fd_DetectionBasedTracker
@@ -69,6 +76,8 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDete
 JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDrawMask
 (JNIEnv * jenv, jclass, jlong imageFrom, jlong imageTo, jobjectArray, jobjectArray, jobjectArray, jobjectArray);
 
+JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
+(JNIEnv * jenv, jclass, jlong jmatrix2dLands, jlong jmatrix3dFace);
 
 void findEyes(cv::Mat frame_gray, cv::Rect face, std::vector<cv::Point> &pixels,  ModelClass *modelClass);
 bool checkInTriangle(cv::Point*, Triangle* triangle, cv::Point**);

@@ -304,10 +304,7 @@ public class Model {
             indices[i * 3 + 2] = (short) (i * 3 + 2);
         }
 
-        _vb = ByteBuffer.allocateDirect(tempV.length * FLOAT_SIZE_BYTES)
-                .order(ByteOrder.nativeOrder()).asFloatBuffer();
-        _vb.put(tempV);
-        _vb.position(0);
+        recalcV();
 
         _tcb = ByteBuffer.allocateDirect(tempVt.length * FLOAT_SIZE_BYTES)
                 .order(ByteOrder.nativeOrder()).asFloatBuffer();
@@ -388,10 +385,7 @@ public class Model {
             indices[i * 3 + 2] = (short) (i * 3 + 2);
         }
 
-        _vb = ByteBuffer.allocateDirect(tempV.length * FLOAT_SIZE_BYTES)
-                .order(ByteOrder.nativeOrder()).asFloatBuffer();
-        _vb.put(tempV);
-        _vb.position(0);
+        recalcV();
 
         _tcb = ByteBuffer.allocateDirect(tempVt.length * FLOAT_SIZE_BYTES)
                 .order(ByteOrder.nativeOrder()).asFloatBuffer();
@@ -407,6 +401,13 @@ public class Model {
                 .order(ByteOrder.nativeOrder()).asShortBuffer();
         _ib.put(indices);
         _ib.position(0);
+    }
+
+    public void recalcV() {
+        _vb = ByteBuffer.allocateDirect(tempV.length * FLOAT_SIZE_BYTES)
+                .order(ByteOrder.nativeOrder()).asFloatBuffer();
+        _vb.put(tempV);
+        _vb.position(0);
     }
 
     public FloatBuffer getVertices() {

@@ -212,6 +212,24 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         Mat glMatrix = null;
         PoseHelper.bindMatrix(100, 100);
         if (foundEyes != null) {
+
+
+            if (false) {
+                Mat inputLandMarks = new Mat(68, 2, CvType.CV_64FC1);
+                for (int i = 0; i < foundEyes.length; i++) {
+                    inputLandMarks.put(i, 0, foundEyes[i].x);
+                    inputLandMarks.put(i, 1, foundEyes[i].y);
+                }
+                Mat output3dShape = new Mat(113, 3, CvType.CV_64FC1);
+                mNativeDetector.morhpFace(inputLandMarks, output3dShape);
+                for (int i = 0; i < output3dShape.rows(); i++) {
+                    model.tempV[i * 3] = (float) output3dShape.get(i, 0)[0];
+                    model.tempV[i * 3 + 1] = (float) output3dShape.get(i, 1)[0];
+                    model.tempV[i * 3 + 2] = (float) output3dShape.get(i, 2)[0];
+                }
+                model.recalcV();
+            }
+
             glMatrix = PoseHelper.findPose(model, width, act, foundEyes, mRgba);
             //PoseHelper.drawDebug(mRgba, model, glMatrix);
             if (Settings.debugMode) {
@@ -219,6 +237,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
                     Imgproc.circle(mRgba, e, 3, new Scalar(255, 255, 255), -1);
                 }
             }
+
         }
 
 

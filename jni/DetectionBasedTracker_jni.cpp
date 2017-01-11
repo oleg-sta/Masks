@@ -23,7 +23,6 @@
 #include <dlib/image_io.h>
 #include <dlib/opencv.h>
 
-
 #define LOG_TAG "FaceDetection/DetectionBasedTracker"
 #define LOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__))
 
@@ -482,6 +481,58 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDete
         jenv->ThrowNew(je, "Unknown exception in JNI code DetectionBasedTracker.nativeDetect()");
     }
     LOGD("Java_org_opencv_samples_facedetect_DetectionBasedTracker_nativeDetect exit");
+}
+
+JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
+(JNIEnv * jenv, jclass, jlong jmatrix2dLands, jlong jmatrix3dFace)
+{
+    LOGD("Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace enter");
+    cv::Mat matrix3dFace = *((Mat*)jmatrix3dFace);
+    cv::Mat matrix2dLands = *((Mat*)jmatrix2dLands);
+    matrix<double> landmarks; // TODO
+    landmarks.set_size(2, matrix2dLands.rows);
+    for (int i = 0; i < matrix2dLands.rows; i++) {
+        landmarks(0,i) = matrix2dLands.at<double>(i, 0);
+        landmarks(1,i) = matrix2dLands.at<double>(i, 1);
+    }
+    LOGD("morhpFace1 %i %i", matrix2dLands.rows, landmarks.nc());
+    int n_blendshapes = 14;
+    FaceModel3D model3d = FaceModel3D("/storage/extSdCard/models", n_blendshapes);
+    LOGD("morhpFace3");
+    Shape2D model2d = Shape2D();
+    OrthogonalProjectionModel projection_model = OrthogonalProjectionModel(n_blendshapes);
+    LOGD("morhpFace4");
+    const matrix<double> &xx = model3d.get_mean_shape3d();
+    LOGD("morhpFace41");
+    const matrix<double> &yy = model2d.get_shape2d(landmarks);
+    LOGD("morhpFace42 %i %i", xx.nc(), yy.nc());
+    dlib::matrix<double,20,1> initialParameters= projection_model.get_initial_parameters(xx, yy);
+    LOGD("morhpFace43");
+    ObjectiveFunctionHelper helper = ObjectiveFunctionHelper(model3d, model2d);
+    LOGD("morhpFace5");
+    ObjectiveFunction objFun = ObjectiveFunction(helper, projection_model);
+    LOGD("morhpFace6");
+    objFun.extract2d_from_image(landmarks);
+    LOGD("morhpFace7");
+    double val_init = objFun(initialParameters);
+    LOGD("morhpFace8");
+    double val = find_min_using_approximate_derivatives(bfgs_search_strategy(),
+                                                        objective_delta_stop_strategy(1e-4),
+                                                        objFun,
+                                                        initialParameters, -1);
+    LOGD("morhpFace9");
+    dlib::matrix<double> full_mean_3d = model3d.get_all_mean_shape3d();
+    LOGD("morhpFace10");
+    std::unordered_map<int, dlib::matrix<double>> all_blendshapes = model3d.get_all_blendshapes();
+    dlib::matrix<double> final_shape_3d = projection_model.get_full_shape3d(initialParameters,full_mean_3d,all_blendshapes);
+    LOGD("morhpFace2 %i", final_shape_3d.nc());
+    for (int i = 0; i < final_shape_3d.nc(); ++i)
+    {
+       matrix3dFace.at<double>(i, 0) = final_shape_3d(0,i);
+       matrix3dFace.at<double>(i, 1) = final_shape_3d(1,i);
+       matrix3dFace.at<double>(i, 2) = final_shape_3d(2,i);
+    }
+    LOGD("Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace exit");
 }
 
 void findEyes(cv::Mat frame_gray, cv::Rect face, std::vector<cv::Point> &pixels, ModelClass *modelClass) {
