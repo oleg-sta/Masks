@@ -484,10 +484,11 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDete
 }
 
 JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
-(JNIEnv * jenv, jclass, jlong jmatrix2dLands, jlong jmatrix3dFace)
+(JNIEnv * jenv, jclass, jlong jmatrix2dLands, jlong jmatrix3dFace, jlong jinitialParams, jint flag)
 {
     LOGD("Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace enter");
     cv::Mat matrix3dFace = *((Mat*)jmatrix3dFace);
+    cv::Mat initialParams0 = *((Mat*)jinitialParams);
     cv::Mat matrix2dLands = *((Mat*)jmatrix2dLands);
     matrix<double> landmarks; // TODO
     landmarks.set_size(2, matrix2dLands.rows);
@@ -507,6 +508,13 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
     const matrix<double> &yy = model2d.get_shape2d(landmarks);
     LOGD("morhpFace42 %i %i", xx.nc(), yy.nc());
     dlib::matrix<double,20,1> initialParameters= projection_model.get_initial_parameters(xx, yy);
+    if (flag == 1) {
+       for (int i = 0; i < 14; i++)
+       {
+           LOGD("morhpFace411 %i %f", i, initialParams0.at<double>(i, 0));
+           initialParameters(0, i + 6) = initialParams0.at<double>(i, 0);
+       }
+    }
     LOGD("morhpFace43");
     ObjectiveFunctionHelper helper = ObjectiveFunctionHelper(model3d, model2d);
     LOGD("morhpFace5");
@@ -531,6 +539,10 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
        matrix3dFace.at<double>(i, 0) = final_shape_3d(0,i);
        matrix3dFace.at<double>(i, 1) = final_shape_3d(1,i);
        matrix3dFace.at<double>(i, 2) = final_shape_3d(2,i);
+    }
+    for (int i = 0; i < 14; i++)
+    {
+       initialParams0.at<double>(i, 0) = initialParameters(0, i + 6);
     }
     LOGD("Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace exit");
 }

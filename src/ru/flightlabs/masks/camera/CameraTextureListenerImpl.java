@@ -79,6 +79,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
     private Model modelHat;
     private int hatTextureid;
 
+    Mat initialParams = null;
     public CameraTextureListenerImpl(Activity act, CompModel compModel) {
         this.act = act;
         this.compModel = compModel;
@@ -221,7 +222,10 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
                     inputLandMarks.put(i, 1, foundEyes[i].y);
                 }
                 Mat output3dShape = new Mat(113, 3, CvType.CV_64FC1);
-                mNativeDetector.morhpFace(inputLandMarks, output3dShape);
+                if (initialParams == null) {
+                    initialParams = new Mat(14, 1, CvType.CV_64FC1, new Scalar(0));
+                }
+                mNativeDetector.morhpFace(inputLandMarks, output3dShape, initialParams, true);
                 for (int i = 0; i < output3dShape.rows(); i++) {
                     model.tempV[i * 3] = (float) output3dShape.get(i, 0)[0];
                     model.tempV[i * 3 + 1] = (float) output3dShape.get(i, 1)[0];
