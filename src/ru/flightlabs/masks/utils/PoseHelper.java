@@ -41,8 +41,8 @@ public class PoseHelper {
         intrinsics.put(2, 2, 1);
 
         MatOfDouble distCoeffs = new MatOfDouble();
-        Mat rvec = new Mat();
-        Mat tvec = new Mat();
+        Mat rvec = new Mat(3, 1, CvType.CV_64F);
+        Mat tvec = new Mat(3, 1, CvType.CV_64F);
 
         java.util.List<Integer> p3d1 = new ArrayList<>();
         java.util.List<Integer> p2d1 = new ArrayList<>();
@@ -65,9 +65,20 @@ public class PoseHelper {
         objectPoints.fromList(pointsList);
         imagePoints.fromList(pointsList2);
         //Calib3d.calibrate(List<Mat> objectPoints, List<Mat> imagePoints, Size image_size, Mat K, Mat D, List<Mat> rvecs, List<Mat> tvecs);
-        Calib3d.solvePnP(objectPoints, imagePoints, intrinsics, distCoeffs, rvec, tvec);
+        if (true) {
+            // TODO calculate values somehow
+            tvec.put(0, 0, 0);
+            tvec.put(1, 0, 0);
+            tvec.put(2, 0, 2);
+            rvec.put(0, 0, -0.235);
+            rvec.put(1, 0, 0);
+            rvec.put(2, 0, 0);
+            Calib3d.solvePnP(objectPoints, imagePoints, intrinsics, distCoeffs, rvec, tvec, true, Calib3d.CV_ITERATIVE);
+        } else {
+            Calib3d.solvePnP(objectPoints, imagePoints, intrinsics, distCoeffs, rvec, tvec);
+        }
         if (Settings.debugMode) {
-            Log.i("wwww2 rvec", rvec.width() + " " + rvec.height());
+            Log.i("wwww2 rvec", rvec.width() + " " + rvec.height() + " " + rvec.type());
             Imgproc.putText(mRgba, "tvec " + String.format("%.3f", tvec.get(0, 0)[0]) + String.format(" %.3f", tvec.get(1, 0)[0]) + String.format(" %.3f", tvec.get(2, 0)[0]), new Point(50, 100), Core.FONT_HERSHEY_SIMPLEX, 1,
                     new Scalar(255, 255, 255), 2);
             Imgproc.putText(mRgba, "rvec " + String.format("%.3f", rvec.get(0, 0)[0]) + String.format(" %.3f", rvec.get(1, 0)[0]) + String.format(" %.3f", rvec.get(2, 0)[0]), new Point(50, 150), Core.FONT_HERSHEY_SIMPLEX, 1,
