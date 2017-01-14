@@ -483,6 +483,19 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDete
     LOGD("Java_org_opencv_samples_facedetect_DetectionBasedTracker_nativeDetect exit");
 }
 
+matrix<double> box_constrain_parameters(dlib::matrix<double> parameters)
+{
+    dlib::matrix<double> constrained_parameters = parameters;
+    for (int i = 6; i < parameters.nr(); ++i)
+    {
+        if (parameters(i,0)<0)
+           constrained_parameters(i,0) = 0;
+        if (parameters(i,0)>1)
+                   constrained_parameters(i,0) = 1;
+    }
+    return constrained_parameters;
+}
+
 JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
 (JNIEnv * jenv, jclass, jlong jmatrix2dLands, jlong jmatrix3dFace, jlong jinitialParams, jstring path, jint flag)
 {
@@ -501,7 +514,7 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
     const int n_blendshapes = 2;//14;
 
     std::string str(jnamestr);
-    LOGD("morhpFace21 %s", str.c_str());
+    LOGD("morhpFace21 %s");
     FaceModel3D model3d = FaceModel3D(str, n_blendshapes);
     LOGD("morhpFace3");
     Shape2D model2d = Shape2D();
@@ -528,18 +541,27 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
     LOGD("morhpFace7");
     double val_init = objFun(initialParameters);
     LOGD("morhpFace8");
-    double val = find_min_using_approximate_derivatives(bfgs_search_strategy(),
+
+    dlib::matrix<double, 6+n_blendshapes, 1> lower = dlib::zeros_matrix<double>(6+n_blendshapes,1);
+    dlib::set_subm(lower,0,0,6,1) = - 10000000;
+    dlib::matrix<double, 6+n_blendshapes, 1> upper = dlib::ones_matrix<double>(6+n_blendshapes,1);
+    dlib::set_subm(upper,0,0,6,1) =  10000000;
+    dlib::matrix<double, 6+n_blendshapes, 1> initial_parameters_box_constrained = box_constrain_parameters(initialParameters);
+    double val = find_min_box_constrained(bfgs_search_strategy(),
                                                         objective_delta_stop_strategy(1e-4),
                                                         objFun,
-                                                        initialParameters, -1);
+                                                        derivative(objFun),
+                                                        initial_parameters_box_constrained, lower,
+                                                        upper);
     LOGD("morhpFace9 %f", initialParameters(0, 6));
     dlib::matrix<double> full_mean_3d = model3d.get_all_mean_shape3d();
     LOGD("morhpFace10");
     std::unordered_map<int, dlib::matrix<double>> all_blendshapes = model3d.get_all_blendshapes();
     //dlib::matrix<double> final_shape_3d = projection_model.convert_mean_shape(initialParameters, full_mean_3d, all_blendshapes);
-    dlib::matrix<double> final_shape_3d = projection_model.convert_mean_shape(initialParameters,full_mean_3d,all_blendshapes);
-    LOGD("morhpFace2 %i", final_shape_3d.nc());
-    LOGD("morhpFace2 %f", initialParameters(0, 6));
+    dlib::matrix<double> final_shape_3d = projection_model.convert_mean_shape(initial_parameters_box_constrained,full_mean_3d,all_blendshapes);
+    LOGD("morhpFace2 %i %i %i", final_shape_3d.nc(), initialParameters.nr(), initialParameters.nc());
+    LOGD("morhpFace2 params %f %f", initial_parameters_box_constrained(0, 6), initial_parameters_box_constrained(0, 7));
+    LOGD("morhpFace2 params %f %f", initial_parameters_box_constrained(6, 0), initial_parameters_box_constrained(7, 0));
     LOGD("morhpFace2 %f %f %f", final_shape_3d(0,0), final_shape_3d(1,0), final_shape_3d(2,0));
     LOGD("morhpFace2 %f %f %f", full_mean_3d(0,0), full_mean_3d(1,0), full_mean_3d(2,0));
     for (int i = 0; i < final_shape_3d.nc(); ++i)
