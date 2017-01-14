@@ -66,6 +66,13 @@ public class PoseHelper {
         imagePoints.fromList(pointsList2);
         //Calib3d.calibrate(List<Mat> objectPoints, List<Mat> imagePoints, Size image_size, Mat K, Mat D, List<Mat> rvecs, List<Mat> tvecs);
         Calib3d.solvePnP(objectPoints, imagePoints, intrinsics, distCoeffs, rvec, tvec);
+        if (Settings.debugMode) {
+            Log.i("wwww2 rvec", rvec.width() + " " + rvec.height());
+            Imgproc.putText(mRgba, "tvec " + String.format("%.3f", tvec.get(0, 0)[0]) + String.format(" %.3f", tvec.get(1, 0)[0]) + String.format(" %.3f", tvec.get(2, 0)[0]), new Point(50, 100), Core.FONT_HERSHEY_SIMPLEX, 1,
+                    new Scalar(255, 255, 255), 2);
+            Imgproc.putText(mRgba, "rvec " + String.format("%.3f", rvec.get(0, 0)[0]) + String.format(" %.3f", rvec.get(1, 0)[0]) + String.format(" %.3f", rvec.get(2, 0)[0]), new Point(50, 150), Core.FONT_HERSHEY_SIMPLEX, 1,
+                    new Scalar(255, 255, 255), 2);
+        }
 
         MatOfPoint3f objectPoints3 = new MatOfPoint3f();
 
@@ -84,6 +91,18 @@ public class PoseHelper {
             for (Point e : sss) {
                 Imgproc.circle(mRgba, e, 3, new Scalar(0, 255, 255), -1);
             }
+            // draw main vertices
+            pointsList3 = new ArrayList<>();
+            pointsList3.add(new Point3(0, 0, 0));
+            pointsList3.add(new Point3(1, 0, 0));
+            pointsList3.add(new Point3(0, 1, 0));
+            pointsList3.add(new Point3(0, 0, 1));
+            objectPoints3.fromList(pointsList3);
+            Calib3d.projectPoints(objectPoints3, rvec, tvec, intrinsics, distCoeffs, imagePoints3);
+            Point[] sss2 = imagePoints3.toArray();
+            Imgproc.line(mRgba, sss2[0], sss2[1], new Scalar(255, 0, 0), 2);
+            Imgproc.line(mRgba, sss2[0], sss2[2], new Scalar(0, 255, 0), 2);
+            Imgproc.line(mRgba, sss2[0], sss2[3], new Scalar(0, 0, 255), 2);
         }
 
         Mat rotation = new Mat(4, 4, CvType.CV_64F);

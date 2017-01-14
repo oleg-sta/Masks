@@ -484,9 +484,10 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDete
 }
 
 JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
-(JNIEnv * jenv, jclass, jlong jmatrix2dLands, jlong jmatrix3dFace, jlong jinitialParams, jint flag)
+(JNIEnv * jenv, jclass, jlong jmatrix2dLands, jlong jmatrix3dFace, jlong jinitialParams, jstring path, jint flag)
 {
     LOGD("Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace enter");
+    const char* jnamestr = jenv->GetStringUTFChars(path, NULL);
     cv::Mat matrix3dFace = *((Mat*)jmatrix3dFace);
     cv::Mat initialParams0 = *((Mat*)jinitialParams);
     cv::Mat matrix2dLands = *((Mat*)jmatrix2dLands);
@@ -497,8 +498,11 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
         landmarks(1,i) = matrix2dLands.at<double>(i, 1);
     }
     LOGD("morhpFace1 %i %i", matrix2dLands.rows, landmarks.nc());
-    int n_blendshapes = 14;
-    FaceModel3D model3d = FaceModel3D("/storage/extSdCard/models", n_blendshapes);
+    const int n_blendshapes = 2;//14;
+
+    std::string str(jnamestr);
+    LOGD("morhpFace21 %s", str.c_str());
+    FaceModel3D model3d = FaceModel3D(str, n_blendshapes);
     LOGD("morhpFace3");
     Shape2D model2d = Shape2D();
     OrthogonalProjectionModel projection_model = OrthogonalProjectionModel(n_blendshapes);
@@ -507,9 +511,9 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
     LOGD("morhpFace41");
     const matrix<double> &yy = model2d.get_shape2d(landmarks);
     LOGD("morhpFace42 %i %i", xx.nc(), yy.nc());
-    dlib::matrix<double,20,1> initialParameters= projection_model.get_initial_parameters(xx, yy);
+    dlib::matrix<double,6+n_blendshapes,1> initialParameters= projection_model.get_initial_parameters(xx, yy);
     if (flag == 1) {
-       for (int i = 0; i < 14; i++)
+       for (int i = 0; i < n_blendshapes; i++)
        {
            LOGD("morhpFace411 %i %f", i, initialParams0.at<double>(i, 0));
            initialParameters(0, i + 6) = initialParams0.at<double>(i, 0);
@@ -528,19 +532,23 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
                                                         objective_delta_stop_strategy(1e-4),
                                                         objFun,
                                                         initialParameters, -1);
-    LOGD("morhpFace9");
+    LOGD("morhpFace9 %f", initialParameters(0, 6));
     dlib::matrix<double> full_mean_3d = model3d.get_all_mean_shape3d();
     LOGD("morhpFace10");
     std::unordered_map<int, dlib::matrix<double>> all_blendshapes = model3d.get_all_blendshapes();
-    dlib::matrix<double> final_shape_3d = projection_model.get_full_shape3d(initialParameters,full_mean_3d,all_blendshapes);
+    //dlib::matrix<double> final_shape_3d = projection_model.convert_mean_shape(initialParameters, full_mean_3d, all_blendshapes);
+    dlib::matrix<double> final_shape_3d = projection_model.convert_mean_shape(initialParameters,full_mean_3d,all_blendshapes);
     LOGD("morhpFace2 %i", final_shape_3d.nc());
+    LOGD("morhpFace2 %f", initialParameters(0, 6));
+    LOGD("morhpFace2 %f %f %f", final_shape_3d(0,0), final_shape_3d(1,0), final_shape_3d(2,0));
+    LOGD("morhpFace2 %f %f %f", full_mean_3d(0,0), full_mean_3d(1,0), full_mean_3d(2,0));
     for (int i = 0; i < final_shape_3d.nc(); ++i)
     {
        matrix3dFace.at<double>(i, 0) = final_shape_3d(0,i);
        matrix3dFace.at<double>(i, 1) = final_shape_3d(1,i);
        matrix3dFace.at<double>(i, 2) = final_shape_3d(2,i);
     }
-    for (int i = 0; i < 14; i++)
+    for (int i = 0; i < n_blendshapes; i++)
     {
        initialParams0.at<double>(i, 0) = initialParameters(0, i + 6);
     }

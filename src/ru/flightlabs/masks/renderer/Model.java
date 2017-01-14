@@ -4,9 +4,13 @@ import android.content.Context;
 import android.util.Log;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -126,6 +130,25 @@ public class Model {
         loadFile();
     }
 
+    public void saveModel(String fileName) {
+        try {
+            OutputStream out = new FileOutputStream(fileName);
+            out.write(("o MeanShape222\r\n").getBytes("cp866"));
+            for (int i = 0; i < tempV.length / 3; i++) {
+                out.write(("v " + String.format("%.5f", tempV[i * 3]) + " "  + String.format("%.5f", tempV[i * 3 + 1]) + " "  + String.format("%.5f", tempV[i * 3 + 2]) + "\r\n").getBytes("cp866"));
+            }
+            for (int i = 0; i < indices.length / 3; i++) {
+                out.write(("f " + indices[i * 3] + " "  + indices[i * 3 + 1] + " "  + indices[i * 3 + 2] + "\r\n").getBytes("cp866"));
+            }
+            out.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     private int loadFile() {
         InputStream inputStream = context.getResources().openRawResource(
                 modelID);

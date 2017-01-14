@@ -1,8 +1,10 @@
 package ru.flightlabs.masks.camera;
 
 import android.app.Activity;
+import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
+import android.os.Environment;
 import android.util.Log;
 
 import org.opencv.android.CameraGLSurfaceView;
@@ -15,6 +17,7 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -27,6 +30,7 @@ import ru.flightlabs.masks.Static;
 import ru.flightlabs.masks.activity.FdActivity2;
 import ru.flightlabs.masks.activity.Settings;
 import ru.flightlabs.masks.renderer.Model;
+import ru.flightlabs.masks.utils.Decompress;
 import ru.flightlabs.masks.utils.OpenGlHelper;
 import ru.flightlabs.masks.utils.OpencvUtils;
 import ru.flightlabs.masks.utils.PhotoMaker;
@@ -80,6 +84,9 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
     private int hatTextureid;
 
     Mat initialParams = null;
+
+    String modelPath;
+
     public CameraTextureListenerImpl(Activity act, CompModel compModel) {
         this.act = act;
         this.compModel = compModel;
@@ -215,7 +222,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         if (foundEyes != null) {
 
 
-            if (false) {
+            if (true) {
                 Mat inputLandMarks = new Mat(68, 2, CvType.CV_64FC1);
                 for (int i = 0; i < foundEyes.length; i++) {
                     inputLandMarks.put(i, 0, foundEyes[i].x);
@@ -225,7 +232,18 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
                 if (initialParams == null) {
                     initialParams = new Mat(14, 1, CvType.CV_64FC1, new Scalar(0));
                 }
-                mNativeDetector.morhpFace(inputLandMarks, output3dShape, initialParams, true);
+                if (modelPath == null) {
+                    if (new File("/storage/extSdCard/models").exists()) {
+                        modelPath = "/storage/extSdCard/models";
+                    } else {
+                        File cascadeDir = act.getApplicationContext().getDir("models", Context.MODE_PRIVATE);
+                        Decompress.unzipFromAssets(act, "models.zip", cascadeDir.getPath());
+                        modelPath = cascadeDir.getPath();
+                    }
+                    Log.i(TAG, "onCameraTexture1 " + modelPath);
+                }
+
+                mNativeDetector.morhpFace(inputLandMarks, output3dShape, initialParams, modelPath, true);
                 for (int i = 0; i < output3dShape.rows(); i++) {
                     model.tempV[i * 3] = (float) output3dShape.get(i, 0)[0];
                     model.tempV[i * 3 + 1] = (float) output3dShape.get(i, 1)[0];
@@ -233,6 +251,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
                 }
                 model.recalcV();
             }
+            Log.i(TAG, "onCameraTexture1 " + model.tempV[0] + " " + model.tempV[1] + " " + model.tempV[2]);
 
             glMatrix = PoseHelper.findPose(model, width, act, foundEyes, mRgba);
             //PoseHelper.drawDebug(mRgba, model, glMatrix);
@@ -317,6 +336,11 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
             mRgba.put(0, 0, m_bbPixels.array());
             Core.flip(mRgba, mRgba, 0);
             PhotoMaker.makePhoto(mRgba, act);
+            // save 3d model
+            File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+            File newFile = new File(file, Settings.DIRECTORY_SELFIE);
+            final File fileJpg = new File(newFile, "outModel.obj");
+            model.saveModel(fileJpg.getPath());
         }
 
         Log.i(TAG, "onCameraTexture " + mRgba.height() + " " + facesArray.length);

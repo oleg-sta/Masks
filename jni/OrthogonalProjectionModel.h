@@ -23,10 +23,10 @@ public:
                                      dlib::matrix<double> mean3d,
                                      std::unordered_map<int, dlib::matrix<double>> blendshapes) const;
 
-private:
     dlib::matrix<double> convert_mean_shape(dlib::matrix<double> params,
-                                            dlib::matrix<double> mean3d,
-                                            std::unordered_map<int, dlib::matrix<double>> blendshapes) const;
+                                     dlib::matrix<double> mean3d,
+                                     std::unordered_map<int, dlib::matrix<double>> blendshapes) const;
+private:
     int n_params = 6;
     const dlib::matrix<double>
     rogrigues(dlib::matrix<double> rotation_vector) const;
