@@ -42,6 +42,8 @@ private:
 
     dlib::matrix<double> mesh;
     dlib::matrix<int> idxs3D;
+    std::unordered_map<int,dlib::matrix<double> > cur_blendshapes;
+    dlib::matrix<double> res;
 };
 
 #endif //SHAPE3D_SHAPEMODEL_H

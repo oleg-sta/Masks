@@ -21,8 +21,10 @@ private:
     ObjectiveFunctionHelper helper;
 
     dlib::matrix<double> shape2d;
+    std::unordered_map<int,dlib::matrix<double> > blendshapes;
 public:
     void extract2d_from_image(dlib::matrix<double> &image);
+    void set(std::unordered_map<int,dlib::matrix<double> > cur_blendshapes);
 
     OrthogonalProjectionModel model;
 };

@@ -21,18 +21,18 @@ public:
 
     dlib::matrix<double> get_full_shape3d(dlib::matrix<double> params,
                                      dlib::matrix<double> mean3d,
-                                     std::unordered_map<int, dlib::matrix<double>> blendshapes) const;
+                                     std::unordered_map<int, dlib::matrix<double>>& blendshapes) const;
 
     dlib::matrix<double> convert_mean_shape(dlib::matrix<double> params,
                                      dlib::matrix<double> mean3d,
-                                     std::unordered_map<int, dlib::matrix<double>> blendshapes) const;
+                                     std::unordered_map<int, dlib::matrix<double>>& blendshapes) const;
 private:
     int n_params = 6;
     const dlib::matrix<double>
     rogrigues(dlib::matrix<double> rotation_vector) const;
     int n_blendshapes;
     dlib::matrix<double> fun(dlib::matrix<double> x,
-                             std::unordered_map<int, dlib::matrix<double> > blendshapes,
+                             std::unordered_map<int, dlib::matrix<double> >& blendshapes,
                              dlib::matrix<double> params) const;
 };
 

@@ -44,6 +44,29 @@ FaceModel3D::FaceModel3D(std::string path_to_models, int n_blendshapes)
 
     }
     std::cin.rdbuf(cinbuf);
+
+        for(int n = 0; n < blendshapes.size(); n++)
+        {
+            //const dlib::matrix<double> blendshape = blendshapes[n];
+            dlib::matrix<double> blendshape_return;
+            blendshape_return.set_size(blendshapes.at(n).nr(), idxs3D.nr());
+            for (int i = 0; i < idxs3D.nr(); ++i)
+            {
+                for (int j = 0; j < blendshapes.at(n).nr(); ++j)
+                {
+                    blendshape_return(j, i) = blendshapes.at(n)(j, idxs3D(i, 0));
+                }
+            }
+            cur_blendshapes[n] = blendshape_return;
+        }
+            res.set_size(mean3DShape.nr(),idxs3D.nr());
+            for (int i = 0; i < idxs3D.nr(); ++i)
+            {
+                for (int j = 0; j < mean3DShape.nr(); ++j)
+                {
+                    res(j, i) = mean3DShape(j, idxs3D(i, 0));
+                }
+            }
 }
 dlib::matrix<double>
 FaceModel3D::fix_mesh_winding(const dlib::matrix<int> &mesh, const dlib::matrix<double> &vertices)
@@ -103,35 +126,11 @@ FaceModel3D::getIdxs3D() const
 dlib::matrix<double>
 FaceModel3D::get_mean_shape3d() const
 {
-    dlib::matrix<double> res;
-    res.set_size(mean3DShape.nr(),idxs3D.nr());
-    for (int i = 0; i < idxs3D.nr(); ++i)
-    {
-        for (int j = 0; j < mean3DShape.nr(); ++j)
-        {
-            res(j, i) = mean3DShape(j, idxs3D(i, 0));
-        }
-    }
     return res;
 }
 std::unordered_map<int, dlib::matrix<double> > const
 FaceModel3D::get_blendshapes() const
 {
-    std::unordered_map<int,dlib::matrix<double> > cur_blendshapes;
-    for(int n = 0; n < blendshapes.size(); n++)
-    {
-        //const dlib::matrix<double> blendshape = blendshapes[n];
-        dlib::matrix<double> blendshape_return;
-        blendshape_return.set_size(blendshapes.at(n).nr(), idxs3D.nr());
-        for (int i = 0; i < idxs3D.nr(); ++i)
-        {
-            for (int j = 0; j < blendshapes.at(n).nr(); ++j)
-            {
-                blendshape_return(j, i) = blendshapes.at(n)(j, idxs3D(i, 0));
-            }
-        }
-        cur_blendshapes[n] = blendshape_return;
-    }
     return cur_blendshapes;
 }
 FaceModel3D::FaceModel3D() {}

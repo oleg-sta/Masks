@@ -488,10 +488,10 @@ matrix<double> box_constrain_parameters(dlib::matrix<double> parameters)
     dlib::matrix<double> constrained_parameters = parameters;
     for (int i = 6; i < parameters.nr(); ++i)
     {
-        if (parameters(i,0)<0)
-           constrained_parameters(i,0) = 0;
-        if (parameters(i,0)>1)
-                   constrained_parameters(i,0) = 1;
+        if (parameters(i,0)<-2)
+           constrained_parameters(i,0) = -2;
+        if (parameters(i,0)>2)
+                   constrained_parameters(i,0) = 2;
     }
     return constrained_parameters;
 }
@@ -511,7 +511,7 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
         landmarks(1,i) = matrix2dLands.at<double>(i, 1);
     }
     LOGD("morhpFace1 %i %i", matrix2dLands.rows, landmarks.nc());
-    const int n_blendshapes = 2;//14;
+    const int n_blendshapes = 2;
 
     std::string str(jnamestr);
     LOGD("morhpFace21 %s");
@@ -539,20 +539,29 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
     LOGD("morhpFace6");
     objFun.extract2d_from_image(landmarks);
     LOGD("morhpFace7");
+    //objFun.set(model3d.get_all_blendshapes());
+    objFun.set(model3d.get_blendshapes());
     double val_init = objFun(initialParameters);
     LOGD("morhpFace8");
 
-    dlib::matrix<double, 6+n_blendshapes, 1> lower = dlib::zeros_matrix<double>(6+n_blendshapes,1);
+    dlib::matrix<double, 6+n_blendshapes, 1> lower = -dlib::ones_matrix<double>(6+n_blendshapes,1) * 2;
     dlib::set_subm(lower,0,0,6,1) = - 10000000;
-    dlib::matrix<double, 6+n_blendshapes, 1> upper = dlib::ones_matrix<double>(6+n_blendshapes,1);
+    dlib::matrix<double, 6+n_blendshapes, 1> upper = dlib::ones_matrix<double>(6+n_blendshapes,1) * 2;
     dlib::set_subm(upper,0,0,6,1) =  10000000;
     dlib::matrix<double, 6+n_blendshapes, 1> initial_parameters_box_constrained = box_constrain_parameters(initialParameters);
+
     double val = find_min_box_constrained(bfgs_search_strategy(),
                                                         objective_delta_stop_strategy(1e-4),
                                                         objFun,
                                                         derivative(objFun),
                                                         initial_parameters_box_constrained, lower,
                                                         upper);
+    /*
+    double val = find_min_using_approximate_derivatives(bfgs_search_strategy(),
+                                                            objective_delta_stop_strategy(1e-5),
+                                                            objFun,
+                                                            initialParameters, -1);
+    */
     LOGD("morhpFace9 %f", initialParameters(0, 6));
     dlib::matrix<double> full_mean_3d = model3d.get_all_mean_shape3d();
     LOGD("morhpFace10");

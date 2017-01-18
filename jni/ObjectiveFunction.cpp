@@ -15,7 +15,7 @@ double ObjectiveFunction::operator()(const dlib::matrix<double> &arg) const
 {
     //TODO: check that shape2d is set
     dlib::matrix<double> meanShapes = helper.get_mean3d();
-    std::unordered_map<int, dlib::matrix<double> > blendshapes = helper.get_blendshapes();
+    //std::unordered_map<int, dlib::matrix<double> > blendshapes = helper.get_blendshapes();
     dlib::matrix<double> resids = model.get_residuals(arg, meanShapes, blendshapes, shape2d);
 
     dlib::running_stats<double> rs;
@@ -30,4 +30,9 @@ void
 ObjectiveFunction::extract2d_from_image(dlib::matrix<double> &image)
 {
     ObjectiveFunction::shape2d = helper.get_y(image);
+}
+
+void ObjectiveFunction::set(std::unordered_map<int,dlib::matrix<double> > cur_blendshapes)
+{
+   blendshapes = cur_blendshapes;
 }
