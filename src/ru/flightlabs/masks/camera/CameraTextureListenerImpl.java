@@ -53,6 +53,9 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
     private int vPos;
     private int vTex;
 
+    private int vTex2;
+    private int vPos2;
+
     // 3d
     private int vPos3d;
     private int vTexFor3d;
@@ -71,6 +74,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
 
     private static final String TAG = "CameraTextureL_class";
     int program2dEffectId;// shader program
+    int program2dEffectId2;// shader program
     int program3dId;// shader program
     private int[] iFBO = null;//{0};
 
@@ -107,6 +111,10 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         int fragmentShaderId = ShaderUtils.createShader(act, GLES20.GL_FRAGMENT_SHADER, R.raw.fss4);
         program2dEffectId = ShaderUtils.createProgram(vertexShaderId, fragmentShaderId);
 
+        int vertexShaderId2 = ShaderUtils.createShader(act, GLES20.GL_VERTEX_SHADER, R.raw.vss);
+        int fragmentShaderId2 = ShaderUtils.createShader(act, GLES20.GL_FRAGMENT_SHADER, R.raw.fss_rad_blur);
+        program2dEffectId2 = ShaderUtils.createProgram(vertexShaderId2, fragmentShaderId2);
+
         int vertexShader3dId = ShaderUtils.createShader(act, GLES20.GL_VERTEX_SHADER, R.raw.vss3d);
         int fragmentShader3dId = ShaderUtils.createShader(act, GLES20.GL_FRAGMENT_SHADER, R.raw.fss3d);
         program3dId = ShaderUtils.createProgram(vertexShader3dId, fragmentShader3dId);
@@ -138,6 +146,11 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         vTex  = GLES20.glGetAttribLocation(program2dEffectId, "vTexCoord");
         GLES20.glEnableVertexAttribArray(vPos);
         GLES20.glEnableVertexAttribArray(vTex);
+
+        vPos2 = GLES20.glGetAttribLocation(program2dEffectId2, "vPosition");
+        vTex2  = GLES20.glGetAttribLocation(program2dEffectId2, "vTexCoord");
+        GLES20.glEnableVertexAttribArray(vPos2);
+        GLES20.glEnableVertexAttribArray(vTex2);
 
         vPos3d = GLES20.glGetAttribLocation(program3dId, "vPosition");
         GLES20.glEnableVertexAttribArray(vPos3d);
@@ -243,7 +256,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
                     Log.i(TAG, "onCameraTexture1 " + modelPath);
                 }
 
-                mNativeDetector.morhpFace(inputLandMarks, output3dShape, initialParams, modelPath, true);
+                mNativeDetector.morhpFace(inputLandMarks, output3dShape, initialParams, modelPath, false);
                 for (int i = 0; i < output3dShape.rows(); i++) {
                     model.tempV[i * 3] = (float) output3dShape.get(i, 0)[0];
                     model.tempV[i * 3 + 1] = (float) output3dShape.get(i, 1)[0];
@@ -303,9 +316,13 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         GLES20.glViewport(0, 0, width, height);
 
         // shader effect
-        shaderEfffect2d(center, center2, texIn);
+        if (FdActivity2.currentIndexEye == 4) {
+            shaderEfffect2d(center, center2, texIn, program2dEffectId2, vPos2, vTex2);
+        } else {
+            shaderEfffect2d(center, center2, texIn, program2dEffectId, vPos, vTex);
+        }
         // TODO change buffer to draw
-        if (FdActivity2.currentIndexEye != 0) {
+        if (FdActivity2.currentIndexEye != 0 && FdActivity2.currentIndexEye != 4) {
             if (foundEyes != null) {
                 if (FdActivity2.currentIndexEye == 2) {
                     shaderEfffect3d(glMatrix, texIn, width, height, modelGlasses, glassesTextureid, 0.9f);
@@ -426,15 +443,15 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         GLES20.glFlush();
 
     }
-    private void shaderEfffect2d(Point center, Point center2, int texIn) {
-        GLES20.glUseProgram(program2dEffectId);
-        int uColorLocation = GLES20.glGetUniformLocation(program2dEffectId, "u_Color");
+    private void shaderEfffect2d(Point center, Point center2, int texIn, int programId, int poss, int texx) {
+        GLES20.glUseProgram(programId);
+        int uColorLocation = GLES20.glGetUniformLocation(programId, "u_Color");
         GLES20.glUniform4f(uColorLocation, 0.0f, 0.0f, 1.0f, 1.0f);
 
-        int uCenter = GLES20.glGetUniformLocation(program2dEffectId, "uCenter");
+        int uCenter = GLES20.glGetUniformLocation(programId, "uCenter");
         GLES20.glUniform2f(uCenter, (float)center.x, (float)center.y);
 
-        int uCenter2 = GLES20.glGetUniformLocation(program2dEffectId, "uCenter2");
+        int uCenter2 = GLES20.glGetUniformLocation(programId, "uCenter2");
         GLES20.glUniform2f(uCenter2, (float)center2.x, (float)center2.y);
 
         FloatBuffer vertexData;
@@ -470,13 +487,13 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         texData.put(tex);
 
         vertexData.position(0);
-        GLES20.glVertexAttribPointer(vPos, 2, GLES20.GL_FLOAT, false, 0, vertexData);
+        GLES20.glVertexAttribPointer(poss, 2, GLES20.GL_FLOAT, false, 0, vertexData);
         texData.position(0);
-        GLES20.glVertexAttribPointer(vTex,  2, GLES20.GL_FLOAT, false, 0, texData);
+        GLES20.glVertexAttribPointer(texx,  2, GLES20.GL_FLOAT, false, 0, texData);
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texIn);
-        GLES20.glUniform1i(GLES20.glGetUniformLocation(program2dEffectId, "sTexture"), 0);
+        GLES20.glUniform1i(GLES20.glGetUniformLocation(programId, "sTexture"), 0);
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
         GLES20.glFlush(); //?

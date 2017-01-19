@@ -488,10 +488,10 @@ matrix<double> box_constrain_parameters(dlib::matrix<double> parameters)
     dlib::matrix<double> constrained_parameters = parameters;
     for (int i = 6; i < parameters.nr(); ++i)
     {
-        if (parameters(i,0)<-2)
-           constrained_parameters(i,0) = -2;
-        if (parameters(i,0)>2)
-                   constrained_parameters(i,0) = 2;
+        if (parameters(i,0)<0)
+           constrained_parameters(i,0) = 0;
+        if (parameters(i,0)>1)
+                   constrained_parameters(i,0) = 1;
     }
     return constrained_parameters;
 }
@@ -511,7 +511,7 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
         landmarks(1,i) = matrix2dLands.at<double>(i, 1);
     }
     LOGD("morhpFace1 %i %i", matrix2dLands.rows, landmarks.nc());
-    const int n_blendshapes = 2;
+    const int n_blendshapes = 1; //14
 
     std::string str(jnamestr);
     LOGD("morhpFace21 %s");
@@ -544,9 +544,9 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
     double val_init = objFun(initialParameters);
     LOGD("morhpFace8");
 
-    dlib::matrix<double, 6+n_blendshapes, 1> lower = -dlib::ones_matrix<double>(6+n_blendshapes,1) * 2;
+    dlib::matrix<double, 6+n_blendshapes, 1> lower = -dlib::ones_matrix<double>(6+n_blendshapes,1) * 0;
     dlib::set_subm(lower,0,0,6,1) = - 10000000;
-    dlib::matrix<double, 6+n_blendshapes, 1> upper = dlib::ones_matrix<double>(6+n_blendshapes,1) * 2;
+    dlib::matrix<double, 6+n_blendshapes, 1> upper = dlib::ones_matrix<double>(6+n_blendshapes,1) * 1;
     dlib::set_subm(upper,0,0,6,1) =  10000000;
     dlib::matrix<double, 6+n_blendshapes, 1> initial_parameters_box_constrained = box_constrain_parameters(initialParameters);
 
@@ -596,8 +596,9 @@ void findEyes(cv::Mat frame_gray, cv::Rect face, std::vector<cv::Point> &pixels,
 //  assign_image(img, cv_image<uchar>(frame_gray));
 	// т.к. предыдущий метод cv_image не работает(может неправильно использую), то делаем преобразование кадра из opencv в dlib вручную
 	array2d<int> img;
-	img.set_size(frame_gray.rows, frame_gray.cols); // for grey
+	//img.set_size(frame_gray.rows, frame_gray.cols); // for grey
 	LOGD("findEyes1122");
+	/*
 	for (int i = 0; i < frame_gray.rows; i++) {
 		//LOGD("findEyes1124");
 		for (int j = 0; j < frame_gray.cols; j++) {
@@ -605,6 +606,8 @@ void findEyes(cv::Mat frame_gray, cv::Rect face, std::vector<cv::Point> &pixels,
 			img[i][j] = frame_gray.at<uchar>(i, j);
 		}
 	}
+	*/
+	dlib::assign_image ( img, cv_image<uchar> ( frame_gray ) );
 	////  cv_image<bgr_pixel> image(frame_gray);
 	LOGD("findEyes114");
 	//std::vector<dlib::rectangle> dets;
