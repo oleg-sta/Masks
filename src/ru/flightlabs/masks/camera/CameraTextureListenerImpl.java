@@ -22,6 +22,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 import ru.flightlabs.masks.CompModel;
 import ru.flightlabs.masks.DetectionBasedTracker;
@@ -31,6 +33,7 @@ import ru.flightlabs.masks.activity.FdActivity2;
 import ru.flightlabs.masks.activity.Settings;
 import ru.flightlabs.masks.renderer.Model;
 import ru.flightlabs.masks.utils.Decompress;
+import ru.flightlabs.masks.utils.FileUtils;
 import ru.flightlabs.masks.utils.OpenGlHelper;
 import ru.flightlabs.masks.utils.OpencvUtils;
 import ru.flightlabs.masks.utils.PhotoMaker;
@@ -49,20 +52,11 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
     CompModel compModel;
     Activity act;
 
-    // 2d
-    private int vPos;
-    private int vTex;
-
-    private int vTex2;
-    private int vPos2;
-
     // 3d
     private int vPos3d;
     private int vTexFor3d;
 
     private int maskTextureid;
-    /** This will be used to pass in the texture. */
-    private int mTextureUniformHandle;
 
     ByteBuffer m_bbPixels;
     Mat mRgba;
@@ -73,19 +67,15 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
     double lastCount = 0.5f;
 
     private static final String TAG = "CameraTextureL_class";
-    int program2dEffectId;// shader program
-    int program2dEffectId2;// shader program
-    int program3dId;// shader program
     private int[] iFBO = null;//{0};
+
+    int[] programs;
+    String[] effects;
+    Map<String, Model> models = new HashMap<>();
+    Map<String, Integer> textures = new HashMap<>();
 
     // 3d
     private Model model;
-
-    private Model modelGlasses;
-    private int glassesTextureid;
-
-    private Model modelHat;
-    private int hatTextureid;
 
     Mat initialParams = null;
 
@@ -98,6 +88,24 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
 
     public void onCameraViewStarted(int width, int height) {
 
+        // load programs
+        String[] progs = act.getResources().getStringArray(R.array.programs);
+        programs = new int[progs.length];
+        for (int i = 0; i < progs.length; i++) {
+            String[] line = progs[i].split(";");
+            int vertexShaderId = ShaderUtils.createShader(GLES20.GL_VERTEX_SHADER, FileUtils.getStringFromAsset(act.getAssets(), "shaders/" + line[0] + ".glsl"));
+            int fragmentShaderId = ShaderUtils.createShader(GLES20.GL_FRAGMENT_SHADER, FileUtils.getStringFromAsset(act.getAssets(), "shaders/" + line[1] + ".glsl"));
+            programs[i] = ShaderUtils.createProgram(vertexShaderId, fragmentShaderId);
+
+            if ("2".equals(line[2])) {
+            } else {
+                vPos3d = GLES20.glGetAttribLocation(programs[i], "vPosition");
+                GLES20.glEnableVertexAttribArray(vPos3d);
+                vTexFor3d = GLES20.glGetAttribLocation(programs[i], "a_TexCoordinate");
+                GLES20.glEnableVertexAttribArray(vTexFor3d);
+            }
+        }
+        effects = act.getResources().getStringArray(R.array.effects);
         mRgba = new Mat(height, width, CvType.CV_8UC4);
         mGray = new Mat();
         //m_bbPixels = ByteBuffer.allocateDirect(width * height * 4);
@@ -105,25 +113,10 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         m_bbPixels = ByteBuffer.wrap(new byte[width * height * 4]);
         m_bbPixels.order(ByteOrder.LITTLE_ENDIAN);
 
-//        int vertexShaderId = ShaderUtils.createShader(this, GLES20.GL_VERTEX_SHADER, R.raw.vertex_shader);
-//        int fragmentShaderId = ShaderUtils.createShader(this, GLES20.GL_FRAGMENT_SHADER, R.raw.fragment_shader);
-        int vertexShaderId = ShaderUtils.createShader(act, GLES20.GL_VERTEX_SHADER, R.raw.vss);
-        int fragmentShaderId = ShaderUtils.createShader(act, GLES20.GL_FRAGMENT_SHADER, R.raw.fss4);
-        program2dEffectId = ShaderUtils.createProgram(vertexShaderId, fragmentShaderId);
-
-        int vertexShaderId2 = ShaderUtils.createShader(act, GLES20.GL_VERTEX_SHADER, R.raw.vss);
-        int fragmentShaderId2 = ShaderUtils.createShader(act, GLES20.GL_FRAGMENT_SHADER, R.raw.fss_rad_blur);
-        program2dEffectId2 = ShaderUtils.createProgram(vertexShaderId2, fragmentShaderId2);
-
-        int vertexShader3dId = ShaderUtils.createShader(act, GLES20.GL_VERTEX_SHADER, R.raw.vss3d);
-        int fragmentShader3dId = ShaderUtils.createShader(act, GLES20.GL_FRAGMENT_SHADER, R.raw.fss3d);
-        program3dId = ShaderUtils.createProgram(vertexShader3dId, fragmentShader3dId);
         load3dModel();
-        bindData(width, height);
+        //bindData(width, height);
 
         Log.i(TAG, "onCameraViewStarted");
-        //mGray = new Mat();
-        //mRgba = new Mat();
     }
 
     private void load3dModel() {
@@ -131,33 +124,21 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
                 act);
         maskTextureid = OpenGlHelper.loadTexture(act, R.raw.m1_2);
         Log.i(TAG, "load3dModel2");
-        modelGlasses = new Model(R.raw.glasses_3d,
+        Model modelGlasses = new Model(R.raw.glasses_3d,
                 act);
         Log.i(TAG, "load3dModel3");
-        glassesTextureid = OpenGlHelper.loadTexture(act, R.raw.glasses);
+        int glassesTextureid = OpenGlHelper.loadTexture(act, R.raw.glasses);
 
-        modelHat = new Model(R.raw.hat,
+        Model modelHat = new Model(R.raw.hat,
                 act);
-        hatTextureid = OpenGlHelper.loadTexture(act, R.raw.hat_tex);
+        int hatTextureid = OpenGlHelper.loadTexture(act, R.raw.hat_tex);
+        models.put("model", model);
+        textures.put("maskTextureid", maskTextureid);
+        models.put("modelGlasses", modelGlasses);
+        textures.put("glassesTextureid", glassesTextureid);
+        models.put("modelHat", modelHat);
+        textures.put("hatTextureid", hatTextureid);
     }
-
-    private void bindData(int width, int height) {
-        vPos = GLES20.glGetAttribLocation(program2dEffectId, "vPosition");
-        vTex  = GLES20.glGetAttribLocation(program2dEffectId, "vTexCoord");
-        GLES20.glEnableVertexAttribArray(vPos);
-        GLES20.glEnableVertexAttribArray(vTex);
-
-        vPos2 = GLES20.glGetAttribLocation(program2dEffectId2, "vPosition");
-        vTex2  = GLES20.glGetAttribLocation(program2dEffectId2, "vTexCoord");
-        GLES20.glEnableVertexAttribArray(vPos2);
-        GLES20.glEnableVertexAttribArray(vTex2);
-
-        vPos3d = GLES20.glGetAttribLocation(program3dId, "vPosition");
-        GLES20.glEnableVertexAttribArray(vPos3d);
-        vTexFor3d = GLES20.glGetAttribLocation(program3dId, "a_TexCoordinate");
-        GLES20.glEnableVertexAttribArray(vTexFor3d);
-    }
-
 
     public void onCameraViewStopped() {
         Log.i(TAG, "onCameraViewStopped");
@@ -179,7 +160,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         // TODO do in background
         if (FdActivity2.newIndexEye != FdActivity2.currentIndexEye) {
             FdActivity2.currentIndexEye = FdActivity2.newIndexEye;
-            OpenGlHelper.changeTexture(act, FdActivity2.eyesResources.getResourceId(FdActivity2.newIndexEye, 0),maskTextureid);
+            OpenGlHelper.changeTexture(act, FdActivity2.eyesResources.getResourceId(FdActivity2.newIndexEye, 0), maskTextureid);
         }
 
         if (compModel.mNativeDetector != null) {
@@ -315,33 +296,29 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         }
         GLES20.glViewport(0, 0, width, height);
 
+        int indexEye = FdActivity2.currentIndexEye;
         // shader effect
-        if (FdActivity2.currentIndexEye == 4) {
-            shaderEfffect2d(center, center2, texIn, program2dEffectId2, vPos2, vTex2);
-        } else {
-            shaderEfffect2d(center, center2, texIn, program2dEffectId, vPos, vTex);
-        }
-        // TODO change buffer to draw
-        if (FdActivity2.currentIndexEye != 0 && FdActivity2.currentIndexEye != 4) {
-            if (foundEyes != null) {
-                if (FdActivity2.currentIndexEye == 2) {
-                    shaderEfffect3d(glMatrix, texIn, width, height, modelGlasses, glassesTextureid, 0.9f);
-                } else if (FdActivity2.currentIndexEye == 3) {
-                    // FIXME depth doesn't work
-                    GLES20.glClearDepthf(1.0f);
-                    GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
-                    shaderEfffect3d(glMatrix, texIn, width, height, modelHat, hatTextureid, 1.0f);
-                    GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-                    GLES20.glDepthMask(true);
-                    GLES20.glDepthFunc(GLES20.GL_LEQUAL);
-                    GLES20.glDepthRangef(0.0f, 1.0f);
-                    shaderEfffect3d(glMatrix, texIn, width, height, model, maskTextureid, 0.0f);
-                    GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-                } else {
-                    shaderEfffect3d(glMatrix, texIn, width, height, model, maskTextureid, 0.7f);
+        if (indexEye < effects.length) {
+            String[] effect = effects[indexEye].split(";");
+            int programId = programs[Integer.parseInt(effect[0])];
+            if (!"".equals(effect[2])) {
+                if (foundEyes != null) {
+                    int vPos = GLES20.glGetAttribLocation(programs[0], "vPosition");
+                    int vTex  = GLES20.glGetAttribLocation(programs[0], "vTexCoord");
+                    GLES20.glEnableVertexAttribArray(vPos);
+                    GLES20.glEnableVertexAttribArray(vTex);
+                    shaderEfffect2d(center, center2, texIn, programs[0], vPos, vTex);
+                    shaderEfffect3d(glMatrix, texIn, width, height, models.get(effect[1]), textures.get(effect[2]), Float.parseFloat(effect[3]), programId);
                 }
             } else {
-                shaderEfffect3dStub();
+                Log.i(TAG, "onCameraTexture444");
+                int vPos = GLES20.glGetAttribLocation(programId, "vPosition");
+                int vTex  = GLES20.glGetAttribLocation(programId, "vTexCoord");
+                GLES20.glEnableVertexAttribArray(vPos);
+                GLES20.glEnableVertexAttribArray(vTex);
+                Log.i(TAG, "onCameraTexture4441");
+                shaderEfffect2d(center, center2, texIn, programId, vPos, vTex);
+                Log.i(TAG, "onCameraTexture4445");
             }
         }
         // shader effect
@@ -365,16 +342,16 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         return !Static.drawOrigTexture;
     }
 
-    private void shaderEfffect3d(Mat glMatrix, int texIn, int width, int height, final Model modelToDraw, int modelTextureId, float alpha) {
-        GLES20.glUseProgram(program3dId);
-        int matrixMvp = GLES20.glGetUniformLocation(program3dId, "u_MVPMatrix");
+    private void shaderEfffect3d(Mat glMatrix, int texIn, int width, int height, final Model modelToDraw, int modelTextureId, float alpha, int programId) {
+        GLES20.glUseProgram(programId);
+        int matrixMvp = GLES20.glGetUniformLocation(programId, "u_MVPMatrix");
 
         float[] matrixView = PoseHelper.convertToArray(glMatrix);
         float[] mMatrix = new float[16];
         Matrix.multiplyMM(mMatrix, 0, PoseHelper.createProjectionMatrixThroughPerspective(width, height), 0, matrixView, 0);
         GLES20.glUniformMatrix4fv(matrixMvp, 1, false, mMatrix, 0);
 
-        int fAlpha = GLES20.glGetUniformLocation(program3dId, "f_alpha");
+        int fAlpha = GLES20.glGetUniformLocation(programId, "f_alpha");
         GLES20.glUniform1f(fAlpha, alpha);
 
         FloatBuffer mVertexBuffer = modelToDraw.getVertices();
@@ -387,11 +364,11 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, modelTextureId);
-        GLES20.glUniform1i(GLES20.glGetUniformLocation(program3dId, "u_Texture"), 0);
+        GLES20.glUniform1i(GLES20.glGetUniformLocation(programId, "u_Texture"), 0);
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texIn);
-        GLES20.glUniform1i(GLES20.glGetUniformLocation(program3dId, "u_TextureOrig"), 1);
+        GLES20.glUniform1i(GLES20.glGetUniformLocation(programId, "u_TextureOrig"), 1);
 
         ShortBuffer mIndices = modelToDraw.getIndices();
         mIndices.position(0);
@@ -400,10 +377,10 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         GLES20.glFlush();
     }
 
-    private void shaderEfffect3dStub() {
-        GLES20.glUseProgram(program3dId);
+    private void shaderEfffect3dStub(int programId) {
+        GLES20.glUseProgram(programId);
         //GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-        int matrixMvp = GLES20.glGetUniformLocation(program3dId, "u_MVPMatrix");
+        int matrixMvp = GLES20.glGetUniformLocation(programId, "u_MVPMatrix");
         float[] matrix = new float[16];
 
         matrix[0] = 1;
@@ -461,12 +438,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
                 1, -1,
                 1,  1
         };
-//        vertices = new float[]{
-//                0, 0,
-//                width,  0,
-//                width, height,
-//                0,  height
-//        };
+
         vertexData = ByteBuffer
                 .allocateDirect(vertices.length * 4)
                 .order(ByteOrder.nativeOrder())

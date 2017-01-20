@@ -89,6 +89,20 @@
         <item>1</item><!-- lips inner -->
     </integer-array>
 
+    <string-array name="programs" translatable="false">
+        <item>vss;fss4;2</item>
+        <item>vss3d;fss3d;3</item>
+        <item>vss;fss_rad_blur;2</item>
+    </string-array>
+
+    <string-array name="effects" translatable="false">
+        <item>0;;;0.1</item>
+        <item>1;model;maskTextureid;0.7;</item>
+        <item>1;modelGlasses;glassesTextureid;0.9</item>
+        <item>1;modelHat;hatTextureid;1.0</item>
+        <item>2;;;0.1</item>
+    </string-array>
+
     <string-array name="points2DTo3D" translatable="false">
         <item>35;26</item>
         <item>31;59</item>

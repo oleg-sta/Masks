@@ -1,6 +1,7 @@
 package ru.flightlabs.masks.utils;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 
@@ -75,5 +76,20 @@ public class FileUtils {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static String getStringFromAsset(AssetManager assetManager, String fileName) {
+        try {
+            InputStream input = assetManager.open(fileName);
+            int size = input.available();
+            byte[] buffer = new byte[size];
+            input.read(buffer);
+            input.close();
+            return new String(buffer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+
     }
 }
