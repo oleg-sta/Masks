@@ -9,6 +9,9 @@
         <item>@drawable/m4_2</item>
         <item>@drawable/m5_2</item>
         <item>@drawable/bear</item>
+        <item>@drawable/bear</item>
+        <item>@drawable/bear</item>
+        <item>@drawable/bear</item>
     </array>
     
     <array name="masks_png">
@@ -18,6 +21,9 @@
         <item>@raw/m3_1</item>
         <item>@raw/m4_2</item>
         <item>@raw/m5_2</item>
+        <item>@raw/bear</item>
+        <item>@raw/bear</item>
+        <item>@raw/bear</item>
         <item>@raw/bear</item>
     </array>
     
@@ -29,6 +35,9 @@
         <item>@raw/m4_2_44</item>
         <item>@raw/m5_2_44</item>
         <item>@raw/bear_44</item>
+        <item>@raw/bear_44</item>
+        <item>@raw/bear_44</item>
+        <item>@raw/bear_44</item>
     </array>
     
     <array name="masks_points_68">
@@ -38,6 +47,9 @@
         <item>@raw/m3_1_68</item>
         <item>@raw/m4_2_68</item>
         <item>@raw/m5_2_68</item>
+        <item>@raw/bear_68</item>
+        <item>@raw/bear_68</item>
+        <item>@raw/bear_68</item>
         <item>@raw/bear_68</item>
     </array>
 
@@ -89,18 +101,30 @@
         <item>1</item><!-- lips inner -->
     </integer-array>
 
+    <!-- vertex shader file name; fragment shader file name; 2 or 3d sahder-->
     <string-array name="programs" translatable="false">
         <item>vss;fss4;2</item>
         <item>vss3d;fss3d;3</item>
         <item>vss;fss_rad_blur;2</item>
+        <!--<item>vss;fss_light;2</item>-->
+        <item>vss;fss_stars;2</item>
+        <item>vss;noise_fss;2</item>
+        <item>vss;fss_space;2</item>
+        <item>vss;fss_fresca;2</item>
     </string-array>
 
+    <!-- programId; 3d model namel; texutre name; alpha; 1 - need blend shape, 0 - no-->
     <string-array name="effects" translatable="false">
-        <item>0;;;0.1</item>
-        <item>1;model;maskTextureid;0.7;</item>
-        <item>1;modelGlasses;glassesTextureid;0.9</item>
-        <item>1;modelHat;hatTextureid;1.0</item>
-        <item>2;;;0.1</item>
+        <item>0;;;0.1;0</item>
+        <item>1;model;maskTextureid;0.7;1</item>
+        <item>1;modelGlasses;glassesTextureid;0.9;0</item>
+        <item>1;modelHat;hatTextureid;1.0;0</item>
+        <item>1;star;hatTextureid;1.0;0</item>
+        <item>2;;;0.1;0</item>
+        <item>3;;;0.1;0</item>
+        <item>4;;;0.1;0</item>
+        <item>5;;;0.1;0</item>
+        <item>6;;;0.1;0</item>
     </string-array>
 
     <string-array name="points2DTo3D" translatable="false">

@@ -52,6 +52,8 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
     CompModel compModel;
     Activity act;
 
+    int iGlobTime = 0;
+
     // 3d
     private int vPos3d;
     private int vTexFor3d;
@@ -138,6 +140,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         textures.put("glassesTextureid", glassesTextureid);
         models.put("modelHat", modelHat);
         textures.put("hatTextureid", hatTextureid);
+        models.put("star", new Model(R.raw.star, act));
     }
 
     public void onCameraViewStopped() {
@@ -146,6 +149,11 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
     }
 
     public boolean onCameraTexture(int texIn, int texOut, int width, int height) {
+        long time = System.currentTimeMillis();
+        iGlobTime++;
+        if (iGlobTime % 100 == 0) {
+            iGlobTime = 0;
+        }
         Log.i(TAG, "onCameraTexture");
         if (frameCount == 0) {
             timeStart = System.currentTimeMillis();
@@ -210,13 +218,23 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         if (Settings.debugMode) {
             Imgproc.putText(mRgba, "frames " + String.format("%.3f", (1f / lastCount) * 10) + " in 1 second.", new Point(50, 50), Core.FONT_HERSHEY_SIMPLEX, 1,
                     new Scalar(255, 255, 255), 2);
+            Imgproc.putText(mRgba, "time " + iGlobTime, new Point(50, 250), Core.FONT_HERSHEY_SIMPLEX, 1,
+                    new Scalar(255, 255, 255), 2);
         }
         Mat glMatrix = null;
+        int indexEye = FdActivity2.currentIndexEye;
         PoseHelper.bindMatrix(100, 100);
         if (foundEyes != null) {
 
 
-            if (true) {
+            boolean shapeBlends = false;
+            if (indexEye < effects.length) {
+                String[] effect = effects[indexEye].split(";");
+                if ("1".equals(effect[4])) {
+                    shapeBlends = true;
+                }
+            }
+            if (shapeBlends) {
                 Mat inputLandMarks = new Mat(68, 2, CvType.CV_64FC1);
                 for (int i = 0; i < foundEyes.length; i++) {
                     inputLandMarks.put(i, 0, foundEyes[i].x);
@@ -296,18 +314,21 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         }
         GLES20.glViewport(0, 0, width, height);
 
-        int indexEye = FdActivity2.currentIndexEye;
         // shader effect
         if (indexEye < effects.length) {
             String[] effect = effects[indexEye].split(";");
             int programId = programs[Integer.parseInt(effect[0])];
             if (!"".equals(effect[2])) {
+                int vPos = GLES20.glGetAttribLocation(programs[0], "vPosition");
+                int vTex  = GLES20.glGetAttribLocation(programs[0], "vTexCoord");
+                GLES20.glEnableVertexAttribArray(vPos);
+                GLES20.glEnableVertexAttribArray(vTex);
+                shaderEfffect2d(center, center2, texIn, programs[0], vPos, vTex);
                 if (foundEyes != null) {
-                    int vPos = GLES20.glGetAttribLocation(programs[0], "vPosition");
-                    int vTex  = GLES20.glGetAttribLocation(programs[0], "vTexCoord");
-                    GLES20.glEnableVertexAttribArray(vPos);
-                    GLES20.glEnableVertexAttribArray(vTex);
-                    shaderEfffect2d(center, center2, texIn, programs[0], vPos, vTex);
+                    // crazy simple animation
+                    if (indexEye == 4) {
+                        animate(models.get(effect[1]), time);
+                    }
                     shaderEfffect3d(glMatrix, texIn, width, height, models.get(effect[1]), textures.get(effect[2]), Float.parseFloat(effect[3]), programId);
                 }
             } else {
@@ -317,6 +338,13 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
                 GLES20.glEnableVertexAttribArray(vPos);
                 GLES20.glEnableVertexAttribArray(vTex);
                 Log.i(TAG, "onCameraTexture4441");
+                if  (indexEye >= 6) {
+                    GLES20.glUseProgram(programId);
+                    int uCenter2 = GLES20.glGetUniformLocation(programId, "iGlobalTime");
+                    Log.i(TAG, "onCameraTexture4443 "+ uCenter2 + " " + iGlobTime);
+                    GLES20.glUniform1f(uCenter2, (float)iGlobTime);
+                }
+                Log.i(TAG, "onCameraTexture44412");
                 shaderEfffect2d(center, center2, texIn, programId, vPos, vTex);
                 Log.i(TAG, "onCameraTexture4445");
             }
@@ -340,6 +368,19 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         Log.i(TAG, "onCameraTexture " + mRgba.height() + " " + facesArray.length);
 
         return !Static.drawOrigTexture;
+    }
+
+    private void animate(Model model, long time) {
+        double alpha = 0.1;//time / 100000;
+        double a = Math.cos(alpha);
+        double b = Math.sin(alpha);
+        for (int i = 0; i < model.tempV.length / 3; i++) {
+            double x = model.tempV[i * 3] * a - model.tempV[i * 3 + 2] * b;
+            double y = model.tempV[i * 3] * b + model.tempV[i * 3 + 2] * a;
+            model.tempV[i * 3] = (float)x;
+            model.tempV[i * 3 + 2] = (float)y;
+        }
+        model.recalcV();
     }
 
     private void shaderEfffect3d(Mat glMatrix, int texIn, int width, int height, final Model modelToDraw, int modelTextureId, float alpha, int programId) {
