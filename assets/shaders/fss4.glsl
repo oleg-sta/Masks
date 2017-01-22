@@ -1,5 +1,6 @@
 // Barrel distortion
 //#version 120 error on adnroid 5 with this line
+precision mediump float;
 uniform sampler2D sTexture;
 varying vec2 texCoord;
 const float PI = 3.1415926535;
