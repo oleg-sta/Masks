@@ -12,6 +12,9 @@
         <item>@drawable/bear</item>
         <item>@drawable/bear</item>
         <item>@drawable/bear</item>
+        <item>@drawable/bear</item>
+        <item>@drawable/bear</item>
+        <item>@drawable/bear</item>
     </array>
     
     <array name="masks_png">
@@ -23,6 +26,9 @@
         <item>@raw/m5_2</item>
         <item>@raw/bear</item>
         <item>@raw/bear</item>
+        <item>@raw/bear</item>
+        <item>@raw/bear</item>
+        <item>@raw/tex10</item>
         <item>@raw/bear</item>
         <item>@raw/bear</item>
     </array>
@@ -38,6 +44,7 @@
         <item>@raw/bear_44</item>
         <item>@raw/bear_44</item>
         <item>@raw/bear_44</item>
+        <item>@raw/bear_44</item>
     </array>
     
     <array name="masks_points_68">
@@ -47,6 +54,7 @@
         <item>@raw/m3_1_68</item>
         <item>@raw/m4_2_68</item>
         <item>@raw/m5_2_68</item>
+        <item>@raw/bear_68</item>
         <item>@raw/bear_68</item>
         <item>@raw/bear_68</item>
         <item>@raw/bear_68</item>
@@ -111,6 +119,9 @@
         <item>vss;noise_fss;2</item>
         <item>vss;fss_space;2</item>
         <item>vss;fss_fresca;2</item>
+        <item>vss;fss_sh;2</item>
+        <item>vss;fss_ocean;2</item>
+        <item>vss;fss_alien_cocons;2</item>
     </string-array>
 
     <!-- programId; 3d model namel; texutre name; alpha; 1 - need blend shape, 0 - no-->
@@ -125,6 +136,9 @@
         <item>4;;;0.1;0</item>
         <item>5;;;0.1;0</item>
         <item>6;;;0.1;0</item>
+        <item>7;;;0.1;0</item>
+        <item>8;;;0.1;0</item>
+        <item>9;;;0.1;0</item>
     </string-array>
 
     <string-array name="points2DTo3D" translatable="false">

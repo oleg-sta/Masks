@@ -94,6 +94,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         String[] progs = act.getResources().getStringArray(R.array.programs);
         programs = new int[progs.length];
         for (int i = 0; i < progs.length; i++) {
+            // TODO use glGetProgramiv to get info of attributes in particular shader
             String[] line = progs[i].split(";");
             int vertexShaderId = ShaderUtils.createShader(GLES20.GL_VERTEX_SHADER, FileUtils.getStringFromAsset(act.getAssets(), "shaders/" + line[0] + ".glsl"));
             int fragmentShaderId = ShaderUtils.createShader(GLES20.GL_FRAGMENT_SHADER, FileUtils.getStringFromAsset(act.getAssets(), "shaders/" + line[1] + ".glsl"));
@@ -345,7 +346,12 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
                     GLES20.glUniform1f(uCenter2, (float)iGlobTime);
                 }
                 Log.i(TAG, "onCameraTexture44412");
-                shaderEfffect2d(center, center2, texIn, programId, vPos, vTex);
+                if (indexEye == 10) {
+                    // just experiment with fur
+                    shaderEfffect2d(center, center2, textures.get("maskTextureid"), programId, vPos, vTex);
+                } else {
+                    shaderEfffect2d(center, center2, texIn, programId, vPos, vTex);
+                }
                 Log.i(TAG, "onCameraTexture4445");
             }
         }
