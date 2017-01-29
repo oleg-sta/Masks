@@ -76,8 +76,11 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDete
 JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDrawMask
 (JNIEnv * jenv, jclass, jlong imageFrom, jlong imageTo, jobjectArray, jobjectArray, jobjectArray, jobjectArray);
 
+JNIEXPORT jlong JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFaceInit
+(JNIEnv * jenv, jclass, jstring path);
+
 JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
-(JNIEnv * jenv, jclass, jlong jmatrix2dLands, jlong jmatrix3dFace, jlong jinitialParams, jstring, jint flag);
+(JNIEnv * jenv, jclass, jlong jmatrix2dLands, jlong jmatrix3dFace, jlong jinitialParams, jlong, jint flag);
 
 void findEyes(cv::Mat frame_gray, cv::Rect face, std::vector<cv::Point> &pixels,  ModelClass *modelClass);
 bool checkInTriangle(cv::Point*, Triangle* triangle, cv::Point**);
