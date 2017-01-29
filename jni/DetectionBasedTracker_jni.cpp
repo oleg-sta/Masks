@@ -29,7 +29,7 @@
 using namespace std;
 using namespace cv;
 using namespace dlib;
-const int n_blendshapes = 3;
+const int n_blendshapes = 2;
 
 //inline void vector_Rect_to_Mat(cv::vector<Rect>& v_rect, Mat& mat)
 //{
@@ -499,18 +499,18 @@ matrix<double> box_constrain_parameters(dlib::matrix<double> parameters)
 JNIEXPORT jlong JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFaceInit
 (JNIEnv * jenv, jclass, jstring path)
 {
-const char* jnamestr = jenv->GetStringUTFChars(path, NULL);
-//const int n_blendshapes = 14;
-std::string str(jnamestr);
-FaceModel3D* model3d = new FaceModel3D(str, n_blendshapes);
-return (jlong)model3d;
+    LOGD("Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFaceInit enter");
+    const char* jnamestr = jenv->GetStringUTFChars(path, NULL);
+    std::string str(jnamestr);
+    FaceModel3D* model3d = new FaceModel3D(str, n_blendshapes);
+    LOGD("Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFaceInit exit");
+    return (jlong)model3d;
 }
 
 JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
 (JNIEnv * jenv, jclass, jlong jmatrix2dLands, jlong jmatrix3dFace, jlong jinitialParams, jlong model3dL, jint flag)
 {
     LOGD("Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace enter");
-    //const char* jnamestr = jenv->GetStringUTFChars(path, NULL);
     cv::Mat matrix3dFace = *((Mat*)jmatrix3dFace);
     cv::Mat initialParams0 = *((Mat*)jinitialParams);
     cv::Mat matrix2dLands = *((Mat*)jmatrix2dLands);
@@ -521,11 +521,7 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
         landmarks(1,i) = matrix2dLands.at<double>(i, 1);
     }
     LOGD("morhpFace1 %i %i", matrix2dLands.rows, landmarks.nc());
-    //const int n_blendshapes = 2; //14
-
-    //std::string str(jnamestr);
-    LOGD("morhpFace21 %s");
-    FaceModel3D model3d = *((FaceModel3D*)model3dL); //*((Mat*)imageGray);
+    FaceModel3D model3d = *((FaceModel3D*)model3dL);
     LOGD("morhpFace3");
     Shape2D model2d = Shape2D();
     OrthogonalProjectionModel projection_model = OrthogonalProjectionModel(n_blendshapes);

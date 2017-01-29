@@ -28,6 +28,9 @@ import ru.flightlabs.masks.renderer.Model;
 
 public class PoseHelper {
 
+    static java.util.List<Integer> p3d1;
+    static java.util.List<Integer> p2d1;
+
     public static Mat findPose(Model model, int width, Context context, Point[] foundEyes, Mat mRgba) {
         MatOfPoint3f objectPoints = new MatOfPoint3f();
         MatOfPoint2f imagePoints  = new MatOfPoint2f();
@@ -44,13 +47,15 @@ public class PoseHelper {
         Mat rvec = new Mat(3, 1, CvType.CV_64F);
         Mat tvec = new Mat(3, 1, CvType.CV_64F);
 
-        java.util.List<Integer> p3d1 = new ArrayList<>();
-        java.util.List<Integer> p2d1 = new ArrayList<>();
-        String[] p3d = context.getResources().getStringArray(R.array.points2DTo3D);
-        for (String p : p3d) {
-            String[] w2 = p.split(";");
-            p2d1.add(Integer.parseInt(w2[0]));
-            p3d1.add(Integer.parseInt(w2[1]));
+        if (p2d1 == null) {
+            p3d1 = new ArrayList<>();
+            p2d1 = new ArrayList<>();
+            String[] p3d = context.getResources().getStringArray(R.array.points2DTo3D);
+            for (String p : p3d) {
+                String[] w2 = p.split(";");
+                p2d1.add(Integer.parseInt(w2[0]));
+                p3d1.add(Integer.parseInt(w2[1]));
+            }
         }
 
         java.util.List<Point3> pointsList = new ArrayList<Point3>();
