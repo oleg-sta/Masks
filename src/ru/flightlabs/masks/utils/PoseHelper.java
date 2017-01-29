@@ -94,37 +94,37 @@ public class PoseHelper {
                     new Scalar(255, 255, 255), 2);
             Imgproc.putText(mRgba, "rvec " + String.format("%.3f", rvec.get(0, 0)[0]) + String.format(" %.3f", rvec.get(1, 0)[0]) + String.format(" %.3f", rvec.get(2, 0)[0]), new Point(50, 150), Core.FONT_HERSHEY_SIMPLEX, 1,
                     new Scalar(255, 255, 255), 2);
-        }
 
-        MatOfPoint3f objectPoints3 = new MatOfPoint3f();
+            MatOfPoint3f objectPoints3 = new MatOfPoint3f();
 
-        MatOfPoint2f imagePoints3  = new MatOfPoint2f();
-        java.util.List<Point3> pointsList3 = new ArrayList<Point3>();
-        Calib3d.projectPoints(objectPoints, rvec, tvec, intrinsics, distCoeffs, imagePoints3);
-        pointsList3 = new ArrayList<Point3>();
-        for (int i = 0; i < model.tempV.length / 3; i++) {
-            pointsList3.add(new Point3(model.tempV[i * 3],model.tempV[i * 3 + 1], model.tempV[i * 3 + 2]));
-        }
-        objectPoints3.fromList(pointsList3);
-        Calib3d.projectPoints(objectPoints3, rvec, tvec, intrinsics, distCoeffs, imagePoints3);
-        Point[] sss = imagePoints3.toArray();
-        // debug
-        if (Settings.debugMode) {
-            for (Point e : sss) {
-                Imgproc.circle(mRgba, e, 3, new Scalar(0, 255, 255), -1);
+            MatOfPoint2f imagePoints3 = new MatOfPoint2f();
+            java.util.List<Point3> pointsList3 = new ArrayList<Point3>();
+            Calib3d.projectPoints(objectPoints, rvec, tvec, intrinsics, distCoeffs, imagePoints3);
+            pointsList3 = new ArrayList<Point3>();
+            for (int i = 0; i < model.tempV.length / 3; i++) {
+                pointsList3.add(new Point3(model.tempV[i * 3], model.tempV[i * 3 + 1], model.tempV[i * 3 + 2]));
             }
-            // draw main vertices
-            pointsList3 = new ArrayList<>();
-            pointsList3.add(new Point3(0, 0, 0));
-            pointsList3.add(new Point3(1, 0, 0));
-            pointsList3.add(new Point3(0, 1, 0));
-            pointsList3.add(new Point3(0, 0, 1));
             objectPoints3.fromList(pointsList3);
             Calib3d.projectPoints(objectPoints3, rvec, tvec, intrinsics, distCoeffs, imagePoints3);
-            Point[] sss2 = imagePoints3.toArray();
-            Imgproc.line(mRgba, sss2[0], sss2[1], new Scalar(255, 0, 0), 2);
-            Imgproc.line(mRgba, sss2[0], sss2[2], new Scalar(0, 255, 0), 2);
-            Imgproc.line(mRgba, sss2[0], sss2[3], new Scalar(0, 0, 255), 2);
+            Point[] sss = imagePoints3.toArray();
+            // debug
+            if (Settings.debugMode) {
+                for (Point e : sss) {
+                    Imgproc.circle(mRgba, e, 3, new Scalar(0, 255, 255), -1);
+                }
+                // draw main vertices
+                pointsList3 = new ArrayList<>();
+                pointsList3.add(new Point3(0, 0, 0));
+                pointsList3.add(new Point3(1, 0, 0));
+                pointsList3.add(new Point3(0, 1, 0));
+                pointsList3.add(new Point3(0, 0, 1));
+                objectPoints3.fromList(pointsList3);
+                Calib3d.projectPoints(objectPoints3, rvec, tvec, intrinsics, distCoeffs, imagePoints3);
+                Point[] sss2 = imagePoints3.toArray();
+                Imgproc.line(mRgba, sss2[0], sss2[1], new Scalar(255, 0, 0), 2);
+                Imgproc.line(mRgba, sss2[0], sss2[2], new Scalar(0, 255, 0), 2);
+                Imgproc.line(mRgba, sss2[0], sss2[3], new Scalar(0, 0, 255), 2);
+            }
         }
 
         Mat rotation = new Mat(4, 4, CvType.CV_64F);

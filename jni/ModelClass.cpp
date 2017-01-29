@@ -11,6 +11,6 @@ full_object_detection ModelClass::getsp(array2d<rgb_pixel> &img, dlib::rectangle
 	return sp(img, d);
 }
 
-full_object_detection ModelClass::getsp(array2d<int> &img, dlib::rectangle &d) {
+full_object_detection ModelClass::getsp(dlib::cv_image<uchar> &img, dlib::rectangle &d) {
 	return sp(img, d);
 }

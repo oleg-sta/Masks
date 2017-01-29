@@ -22,6 +22,7 @@
 #include <dlib/gui_widgets.h>
 #include <dlib/image_io.h>
 #include <dlib/opencv.h>
+#include <dlib/opencv/cv_image.h>
 
 #define LOG_TAG "FaceDetection/DetectionBasedTracker"
 #define LOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__))
@@ -598,9 +599,10 @@ void findEyes(cv::Mat frame_gray, cv::Rect face, std::vector<cv::Point> &pixels,
 	LOGD("findEyes112");
 	LOGD("findEyes1121 %i", frame_gray.type());
 
-	array2d<int> img;
+	//array2d<int> img;
 	LOGD("findEyes1122");
-	dlib::assign_image ( img, cv_image<uchar> ( frame_gray ) );
+	//dlib::assign_image ( img, cv_image<uchar> ( frame_gray ) );
+	cv_image<uchar> img(frame_gray);
 	LOGD("findEyes114");
 	dlib::rectangle d(face.x, face.y, face.x + face.width,
 			face.y + face.height);
