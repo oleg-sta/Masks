@@ -596,34 +596,16 @@ void findEyes(cv::Mat frame_gray, cv::Rect face, std::vector<cv::Point> &pixels,
 	LOGD("findEyes111");
 	shape_predictor sp;
 	LOGD("findEyes112");
-	//array2d<int> img;
 	LOGD("findEyes1121 %i", frame_gray.type());
 
-//  assign_image(img, cv_image<uchar>(frame_gray));
-	// т.к. предыдущий метод cv_image не работает(может неправильно использую), то делаем преобразование кадра из opencv в dlib вручную
 	array2d<int> img;
-	//img.set_size(frame_gray.rows, frame_gray.cols); // for grey
 	LOGD("findEyes1122");
-	/*
-	for (int i = 0; i < frame_gray.rows; i++) {
-		//LOGD("findEyes1124");
-		for (int j = 0; j < frame_gray.cols; j++) {
-			//LOGD("findEyes115");
-			img[i][j] = frame_gray.at<uchar>(i, j);
-		}
-	}
-	*/
 	dlib::assign_image ( img, cv_image<uchar> ( frame_gray ) );
-	////  cv_image<bgr_pixel> image(frame_gray);
 	LOGD("findEyes114");
-	//std::vector<dlib::rectangle> dets;
-	//dets.push_back(dlib::rectangle);
 	dlib::rectangle d(face.x, face.y, face.x + face.width,
 			face.y + face.height);
 	LOGD("findEyes115");
-	//deserialize(s) >> sp;
 	LOGD("findEyes113");
-	//  full_object_detection shape = sp(img, d);
 	full_object_detection shape = modelClass->getsp(img, d);
 	LOGD("findEyes116 %i", shape.num_parts());
 	if (shape.num_parts() > 2) {

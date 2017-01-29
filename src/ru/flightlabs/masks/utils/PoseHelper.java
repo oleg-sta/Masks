@@ -30,22 +30,35 @@ public class PoseHelper {
 
     static java.util.List<Integer> p3d1;
     static java.util.List<Integer> p2d1;
+    static Mat intrinsics;
+    static Mat rvec;
+    static Mat tvec;
 
     public static Mat findPose(Model model, int width, Context context, Point[] foundEyes, Mat mRgba) {
         MatOfPoint3f objectPoints = new MatOfPoint3f();
         MatOfPoint2f imagePoints  = new MatOfPoint2f();
 
-        Mat intrinsics = Mat.eye(3, 3, CvType.CV_64F);
-        Log.i("wwww2", intrinsics.get(0, 0)[0] + " " + intrinsics.get(1, 0)[0]);
-        intrinsics.put(0, 0, mRgba.width()); // ?
-        intrinsics.put(1, 1, mRgba.width()); // ?
-        intrinsics.put(0, 2, mRgba.width() / 2);
-        intrinsics.put(1, 2, mRgba.height() / 2);
-        intrinsics.put(2, 2, 1);
+        if (intrinsics == null) {
+            intrinsics = Mat.eye(3, 3, CvType.CV_64F);
+            intrinsics.put(0, 0, mRgba.width()); // ?
+            intrinsics.put(1, 1, mRgba.width()); // ?
+            intrinsics.put(0, 2, mRgba.width() / 2);
+            intrinsics.put(1, 2, mRgba.height() / 2);
+            intrinsics.put(2, 2, 1);
+        }
 
         MatOfDouble distCoeffs = new MatOfDouble();
-        Mat rvec = new Mat(3, 1, CvType.CV_64F);
-        Mat tvec = new Mat(3, 1, CvType.CV_64F);
+        if (rvec == null) {
+            rvec = new Mat(3, 1, CvType.CV_64F);
+            tvec = new Mat(3, 1, CvType.CV_64F);
+            // TODO calculate values somehow
+            tvec.put(0, 0, 0);
+            tvec.put(1, 0, 0);
+            tvec.put(2, 0, 2);
+            rvec.put(0, 0, -0.235);
+            rvec.put(1, 0, 0);
+            rvec.put(2, 0, 0);
+        }
 
         if (p2d1 == null) {
             p3d1 = new ArrayList<>();
@@ -71,13 +84,6 @@ public class PoseHelper {
         imagePoints.fromList(pointsList2);
         //Calib3d.calibrate(List<Mat> objectPoints, List<Mat> imagePoints, Size image_size, Mat K, Mat D, List<Mat> rvecs, List<Mat> tvecs);
         if (true) {
-            // TODO calculate values somehow
-            tvec.put(0, 0, 0);
-            tvec.put(1, 0, 0);
-            tvec.put(2, 0, 2);
-            rvec.put(0, 0, -0.235);
-            rvec.put(1, 0, 0);
-            rvec.put(2, 0, 0);
             Calib3d.solvePnP(objectPoints, imagePoints, intrinsics, distCoeffs, rvec, tvec, true, Calib3d.CV_ITERATIVE);
         } else {
             Calib3d.solvePnP(objectPoints, imagePoints, intrinsics, distCoeffs, rvec, tvec);
