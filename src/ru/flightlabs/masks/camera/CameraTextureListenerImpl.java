@@ -298,23 +298,27 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         }
 
         // temporary for debug purposes or maby for simple effects
-        Core.flip(mRgba, mRgba, 0);
-        mRgba.get(0, 0, m_bbPixels.array());
+        if (Settings.debugMode) {
+            Core.flip(mRgba, mRgba, 0);
+            mRgba.get(0, 0, m_bbPixels.array());
 
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texIn);
-        GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D,         // Type of texture
-                0,                   // Pyramid level (for mip-mapping) - 0 is the top level
-                GLES20.GL_RGBA,              // Internal colour format to convert to
-                width,          // Image width  i.e. 640 for Kinect in standard mode
-                height,          // Image height i.e. 480 for Kinect in standard mode
-                0,                   // Border width in pixels (can either be 1 or 0)
-                GLES20.GL_RGBA,              // Input image format (i.e. GL_RGB, GL_RGBA, GL_BGR etc.)
-                GLES20.GL_UNSIGNED_BYTE,    // Image data type
-                m_bbPixels);        // The actual image data itself
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texIn);
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D,         // Type of texture
+                    0,                   // Pyramid level (for mip-mapping) - 0 is the top level
+                    GLES20.GL_RGBA,              // Internal colour format to convert to
+                    width,          // Image width  i.e. 640 for Kinect in standard mode
+                    height,          // Image height i.e. 480 for Kinect in standard mode
+                    0,                   // Border width in pixels (can either be 1 or 0)
+                    GLES20.GL_RGBA,              // Input image format (i.e. GL_RGB, GL_RGBA, GL_BGR etc.)
+                    GLES20.GL_UNSIGNED_BYTE,    // Image data type
+                    m_bbPixels);        // The actual image data itself
 
-        GLES20.glFlush();
-        GLES20.glFinish();
+            GLES20.glFlush();
+            GLES20.glFinish();
+        }
+
+
         if (iFBO == null) {
             //int hFBO;
             iFBO = new int[]{0};
