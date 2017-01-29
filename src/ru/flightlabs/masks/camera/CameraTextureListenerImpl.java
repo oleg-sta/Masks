@@ -251,7 +251,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
                 }
                 Mat output3dShape = new Mat(113, 3, CvType.CV_64FC1);
                 if (initialParams == null) {
-                    initialParams = new Mat(14, 1, CvType.CV_64FC1, new Scalar(0));
+                    initialParams = new Mat(20, 1, CvType.CV_64FC1, new Scalar(0));
                 }
                 if (modelPath == null) {
                     if (new File("/storage/extSdCard/models").exists()) {
@@ -264,7 +264,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
                     Log.i(TAG, "onCameraTexture1 " + modelPath);
                 }
 
-                mNativeDetector.morhpFace(inputLandMarks, output3dShape, initialParams, modelPath, false);
+                mNativeDetector.morhpFace(inputLandMarks, output3dShape, initialParams, modelPath, true);
                 for (int i = 0; i < output3dShape.rows(); i++) {
                     model.tempV[i * 3] = (float) output3dShape.get(i, 0)[0];
                     model.tempV[i * 3 + 1] = (float) output3dShape.get(i, 1)[0];

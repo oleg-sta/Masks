@@ -16,10 +16,12 @@ public:
     ObjectiveFunctionHelper();
 
     dlib::matrix<double> get_y(dlib::matrix<double> &image) ;
-    dlib::matrix<double> get_mean3d() const;
-    std::unordered_map<int, dlib::matrix<double>> get_blendshapes() const;
-private:
+    const dlib::matrix<double> &
+    get_mean3d() const;
+    const std::unordered_map<int, dlib::matrix<double>> &
+    get_blendshapes() const;
     FaceModel3D faceModel3D;
+private:
     Shape2D shape2D;
 };
 

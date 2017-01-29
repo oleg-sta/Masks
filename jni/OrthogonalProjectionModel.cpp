@@ -4,7 +4,6 @@
 
 
 #include "OrthogonalProjectionModel.h"
-
 OrthogonalProjectionModel::OrthogonalProjectionModel(int nblendshapes) : n_blendshapes(nblendshapes)
 {
     n_params+=nblendshapes;
@@ -50,19 +49,19 @@ OrthogonalProjectionModel::get_initial_parameters(dlib::matrix<double> xx, dlib:
     return out;
 }
 dlib::matrix<double>
-OrthogonalProjectionModel::get_residuals(dlib::matrix<double> params,
-                                         dlib::matrix<double> mean3d,
-                                         std::unordered_map<int, dlib::matrix<double>> blendshapes,
-                                         dlib::matrix<double> y) const
+OrthogonalProjectionModel::get_residuals(const dlib::matrix<double> &params,
+                                         const dlib::matrix<double> &mean3d,
+                                         const std::unordered_map<int, dlib::matrix<double> > &blendshapes,
+                                         const dlib::matrix<double> &y) const
 {
     //TODO: check arguments consistency
     dlib::matrix<double> r = y - OrthogonalProjectionModel::fun(mean3d, blendshapes, params);
     return r;
 }
 dlib::matrix<double>
-OrthogonalProjectionModel::fun(dlib::matrix<double> mean3d,
-                               std::unordered_map<int, dlib::matrix<double>>& blendshapes,
-                               dlib::matrix<double> params) const
+OrthogonalProjectionModel::fun(const dlib::matrix<double> &mean3d,
+                               const std::unordered_map<int, dlib::matrix<double> > &blendshapes,
+                               const dlib::matrix<double> &params) const
 {
 
     dlib::matrix<double> full_shape = OrthogonalProjectionModel::get_full_shape3d(params,mean3d,blendshapes);
@@ -70,7 +69,11 @@ OrthogonalProjectionModel::fun(dlib::matrix<double> mean3d,
 
 }
 const dlib::matrix<double>
-OrthogonalProjectionModel::rogrigues(dlib::matrix<double> rotation_vector) const
+OrthogonalProjectionModel::rogrigues(const dlib::matrix<double,
+                                                        0,
+                                                        0,
+                                                        dlib::default_memory_manager,
+                                                        dlib::row_major_layout> &rotation_vector) const
 {
     //TODO: assert that rotation vector is 3x1
     double theta =  sqrt(dlib::sum(dlib::squared(rotation_vector)));
@@ -92,25 +95,25 @@ OrthogonalProjectionModel::rogrigues(dlib::matrix<double> rotation_vector) const
 }
 OrthogonalProjectionModel::OrthogonalProjectionModel() :n_blendshapes(14){}
 dlib::matrix<double>
-OrthogonalProjectionModel::convert_mean_shape(dlib::matrix<double> params,
-                                              dlib::matrix<double> mean3d,
-                                              std::unordered_map<int, dlib::matrix<double>>& blendshapes) const
+OrthogonalProjectionModel::convert_mean_shape(const dlib::matrix<double> &params,
+                                              const dlib::matrix<double> &mean3d,
+                                              const std::unordered_map<int, dlib::matrix<double> > &blendshapes) const
 {
     dlib::matrix<double> shape3D;
     dlib::matrix<double> w = dlib::rowm(params, dlib::range(6,params.nr()-1));
     dlib::matrix<double> sum_w = dlib::zeros_matrix<double>(mean3d.nr(),mean3d.nc());
     for (int i = 0; i < blendshapes.size(); ++i)
     {
-        dlib::matrix<double> current_blendshape = blendshapes[i] * w(i,0);
+        dlib::matrix<double> current_blendshape = blendshapes.at(i) * w(i,0);
         sum_w += current_blendshape;
     }
     shape3D = mean3d + sum_w;
     return shape3D;
 }
 dlib::matrix<double>
-OrthogonalProjectionModel::get_full_shape3d(dlib::matrix<double> params,
-                                            dlib::matrix<double> mean3d,
-                                            std::unordered_map<int, dlib::matrix<double>>& blendshapes) const
+OrthogonalProjectionModel::get_full_shape3d(const dlib::matrix<double> &params,
+                                            const dlib::matrix<double> &mean3d,
+                                            const std::unordered_map<int, dlib::matrix<double> > &blendshapes) const
 {
     double s = params(0);
     dlib::matrix<double,3,1> r = dlib::rowm(params, dlib::range(1,3));
@@ -128,4 +131,9 @@ OrthogonalProjectionModel::get_full_shape3d(dlib::matrix<double> params,
         dlib::set_colm(projected,j) = curr_column;
     }
     return projected;
+}
+int
+OrthogonalProjectionModel::get_n_blendshapes() const
+{
+    return n_blendshapes;
 };

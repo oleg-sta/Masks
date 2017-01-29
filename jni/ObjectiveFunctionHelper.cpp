@@ -22,13 +22,13 @@ ObjectiveFunctionHelper::get_y(dlib::matrix<double> &image)
     }
     return res;
 }
-dlib::matrix<double>
+const dlib::matrix<double> &
 ObjectiveFunctionHelper::get_mean3d() const
 {
     return faceModel3D.get_mean_shape3d();
 }
 ObjectiveFunctionHelper::ObjectiveFunctionHelper() {}
-std::unordered_map<int, dlib::matrix<double>>
+const std::unordered_map<int, dlib::matrix<double>> &
 ObjectiveFunctionHelper::get_blendshapes() const
 {
     return faceModel3D.get_blendshapes();

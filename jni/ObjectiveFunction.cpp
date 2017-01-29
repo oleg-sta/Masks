@@ -14,9 +14,9 @@ ObjectiveFunction::ObjectiveFunction(ObjectiveFunctionHelper &phelper,
 double ObjectiveFunction::operator()(const dlib::matrix<double> &arg) const
 {
     //TODO: check that shape2d is set
-    dlib::matrix<double> meanShapes = helper.get_mean3d();
+    //dlib::matrix<double> meanShapes = ;//helper.faceModel3D.mean3D_shape;//
     //std::unordered_map<int, dlib::matrix<double> > blendshapes = helper.get_blendshapes();
-    dlib::matrix<double> resids = model.get_residuals(arg, meanShapes, blendshapes, shape2d);
+    dlib::matrix<double> resids = model.get_residuals(arg, helper.get_mean3d(), helper.get_blendshapes(), shape2d);
 
     dlib::running_stats<double> rs;
     for (int i = 0; i < resids.nc(); ++i)
@@ -24,6 +24,7 @@ double ObjectiveFunction::operator()(const dlib::matrix<double> &arg) const
         double score = dlib::length(dlib::colm(resids,i));
         rs.add(score);
     }
+
     return rs.mean();
 }
 void
@@ -31,8 +32,4 @@ ObjectiveFunction::extract2d_from_image(dlib::matrix<double> &image)
 {
     ObjectiveFunction::shape2d = helper.get_y(image);
 }
-
-void ObjectiveFunction::set(std::unordered_map<int,dlib::matrix<double> > cur_blendshapes)
-{
-   blendshapes = cur_blendshapes;
-}
+ObjectiveFunction::ObjectiveFunction() {}

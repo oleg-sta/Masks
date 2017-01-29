@@ -13,37 +13,25 @@ class FaceModel3D
 public:
     FaceModel3D(std::string models_path, int n);
     FaceModel3D();
-    dlib::matrix<double> get_mean_shape3d() const;
     dlib::matrix<double> get_all_mean_shape3d() const;
 
-    dlib::matrix<int>
-    getIdxs2D() const;
+    dlib::matrix<int>  getIdxs2D() const;
 
-/*
-    dlib::matrix<int> &
-    getIdxs3D() const;
-*/
+    const std::unordered_map<int, dlib::matrix<double> >& get_all_blendshapes() const;
+    const std::unordered_map<int, dlib::matrix<double>>& get_blendshapes() const{ return blendshapes;};
 
-    std::unordered_map<int, dlib::matrix<double> > const
-    get_blendshapes() const;
-
-    std::unordered_map<int, dlib::matrix<double> > const
-    get_all_blendshapes() const;
-
+    const dlib::matrix<double>& get_mean_shape3d() const {return mean3D_shape;};
 private:
-    dlib::matrix<double> mean3DShape;
+    dlib::matrix<double> calculate_mean_shape3d() const;
+    std::unordered_map<int, dlib::matrix<double>> calculate_blendshapes() const;
+    std::unordered_map<int, dlib::matrix<double> > all_blendshapes;
+    std::unordered_map<int, dlib::matrix<double> > blendshapes;
+    dlib::matrix<double> mean3D_shape;
+    dlib::matrix<double> mean3D_shape_full;
     dlib::matrix<int> idxs2D;
-    dlib::matrix<double>
-    fix_mesh_winding(const dlib::matrix<int> &matrix,const dlib::matrix<double> &vertices);
-    dlib::matrix<int>  flip_winding(dlib::matrix<int> triangle);
-    dlib::matrix<double>
-    getNormal(dlib::matrix<double> matrix);
-    std::unordered_map<int, dlib::matrix<double> > blendshapes ;
 
-    dlib::matrix<double> mesh;
+
     dlib::matrix<int> idxs3D;
-    std::unordered_map<int,dlib::matrix<double> > cur_blendshapes;
-    dlib::matrix<double> res;
 };
 
 #endif //SHAPE3D_SHAPEMODEL_H
