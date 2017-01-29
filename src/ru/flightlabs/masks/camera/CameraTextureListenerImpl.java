@@ -24,6 +24,7 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import ru.flightlabs.masks.CompModel;
 import ru.flightlabs.masks.DetectionBasedTracker;
@@ -83,6 +84,8 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
 
     String modelPath;
 
+    float[] verticesParticels;
+
     public CameraTextureListenerImpl(Activity act, CompModel compModel) {
         this.act = act;
         this.compModel = compModel;
@@ -102,10 +105,13 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
 
             if ("2".equals(line[2])) {
             } else {
-                vPos3d = GLES20.glGetAttribLocation(programs[i], "vPosition");
-                GLES20.glEnableVertexAttribArray(vPos3d);
-                vTexFor3d = GLES20.glGetAttribLocation(programs[i], "a_TexCoordinate");
-                GLES20.glEnableVertexAttribArray(vTexFor3d);
+                // temporary fix
+                if (i == 1) {
+                    vPos3d = GLES20.glGetAttribLocation(programs[i], "vPosition");
+                    GLES20.glEnableVertexAttribArray(vPos3d);
+                    vTexFor3d = GLES20.glGetAttribLocation(programs[i], "a_TexCoordinate");
+                    GLES20.glEnableVertexAttribArray(vTexFor3d);
+                }
             }
         }
         effects = act.getResources().getStringArray(R.array.effects);
@@ -118,6 +124,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
 
         load3dModel();
         //bindData(width, height);
+        initParticles();
 
         Log.i(TAG, "onCameraViewStarted");
     }
@@ -224,6 +231,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         }
         Mat glMatrix = null;
         int indexEye = FdActivity2.currentIndexEye;
+        Log.i(TAG, "indexEye " + indexEye);
         PoseHelper.bindMatrix(100, 100);
         if (foundEyes != null) {
 
@@ -318,6 +326,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         // shader effect
         if (indexEye < effects.length) {
             String[] effect = effects[indexEye].split(";");
+            Log.i(TAG, "effect " + effect[0] + " " + effect[1] + " " + effect[2]);
             int programId = programs[Integer.parseInt(effect[0])];
             if (!"".equals(effect[2])) {
                 int vPos = GLES20.glGetAttribLocation(programs[0], "vPosition");
@@ -330,7 +339,16 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
                     if (indexEye == 4) {
                         animate(models.get(effect[1]), time);
                     }
-                    shaderEfffect3d(glMatrix, texIn, width, height, models.get(effect[1]), textures.get(effect[2]), Float.parseFloat(effect[3]), programId);
+                    if (indexEye == 13) {
+                        Log.i(TAG, "index 13");
+                        GLES20.glUseProgram(programId);
+                        int uCenter2 = GLES20.glGetUniformLocation(programId, "iGlobalTime");
+                        Log.i(TAG, "onCameraTexture4443 "+ uCenter2 + " " + iGlobTime);
+                        GLES20.glUniform1f(uCenter2, (float)iGlobTime);
+                        shaderEfffect3dParticle(glMatrix, width, height, programId);
+                    } else {
+                        shaderEfffect3d(glMatrix, texIn, width, height, models.get(effect[1]), textures.get(effect[2]), Float.parseFloat(effect[3]), programId);
+                    }
                 }
             } else {
                 Log.i(TAG, "onCameraTexture444");
@@ -466,6 +484,42 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, 3, GLES20.GL_UNSIGNED_SHORT, indexArray);
         GLES20.glFlush();
 
+    }
+
+    private void shaderEfffect3dParticle(Mat glMatrix, int width, int height, int programId) {
+        GLES20.glUseProgram(programId);
+
+        int matrixMvp = GLES20.glGetUniformLocation(programId, "u_MVPMatrix");
+
+        float[] matrixView = PoseHelper.convertToArray(glMatrix);
+        float[] mMatrix = new float[16];
+        Matrix.multiplyMM(mMatrix, 0, PoseHelper.createProjectionMatrixThroughPerspective(width, height), 0, matrixView, 0);
+        GLES20.glUniformMatrix4fv(matrixMvp, 1, false, mMatrix, 0);
+
+
+        FloatBuffer vertexData;
+        vertexData = ByteBuffer
+                .allocateDirect(verticesParticels.length * 4)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer();
+        vertexData.put(verticesParticels);
+        vertexData.position(0);
+        GLES20.glVertexAttribPointer(vPos3d, 3, GLES20.GL_FLOAT, false, 0, vertexData);
+
+        GLES20.glDrawArrays(GLES20.GL_POINTS, 0, 10);
+        GLES20.glFlush();
+    }
+
+    private void initParticles() {
+        int parts = 100;
+        verticesParticels = new float[parts * 3];
+        for (int i = 0; i < parts; i++) {
+            float theta = 3.14f / 6f * new Random().nextFloat();
+            float phi = 6.28f * new Random().nextFloat();
+            verticesParticels[i * 3] = (float) (Math.sin(theta) * Math.cos(phi));
+            verticesParticels[i * 3 + 1] = (float) Math.cos(theta);
+            verticesParticels[i * 3 + 2] = (float)(Math.sin(theta) * Math.sin(phi));
+        }
     }
     private void shaderEfffect2d(Point center, Point center2, int texIn, int programId, int poss, int texx) {
         GLES20.glUseProgram(programId);
