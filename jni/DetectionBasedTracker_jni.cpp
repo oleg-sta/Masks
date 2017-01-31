@@ -558,7 +558,7 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
     dlib::matrix<double, 6+n_blendshapes, 1> initial_parameters_box_constrained = box_constrain_parameters(initialParameters);
 
     double val = find_min_box_constrained(bfgs_search_strategy(),
-                                                        objective_delta_stop_strategy(1e-4),
+                                                        objective_delta_stop_strategy(1e-2),
                                                         objFun,
                                                         derivative(objFun),
                                                         initial_parameters_box_constrained, lower,

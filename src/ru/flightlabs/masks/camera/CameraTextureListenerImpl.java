@@ -51,7 +51,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
     private int mAbsoluteFaceSize = 0;
     DetectionBasedTracker mNativeDetector;
     CompModel compModel;
-    Activity act;
+    Context act;
 
     int iGlobTime = 0;
 
@@ -61,9 +61,11 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
 
     private int maskTextureid;
 
+    ByteBuffer m_bbPixelsGrey;
     ByteBuffer m_bbPixels;
     Mat mRgba;
     Mat mGray;
+    Mat mGrayprogram;
 
     int frameCount;
     long timeStart;
@@ -71,6 +73,9 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
 
     private static final String TAG = "CameraTextureL_class";
     private int[] iFBO = null;//{0};
+
+    private int[] texGray, grayFbo;
+    int programGrey;
 
     int[] programs;
     Map<String, Model> models = new HashMap<>();
@@ -125,16 +130,51 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
 
         mRgba = new Mat(height, width, CvType.CV_8UC4);
         mGray = new Mat();
+        mGrayprogram = new Mat(height, (4 * width + 3) / 4, CvType.CV_8UC1);
+
         //m_bbPixels = ByteBuffer.allocateDirect(width * height * 4);
         // workaround due to https://code.google.com/p/android/issues/detail?id=80064
         m_bbPixels = ByteBuffer.wrap(new byte[width * height * 4]);
         m_bbPixels.order(ByteOrder.LITTLE_ENDIAN);
+
+        m_bbPixelsGrey = ByteBuffer.wrap(new byte[(4 * width + 3) / 4 * height]);
+        m_bbPixelsGrey.order(ByteOrder.LITTLE_ENDIAN);
 
         load3dModel();
         //bindData(width, height);
         initParticles();
 
         Log.i(TAG, "onCameraViewStarted");
+    }
+
+    private void initFboGray(int width, int height) {
+        texGray = new int[]{0};
+        GLES20.glGenTextures(1, texGray, 0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texGray[0]);
+        GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, (width + 3) / 4, height, 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, null);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
+
+        grayFbo = new int[]{0};
+        GLES20.glGenFramebuffers(1, grayFbo, 0);
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, grayFbo[0]);
+        GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER, GLES20.GL_COLOR_ATTACHMENT0, GLES20.GL_TEXTURE_2D, texGray[0], 0);
+
+        int vertexShaderId = ShaderUtils.createShader(GLES20.GL_VERTEX_SHADER, FileUtils.getStringFromAsset(act.getAssets(), "shaders/vss.glsl"));
+        int fragmentShaderId = ShaderUtils.createShader(GLES20.GL_FRAGMENT_SHADER, FileUtils.getStringFromAsset(act.getAssets(), "shaders/fss_grey.glsl"));
+        programGrey = ShaderUtils.createProgram(vertexShaderId, fragmentShaderId);
+    }
+
+    private void loadGray() {
+
+//        GLES20.glReadPixels(0, 0, windowWidth, windowHeight, GL_LUMINANCE, GL_UNSIGNED_BYTE, (GLvoid*)buffer);
+//
+//// must restore scales to default values
+//        glPixelTransferf(GL_RED_SCALE, 1);
+//        glPixelTransferf(GL_GREEN_SCALE, 1);
+//        glPixelTransferf(GL_BLUE_SCALE, 1);
     }
 
     private void load3dModel() {
@@ -190,24 +230,53 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         if (compModel.mNativeDetector != null) {
             mNativeDetector = compModel.mNativeDetector;
         }
-        Log.i(TAG, "onCameraTexture " + width + " " + height);
-        Log.i(TAG, "onCameraTexture2");
-        GLES20.glReadPixels(0, 0, width, height, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, m_bbPixels);
-        m_bbPixels.rewind();
-        Log.i(TAG, "onCameraTexture3" + m_bbPixels.array().length);
+        // screen to Mat
+        if (grayFbo == null) {
+            initFboGray(width, height);
+        }
+        Mat findGray = null;
+        //if (Settings.debugMode)
+        if (!Settings.debugMode && false) {
+            // strange, but it's slower then color!!!
+            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, grayFbo[0]);
+            GLES20.glViewport(0, 0, (width + 3) / 4, height);
+            int vPos = GLES20.glGetAttribLocation(programGrey, "vPosition");
+            int vTex = GLES20.glGetAttribLocation(programGrey, "vTexCoord");
+            GLES20.glEnableVertexAttribArray(vPos);
+            GLES20.glEnableVertexAttribArray(vTex);
+            Log.i(TAG, "onCameraTexture511");
+            shaderEfffect2d(new Point(0, 0), new Point(width, height), texIn, programGrey, vPos, vTex);
+            Log.i(TAG, "onCameraTexture5112");
+            long tim = System.currentTimeMillis();
+            GLES20.glReadPixels(0, 0, (width + 3) / 4, height, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, m_bbPixelsGrey);
+            Log.i(TAG, "onCameraTexture51123");
+            Log.i(TAG, "onCameraTextureTime1 " + (System.currentTimeMillis() - tim));
+            m_bbPixelsGrey.rewind();
+            Log.i(TAG, "onCameraTexture51124");
+            mGrayprogram.put(0, 0, m_bbPixelsGrey.array());
+            Log.i(TAG, "onCameraTexture51125");
+            findGray = mGrayprogram;
+        } else {
+            Log.i(TAG, "onCameraTexture " + width + " " + height);
+            long tim = System.currentTimeMillis();
+            GLES20.glReadPixels(0, 0, width, height, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, m_bbPixels);
+            Log.i(TAG, "onCameraTextureTime2 " + (System.currentTimeMillis() - tim));
+            m_bbPixels.rewind();
+            Log.i(TAG, "onCameraTexture3" + m_bbPixels.array().length);
+            mRgba.put(0, 0, m_bbPixels.array());
+            Core.flip(mRgba, mRgba, 0);
+            Log.i(TAG, "onCameraTexture5");
 
-        //mRgba.get(width, height, pixelValues);
-        mRgba.put(0, 0, m_bbPixels.array());
-        Core.flip(mRgba, mRgba, 0);
-        Log.i(TAG, "onCameraTexture5");
-        Imgproc.cvtColor(mRgba, mGray, Imgproc.COLOR_RGBA2GRAY);
+            Imgproc.cvtColor(mRgba, mGray, Imgproc.COLOR_RGBA2GRAY);
+            findGray = mGray;
+        }
 
         if (mAbsoluteFaceSize == 0) {
             mAbsoluteFaceSize = Math.round(height * mRelativeFaceSize);
             //mNativeDetector.setMinFaceSize(mAbsoluteFaceSize);
         }
 
-        MatOfRect faces = compModel.findFaces(mGray, mAbsoluteFaceSize);
+        MatOfRect faces = compModel.findFaces(findGray, mAbsoluteFaceSize);
         Rect[] facesArray = faces.toArray();
         final boolean haveFace = facesArray.length > 0;
         Log.i(TAG, "onCameraTexture5 " + haveFace);
@@ -220,7 +289,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
             }
             center = OpencvUtils.convertToGl(new Point((2 * facesArray[0].x + facesArray[0].width) / 2.0, (2 * facesArray[0].y + facesArray[0].height) / 2.0), width, height);
             if (mNativeDetector != null) {
-                foundEyes = mNativeDetector.findEyes(mGray, facesArray[0]);
+                foundEyes = mNativeDetector.findEyes(findGray, facesArray[0]);
                 if (Settings.debugMode) {
                     for (Point p : foundEyes) {
                         Imgproc.circle(mRgba, p, 2, new Scalar(255, 10, 10));
@@ -295,6 +364,9 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
             Static.makePhoto = false;
             makeAfterPhoto= true;
             PhotoMaker.makePhoto(mRgba, act);
+            Mat c = new Mat();
+            Imgproc.cvtColor(mGrayprogram, c, Imgproc.COLOR_GRAY2RGBA);
+            PhotoMaker.makePhoto(c, act);
         }
 
         // temporary for debug purposes or maby for simple effects
@@ -573,5 +645,6 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
         GLES20.glFlush(); //?
+        GLES20.glFinish();
     }
 }
