@@ -170,7 +170,7 @@ public class CvCameraViewListener2Impl implements CameraBridgeViewBase.CvCameraV
         if (foundEyes != null) {
 
             // FIXME you know what i mean
-            FdActivity.glViewMatrix2 = PoseHelper.findPose(meRender.model, mGray.width(), act, foundEyes, mRgba);
+            //FdActivity.glViewMatrix2 = PoseHelper.findPose(meRender.model, mGray.width(), act, foundEyes, mRgba);
 
             if (Settings.debugMode) {
                 for (Point p : foundEyes) {

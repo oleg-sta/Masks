@@ -28,61 +28,78 @@ import ru.flightlabs.masks.renderer.Model;
 
 public class PoseHelper {
 
-    static java.util.List<Integer> p3d1;
-    static java.util.List<Integer> p2d1;
-    static Mat intrinsics;
-    static Mat rvec;
-    static Mat tvec;
+    int[] p3d1;
+    int[] p2d1;
+    Mat intrinsics;
+    Mat rvec;
+    Mat tvec;
 
-    public static Mat findPose(Model model, int width, Context context, Point[] foundEyes, Mat mRgba) {
-        MatOfPoint3f objectPoints = new MatOfPoint3f();
-        MatOfPoint2f imagePoints  = new MatOfPoint2f();
+    MatOfPoint3f objectPoints;
+    double[] pointsListArray;
+    MatOfPoint2f imagePoints;
+    double[] pointsList2Array;
 
-        if (intrinsics == null) {
-            intrinsics = Mat.eye(3, 3, CvType.CV_64F);
-            intrinsics.put(0, 0, mRgba.width()); // ?
-            intrinsics.put(1, 1, mRgba.width()); // ?
-            intrinsics.put(0, 2, mRgba.width() / 2);
-            intrinsics.put(1, 2, mRgba.height() / 2);
-            intrinsics.put(2, 2, 1);
+    Mat cvToGl;
+    Mat rotation;
+    Mat viewMatrix;
+
+    public void init(Context context, int width, int height) {
+        intrinsics = Mat.eye(3, 3, CvType.CV_64F);
+        intrinsics.put(0, 0, width); // ?
+        intrinsics.put(1, 1, width); // ?
+        intrinsics.put(0, 2, width / 2);
+        intrinsics.put(1, 2, height / 2);
+        intrinsics.put(2, 2, 1);
+
+        rvec = new Mat(3, 1, CvType.CV_64F);
+        tvec = new Mat(3, 1, CvType.CV_64F);
+        // TODO calculate values somehow
+        tvec.put(0, 0, 0);
+        tvec.put(1, 0, 0);
+        tvec.put(2, 0, 2);
+        rvec.put(0, 0, -0.235);
+        rvec.put(1, 0, 0);
+        rvec.put(2, 0, 0);
+
+        String[] p3d = context.getResources().getStringArray(R.array.points2DTo3D);
+        p2d1 = new int[p3d.length];
+        p3d1 = new int[p3d.length];
+        for (int i = 0; i < p3d.length; i++) {
+            String p = p3d[i];
+            String[] w2 = p.split(";");
+            p2d1[i] = Integer.parseInt(w2[0]);
+            p3d1[i] = Integer.parseInt(w2[1]);
         }
+        objectPoints = new MatOfPoint3f(new Mat(p3d1.length, 1, CvType.CV_32FC3));
+        pointsListArray = new double[p3d1.length * 3];
+        imagePoints  = new MatOfPoint2f(new Mat(p3d1.length, 1, CvType.CV_32FC2));
+        pointsList2Array = new double[p3d1.length * 2];
 
+        cvToGl = new Mat(4, 4, CvType.CV_64F, new Scalar(0));
+        cvToGl.put(0, 0, 1.0f);
+        cvToGl.put(1, 1, -1.0f);
+        cvToGl.put(2, 2, -1.0f);
+        cvToGl.put(3, 3, 1.0f);
+
+        rotation = new Mat(4, 4, CvType.CV_64F);
+        viewMatrix = new Mat(4, 4, CvType.CV_64F, new Scalar(0));
+    }
+
+    public Mat findPose(Model model, Point[] foundEyes, Mat mRgba) {
         MatOfDouble distCoeffs = new MatOfDouble();
-        if (rvec == null) {
-            rvec = new Mat(3, 1, CvType.CV_64F);
-            tvec = new Mat(3, 1, CvType.CV_64F);
-            // TODO calculate values somehow
-            tvec.put(0, 0, 0);
-            tvec.put(1, 0, 0);
-            tvec.put(2, 0, 2);
-            rvec.put(0, 0, -0.235);
-            rvec.put(1, 0, 0);
-            rvec.put(2, 0, 0);
-        }
 
-        if (p2d1 == null) {
-            p3d1 = new ArrayList<>();
-            p2d1 = new ArrayList<>();
-            String[] p3d = context.getResources().getStringArray(R.array.points2DTo3D);
-            for (String p : p3d) {
-                String[] w2 = p.split(";");
-                p2d1.add(Integer.parseInt(w2[0]));
-                p3d1.add(Integer.parseInt(w2[1]));
-            }
+        for (int i = 0; i < p3d1.length; i++) {
+            int p3di = p3d1[i];
+            int p2di = p2d1[i];
+            // pointsList.add(new Point3(model.tempV[p3di * 3], model.tempV[p3di * 3 + 1], model.tempV[p3di * 3 + 2]));
+            pointsListArray[i * 3] = model.tempV[p3di * 3];
+            pointsListArray[i * 3 + 1] = model.tempV[p3di * 3 + 1];
+            pointsListArray[i * 3 + 2] = model.tempV[p3di * 3 + 2];
+            pointsList2Array[i * 2] = foundEyes[p2di].x;
+            pointsList2Array[i * 2 + 1] = foundEyes[p2di].y;
         }
-
-        java.util.List<Point3> pointsList = new ArrayList<Point3>();
-        java.util.List<Point> pointsList2 = new ArrayList<Point>();
-//            String[] p3d = getResources().getStringArray(R.array.pointsToPnP3D);
-        for (int i = 0; i < p3d1.size(); i++) {
-            int p3di = p3d1.get(i);
-            int p2di = p2d1.get(i);
-            pointsList.add(new Point3(model.tempV[p3di * 3], model.tempV[p3di * 3 + 1], model.tempV[p3di * 3 + 2]));
-            pointsList2.add(foundEyes[p2di]);
-        }
-        objectPoints.fromList(pointsList);
-        imagePoints.fromList(pointsList2);
-        //Calib3d.calibrate(List<Mat> objectPoints, List<Mat> imagePoints, Size image_size, Mat K, Mat D, List<Mat> rvecs, List<Mat> tvecs);
+        objectPoints.put(0, 0, pointsListArray);
+        imagePoints.put(0, 0, pointsList2Array);
         if (true) {
             Calib3d.solvePnP(objectPoints, imagePoints, intrinsics, distCoeffs, rvec, tvec, true, Calib3d.CV_ITERATIVE);
         } else {
@@ -127,8 +144,6 @@ public class PoseHelper {
             }
         }
 
-        Mat rotation = new Mat(4, 4, CvType.CV_64F);
-        Mat viewMatrix = new Mat(4, 4, CvType.CV_64F, new Scalar(0));
         Calib3d.Rodrigues(rvec, rotation);
 
         for (int row = 0; row < 3; ++row) {
@@ -144,11 +159,6 @@ public class PoseHelper {
 
         Mat viewMatrix2 = new Mat(4, 4, CvType.CV_64F, new Scalar(0));
 
-        Mat cvToGl = new Mat(4, 4, CvType.CV_64F, new Scalar(0));
-        cvToGl.put(0, 0, 1.0f);
-        cvToGl.put(1, 1, -1.0f);
-        cvToGl.put(2, 2, -1.0f);
-        cvToGl.put(3, 3, 1.0f);
         Core.gemm(cvToGl, viewMatrix, 1, new Mat(), 0, viewMatrix2);
 
         Mat glViewMatrix = new Mat(4, 4, CvType.CV_64F, new Scalar(0));

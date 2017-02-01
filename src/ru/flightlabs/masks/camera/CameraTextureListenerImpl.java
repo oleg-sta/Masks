@@ -92,6 +92,8 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
 
     Map<Integer, Effect> effectsMap = new HashMap<>();
 
+    PoseHelper poseHelper;
+
     public CameraTextureListenerImpl(Activity act, CompModel compModel) {
         this.act = act;
         this.compModel = compModel;
@@ -144,6 +146,8 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         //bindData(width, height);
         initParticles();
 
+        poseHelper = new PoseHelper();
+        poseHelper.init(act, width, height);
         Log.i(TAG, "onCameraViewStarted");
     }
 
@@ -317,10 +321,12 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
             boolean shapeBlends = effect.needBlendShape;
             if (shapeBlends) {
                 Mat inputLandMarks = new Mat(68, 2, CvType.CV_64FC1);
+                double[] buff = new double[inputLandMarks.cols() * inputLandMarks.rows()];
                 for (int i = 0; i < foundEyes.length; i++) {
-                    inputLandMarks.put(i, 0, foundEyes[i].x);
-                    inputLandMarks.put(i, 1, foundEyes[i].y);
+                    buff[i * 2] = foundEyes[i].x;
+                    buff[i * 2 + 1] = foundEyes[i].y;
                 }
+                inputLandMarks.put(0, 0, buff);
                 Mat output3dShape = new Mat(113, 3, CvType.CV_64FC1);
                 if (initialParams == null) {
                     initialParams = new Mat(20, 1, CvType.CV_64FC1, new Scalar(0));
@@ -335,18 +341,18 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
                     }
                     Log.i(TAG, "onCameraTexture1 " + modelPath);
                 }
-
                 mNativeDetector.morhpFace(inputLandMarks, output3dShape, initialParams, modelPath, true);
-                for (int i = 0; i < output3dShape.rows(); i++) {
-                    model.tempV[i * 3] = (float) output3dShape.get(i, 0)[0];
-                    model.tempV[i * 3 + 1] = (float) output3dShape.get(i, 1)[0];
-                    model.tempV[i * 3 + 2] = (float) output3dShape.get(i, 2)[0];
+                double[] buffShape = new double[output3dShape.cols() * output3dShape.rows()];
+                output3dShape.get(0, 0, buffShape);
+                int rows = output3dShape.rows();
+                for (int i = 0; i < rows; i++) {
+                    model.tempV[i * 3] = (float) buffShape[i * 3];
+                    model.tempV[i * 3 + 1] = (float) buffShape[i * 3 + 1];
+                    model.tempV[i * 3 + 2] = (float) buffShape[i * 3 + 2];
                 }
                 model.recalcV();
             }
-            Log.i(TAG, "onCameraTexture1 " + model.tempV[0] + " " + model.tempV[1] + " " + model.tempV[2]);
-
-            glMatrix = PoseHelper.findPose(model, width, act, foundEyes, mRgba);
+            glMatrix = poseHelper.findPose(model, foundEyes, mRgba);
             //PoseHelper.drawDebug(mRgba, model, glMatrix);
             if (Settings.debugMode) {
                 for (Point e : foundEyes) {
@@ -645,6 +651,6 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
         GLES20.glFlush(); //?
-        GLES20.glFinish();
+        //GLES20.glFinish();
     }
 }
