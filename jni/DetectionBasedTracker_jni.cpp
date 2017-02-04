@@ -15,6 +15,7 @@
 #include "ModelClass.cpp"
 #include "Line.cpp"
 #include "Triangle.cpp"
+#include "ForwardDifference.h"
 
 #include <dlib/image_processing/frontal_face_detector.h>
 #include <dlib/image_processing/render_face_detections.h>
@@ -557,10 +558,12 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
     dlib::set_subm(upper,0,0,6,1) =  10000000;
     dlib::matrix<double, 6+n_blendshapes, 1> initial_parameters_box_constrained = box_constrain_parameters(initialParameters);
 
+
+    auto forward_derivative_fun = forward_derivative(objFun);
     double val = find_min_box_constrained(bfgs_search_strategy(),
                                                         objective_delta_stop_strategy(1e-2),
                                                         objFun,
-                                                        derivative(objFun),
+                                                        forward_derivative_fun,
                                                         initial_parameters_box_constrained, lower,
                                                         upper);
     /*

@@ -12,3 +12,5 @@
 /.idea/*
 /.settings/*
 /jni/dlib/*
+/captures/*
+/reports/*
