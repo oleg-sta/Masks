@@ -341,7 +341,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
                     }
                     Log.i(TAG, "onCameraTexture1 " + modelPath);
                 }
-                mNativeDetector.morhpFace(inputLandMarks, output3dShape, initialParams, modelPath, true);
+                mNativeDetector.morhpFace(inputLandMarks, output3dShape, initialParams, modelPath, true, Settings.useLinear);
                 double[] buffShape = new double[output3dShape.cols() * output3dShape.rows()];
                 output3dShape.get(0, 0, buffShape);
                 int rows = output3dShape.rows();

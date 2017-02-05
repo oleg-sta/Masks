@@ -167,6 +167,12 @@ public class FdActivity2 extends Activity {
                 }
             }
         });
+        ((CheckBox)findViewById(R.id.checkBoxLinear)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                Settings.useLinear = b;
+            }
+        });
         cameraButton.setSoundEffectsEnabled(false);
 
         findViewById(R.id.video_button).setOnClickListener(new OnClickListener() {

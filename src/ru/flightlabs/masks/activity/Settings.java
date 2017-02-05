@@ -29,8 +29,9 @@ public class Settings extends Activity {
     public static final String MODEL_PATH = "modelPath";
     public static final String MODEL_PATH_DEFAULT = "/storage/extSdCard/sp_s2.dat";
     private static final String TAG = "Settings_class";
+    public static boolean useLinear;
 
-    
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "called onCreate");

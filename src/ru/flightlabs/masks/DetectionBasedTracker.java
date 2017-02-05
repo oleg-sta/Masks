@@ -67,11 +67,11 @@ public class DetectionBasedTracker
                 foundEyes, lines, trianlges);
     }
 
-    public void morhpFace(Mat input2dShape, Mat output3dShape, Mat jmatrixinitial, String modelpath, boolean flag) {
+    public void morhpFace(Mat input2dShape, Mat output3dShape, Mat jmatrixinitial, String modelpath, boolean flag, boolean useLinear) {
         if (mNative3d == 0) {
             mNative3d = morhpFaceInit(modelpath);
         }
-        morhpFace(input2dShape.getNativeObjAddr(), output3dShape.getNativeObjAddr(), jmatrixinitial.getNativeObjAddr(), mNative3d, flag? 1 : 0);
+        morhpFace(input2dShape.getNativeObjAddr(), output3dShape.getNativeObjAddr(), jmatrixinitial.getNativeObjAddr(), mNative3d, flag? 1 : 0, useLinear? 1 : 0);
     }
 
     private long mNativeObj = 0;
@@ -90,7 +90,7 @@ public class DetectionBasedTracker
     private static native void nativeDrawMask(long maskImage, long toImage, ru.flightlabs.masks.model.primitives.Point[] pointsWas,
             Point[] foundEyes, Line[] lines, Triangle[] trianlges);
 
-    private static native void morhpFace(long jmatrix2dLands, long jmatrix3dFace, long jmatrixinitial, long modelpath, int flag);
+    private static native void morhpFace(long jmatrix2dLands, long jmatrix3dFace, long jmatrixinitial, long modelpath, int flag, int useLinear);
     private static native long morhpFaceInit(String modelpath);
     
 }

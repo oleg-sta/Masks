@@ -2,6 +2,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/objdetect/detection_based_tracker.hpp>
 #include "opencv2/imgproc/imgproc.hpp"
+#include <opencv2/calib3d/calib3d.hpp>
 
 #include <string>
 #include <vector>
@@ -17,6 +18,9 @@
 #include "Triangle.cpp"
 #include "ForwardDifference.h"
 
+#include "orthographic_camera_estimation_linear.hpp"
+#include "find_coeffs_linear.hpp"
+
 #include <dlib/image_processing/frontal_face_detector.h>
 #include <dlib/image_processing/render_face_detections.h>
 #include <dlib/image_processing.h>
@@ -31,7 +35,7 @@
 using namespace std;
 using namespace cv;
 using namespace dlib;
-const int n_blendshapes = 2;
+const int n_blendshapes = 3;
 
 //inline void vector_Rect_to_Mat(cv::vector<Rect>& v_rect, Mat& mat)
 //{
@@ -510,9 +514,11 @@ JNIEXPORT jlong JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
 }
 
 JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
-(JNIEnv * jenv, jclass, jlong jmatrix2dLands, jlong jmatrix3dFace, jlong jinitialParams, jlong model3dL, jint flag)
+(JNIEnv * jenv, jclass, jlong jmatrix2dLands, jlong jmatrix3dFace, jlong jinitialParams, jlong model3dL, jint flag, jint juseLinear)
 {
     LOGD("Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace enter");
+    LOGD("morhpFace3 %i", juseLinear );
+    bool useLinear = (juseLinear == 1)? true : false;
     cv::Mat matrix3dFace = *((Mat*)jmatrix3dFace);
     cv::Mat initialParams0 = *((Mat*)jinitialParams);
     cv::Mat matrix2dLands = *((Mat*)jmatrix2dLands);
@@ -558,7 +564,12 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
     dlib::set_subm(upper,0,0,6,1) =  10000000;
     dlib::matrix<double, 6+n_blendshapes, 1> initial_parameters_box_constrained = box_constrain_parameters(initialParameters);
 
+    dlib::matrix<double> initial_parameters = initialParameters;
 
+
+    if (!useLinear)
+    {
+    LOGD("morhpFace8 iteration");
     auto forward_derivative_fun = forward_derivative(objFun);
     double val = find_min_box_constrained(bfgs_search_strategy(),
                                                         objective_delta_stop_strategy(1e-2),
@@ -566,6 +577,61 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
                                                         forward_derivative_fun,
                                                         initial_parameters_box_constrained, lower,
                                                         upper);
+     initial_parameters(6,0) = initial_parameters_box_constrained(6,0);
+     initial_parameters(7,0) = initial_parameters_box_constrained(7,0);
+     initial_parameters(8,0) = initial_parameters_box_constrained(8,0);
+
+     }
+     else
+     {
+     LOGD("morhpFace8 linear");
+    //////experiment
+    const int n_transformation_parameters = 6;
+    const int n_blendshapes_parameters = n_blendshapes;
+    dlib::matrix<double> blend_coeffs;
+    eos::fitting::ScaledOrthoProjectionParameters resOrtho;
+
+    dlib::matrix<double> current_3dshape = xx;//dlib::zeros_matrix<double>(xx.nc(), xx.nr());
+    std::vector<cv::Vec2f> yy2d;
+    std::vector<cv::Vec4f> xx3d;
+    dlib::matrix<double> yy2 = helper.get_y(landmarks);
+    	    for (int i2 = 0; i2 < xx.nc(); i2++)
+    	    {
+                    cv::Vec2f vec2f = cv::Vec2f(yy2(0, i2), yy2(1, i2));
+    		yy2d.emplace_back(vec2f);
+    		cv::Vec4f vec4f = cv::Vec4f(current_3dshape(0, i2), current_3dshape(1, i2), current_3dshape(2, i2), 1);
+    		xx3d.emplace_back(vec4f);
+    	    }
+    	    resOrtho = eos::fitting::estimate_orthographic_projection_linear(yy2d, xx3d);
+
+    	    blend_coeffs = find_coeffs_linear(resOrtho, yy2d, xx, model3d.get_blendshapes());
+    	    LOGD("morhpFace9 %i %i %i %i", blend_coeffs.nc(), blend_coeffs.nr(), initial_parameters.nc(), initial_parameters.nr());
+
+
+    	    //current_3dshape = projection_model.convert_mean_shape(blend_coeffs,xx,model3d.get_blendshapes());
+
+
+
+    	    cv::Mat rodr;
+    	    cv::Rodrigues(resOrtho.R, rodr);
+
+    	    initial_parameters(0,0) = resOrtho.s;
+    	    initial_parameters(1,0) = rodr.at<float>(0, 0);
+    	    initial_parameters(2,0) = rodr.at<float>(1, 0);
+    	    initial_parameters(3,0) = rodr.at<float>(2, 0);
+    	    initial_parameters(4,0) = resOrtho.tx;
+    	    initial_parameters(5,0) = resOrtho.ty;
+
+
+    	    //set_subm(initial_parameters,0,0,n_transformation_parameters,1) = initial_parameters_tr;
+            //set_subm(initial_parameters,n_transformation_parameters+1,0,n_blendshapes_parameters,1) = blend_coeffs;
+            initial_parameters(6,0) = blend_coeffs(0,0);
+            initial_parameters(7,0) = blend_coeffs(1,0);
+            initial_parameters(8,0) = blend_coeffs(2,0);
+
+    }
+     // experiment
+
     /*
     double val = find_min_using_approximate_derivatives(bfgs_search_strategy(),
                                                             objective_delta_stop_strategy(1e-5),
@@ -577,7 +643,7 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
     LOGD("morhpFace10");
     std::unordered_map<int, dlib::matrix<double>> all_blendshapes = model3d.get_all_blendshapes();
     //dlib::matrix<double> final_shape_3d = projection_model.convert_mean_shape(initialParameters, full_mean_3d, all_blendshapes);
-    dlib::matrix<double> final_shape_3d = projection_model.convert_mean_shape(initial_parameters_box_constrained,full_mean_3d,all_blendshapes);
+    dlib::matrix<double> final_shape_3d = projection_model.convert_mean_shape(initial_parameters,full_mean_3d,all_blendshapes);
     LOGD("morhpFace2 %i %i %i", final_shape_3d.nc(), initialParameters.nr(), initialParameters.nc());
     LOGD("morhpFace2 params %f %f", initial_parameters_box_constrained(0, 6), initial_parameters_box_constrained(0, 7));
     LOGD("morhpFace2 params %f %f", initial_parameters_box_constrained(6, 0), initial_parameters_box_constrained(7, 0));
@@ -591,7 +657,7 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
     }
     for (int i = 0; i < 6+n_blendshapes; i++)
     {
-       initialParams0.at<double>(i, 0) = initialParameters(0, i);
+       initialParams0.at<double>(i, 0) = initial_parameters(0, i);
     }
     LOGD("Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace exit");
 }
