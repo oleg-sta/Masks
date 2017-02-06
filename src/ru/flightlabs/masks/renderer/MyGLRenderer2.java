@@ -1,6 +1,7 @@
 package ru.flightlabs.masks.renderer;
 
 import android.app.Activity;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLSurfaceView;
@@ -39,6 +40,7 @@ import ru.flightlabs.masks.utils.PoseHelper;
 
 public class MyGLRenderer2 implements GLSurfaceView.Renderer {
 
+    final TypedArray eyesResources;
     public int currText = -1;
     private int[] textures = new int[1];
     FloatBuffer mVertexBuffer;
@@ -58,8 +60,9 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
 
     private static final String TAG = "MyGLRenderer2_class";
 
-    public MyGLRenderer2(Activity activity) {
+    public MyGLRenderer2(Activity activity, TypedArray eyesResources) {
         this.activity = activity;
+        this.eyesResources = eyesResources;
     }
 
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
@@ -97,7 +100,7 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_REPEAT);
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_REPEAT);
 
-        Bitmap mBitmap = BitmapFactory.decodeResource(activity.getResources(), FdActivity.eyesResources.getResourceId(FdActivity.newIndexEye, 0));
+        Bitmap mBitmap = BitmapFactory.decodeResource(activity.getResources(), eyesResources.getResourceId(FdActivity.newIndexEye, 0));
         currText = FdActivity.newIndexEye;
         GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap, 0);
         mBitmap.recycle();
@@ -125,7 +128,7 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
         if (s == null) return;
         if (FdActivity.newIndexEye != currText) {
             currText = FdActivity.newIndexEye;
-            changeTexture(gl, FdActivity.eyesResources.getResourceId(FdActivity.newIndexEye, 0));
+            changeTexture(gl, eyesResources.getResourceId(FdActivity.newIndexEye, 0));
         }
 
 

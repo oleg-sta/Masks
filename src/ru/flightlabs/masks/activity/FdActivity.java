@@ -65,7 +65,7 @@ public class FdActivity extends Activity {
     public static Mat currentMaskLandScaped; // рисунок хранится с альфа каналом для наложения, уже повернут для наложения в режиме landscape
     private boolean makeNewFace;
     
-    public static TypedArray eyesResources;
+    public TypedArray eyesResources;
     TypedArray eyesResourcesSmall;
     TypedArray eyesResourcesLandmarks;
     
@@ -104,8 +104,6 @@ public class FdActivity extends Activity {
 
                 // Load native library after(!) OpenCV initialization
                 System.loadLibrary("detection_based_tracker");
-                compModel = new CompModel();
-                compModel.context = getApplicationContext();
 
                 mOpenCvCameraView.enableView();
 
@@ -180,6 +178,7 @@ public class FdActivity extends Activity {
         setContentView(R.layout.face_detect_surface_view);
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
+        mOpenCvCameraView.enableFpsMeter();
         cameraIndex = 0;
         numberOfCameras = android.hardware.Camera.getNumberOfCameras();
         android.hardware.Camera.CameraInfo cameraInfo = new android.hardware.Camera.CameraInfo();
@@ -192,7 +191,10 @@ public class FdActivity extends Activity {
         }
 
         mOpenCvCameraView.setCameraIndex(cameraIndex);
-        mOpenCvCameraView.setCvCameraViewListener(new CvCameraViewListener2Impl());
+
+        compModel = new CompModel();
+        compModel.context = getApplicationContext();
+        mOpenCvCameraView.setCvCameraViewListener(new CvCameraViewListener2Impl(compModel, this));
 
         ListView itemsList = (ListView) findViewById(R.id.list_effects);
         TypedArray icons = getResources().obtainTypedArray(R.array.effects_array);
@@ -312,10 +314,9 @@ public class FdActivity extends Activity {
         gLSurfaceView.getHolder().setFormat(PixelFormat.TRANSPARENT);
         gLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         gLSurfaceView.setZOrderOnTop(true);
-        meRender = new MyGLRenderer2(this);
+        meRender = new MyGLRenderer2(this, eyesResources);
         gLSurfaceView.setRenderer(meRender);
 
-        new ModelLoaderTask(progressBar).execute(compModel);
     }
     
     public void changeMask(int newMask) {
@@ -341,6 +342,7 @@ public class FdActivity extends Activity {
         multi = prefs.getBoolean(Settings.MULTI_MODE, true);
         OpenCVLoader.initDebug();
         mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        new ModelLoaderTask(progressBar).execute(compModel);
     }
 
     public void onDestroy() {

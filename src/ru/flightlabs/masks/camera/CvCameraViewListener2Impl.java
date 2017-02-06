@@ -60,6 +60,11 @@ public class CvCameraViewListener2Impl implements CameraBridgeViewBase.CvCameraV
     private Mat mRgba;
     private Mat mGray;
 
+    public CvCameraViewListener2Impl(CompModel compModel, Activity act) {
+        this.compModel = compModel;
+        this.act = act;
+    }
+
     public void onCameraViewStarted(int width, int height) {
         Log.i(TAG, "onCameraViewStarted");
         mGray = new Mat();
