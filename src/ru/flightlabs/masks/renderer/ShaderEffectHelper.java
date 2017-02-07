@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Random;
 
 import ru.flightlabs.masks.R;
-import ru.flightlabs.masks.activity.FdActivity2;
+import ru.flightlabs.masks.Static;
 import ru.flightlabs.masks.camera.Effect;
 import ru.flightlabs.masks.utils.FileUtils;
 import ru.flightlabs.masks.utils.OpenGlHelper;
@@ -54,12 +54,14 @@ public class ShaderEffectHelper {
         this.eyesResources = eyesResources;
     }
     public void init() {
+        Log.i(TAG, "init");
         // load programs
         String[] progs = context.getResources().getStringArray(R.array.programs);
         programs = new int[progs.length];
         for (int i = 0; i < progs.length; i++) {
             // TODO use glGetProgramiv to get info of attributes in particular shader
             String[] line = progs[i].split(";");
+            Log.i(TAG, "load shaders " + progs[i]);
             int vertexShaderId = ShaderUtils.createShader(GLES20.GL_VERTEX_SHADER, FileUtils.getStringFromAsset(context.getAssets(), "shaders/" + line[0] + ".glsl"));
             int fragmentShaderId = ShaderUtils.createShader(GLES20.GL_FRAGMENT_SHADER, FileUtils.getStringFromAsset(context.getAssets(), "shaders/" + line[1] + ".glsl"));
             programs[i] = ShaderUtils.createProgram(vertexShaderId, fragmentShaderId);
@@ -85,6 +87,7 @@ public class ShaderEffectHelper {
     }
 
     private void load3dModel() {
+        Log.i(TAG, "load3dModel");
         model = new Model(R.raw.for_android_test,
                 context);
         //if (true) return;
@@ -112,9 +115,9 @@ public class ShaderEffectHelper {
 
         // TODO do in background
         // FIXME not in place
-        if (FdActivity2.newIndexEye != FdActivity2.currentIndexEye) {
-            FdActivity2.currentIndexEye = FdActivity2.newIndexEye;
-            OpenGlHelper.changeTexture(context, eyesResources.getResourceId(FdActivity2.newIndexEye, 0), maskTextureid);
+        if (Static.newIndexEye != Static.currentIndexEye) {
+            Static.currentIndexEye = Static.newIndexEye;
+            OpenGlHelper.changeTexture(context, eyesResources.getResourceId(Static.newIndexEye, 0), maskTextureid);
         }
 
         Effect effect = effectsMap.get(indexEye);

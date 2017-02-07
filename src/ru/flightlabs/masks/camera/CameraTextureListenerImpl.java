@@ -180,7 +180,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
             //mNativeDetector.setMinFaceSize(mAbsoluteFaceSize);
         }
 
-        int indexEye = FdActivity2.newIndexEye;
+        int indexEye = Static.newIndexEye;
         final Effect effect = shaderHelper.effectsMap.get(indexEye);
         Log.i(TAG, "indexEye " + indexEye + " effect " + effect.programId + " " + effect.model3dName + " " + effect.textureName);
 

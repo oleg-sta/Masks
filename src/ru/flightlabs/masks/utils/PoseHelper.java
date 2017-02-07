@@ -24,9 +24,8 @@ import java.util.ArrayList;
 import ru.flightlabs.masks.CompModel;
 import ru.flightlabs.masks.DetectionBasedTracker;
 import ru.flightlabs.masks.R;
-import ru.flightlabs.masks.activity.FdActivity2;
+import ru.flightlabs.masks.Static;
 import ru.flightlabs.masks.activity.Settings;
-import ru.flightlabs.masks.camera.Effect;
 import ru.flightlabs.masks.renderer.Model;
 
 /**
@@ -60,6 +59,7 @@ public class PoseHelper {
         this.compModel = compModel;
     }
     public void init(Context context, int width, int height) {
+        Log.i(TAG, "init");
         intrinsics = Mat.eye(3, 3, CvType.CV_64F);
         intrinsics.put(0, 0, width); // ?
         intrinsics.put(1, 1, width); // ?
@@ -129,7 +129,7 @@ public class PoseHelper {
         }
 
         Mat glMatrix = null;
-        int indexEye = FdActivity2.currentIndexEye;
+        int indexEye = Static.currentIndexEye;
         Log.i(TAG, "indexEye " + indexEye);
         PoseHelper.bindMatrix(100, 100);
 

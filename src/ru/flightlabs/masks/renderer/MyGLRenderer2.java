@@ -100,8 +100,8 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_REPEAT);
         gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_REPEAT);
 
-        Bitmap mBitmap = BitmapFactory.decodeResource(activity.getResources(), eyesResources.getResourceId(FdActivity.newIndexEye, 0));
-        currText = FdActivity.newIndexEye;
+        Bitmap mBitmap = BitmapFactory.decodeResource(activity.getResources(), eyesResources.getResourceId(Static.newIndexEye, 0));
+        currText = Static.newIndexEye;
         GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, mBitmap, 0);
         mBitmap.recycle();
 
@@ -126,9 +126,9 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
         if (!Settings.debugMode) return;
         Mat s = FdActivity.glViewMatrix2;
         if (s == null) return;
-        if (FdActivity.newIndexEye != currText) {
-            currText = FdActivity.newIndexEye;
-            changeTexture(gl, eyesResources.getResourceId(FdActivity.newIndexEye, 0));
+        if (Static.newIndexEye != currText) {
+            currText = Static.newIndexEye;
+            changeTexture(gl, eyesResources.getResourceId(Static.newIndexEye, 0));
         }
 
 

@@ -58,6 +58,7 @@ public class ShaderUtils {
     }
 
     public static int createShader(int type, String shaderText) {
+        Log.i("ShaderUtils", "createShader");
         final int shaderId = glCreateShader(type);
         if (shaderId == 0) {
             return 0;

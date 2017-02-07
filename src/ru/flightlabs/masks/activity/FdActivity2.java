@@ -49,9 +49,6 @@ public class FdActivity2 extends Activity {
     TypedArray eyesResourcesSmall;
     TypedArray eyesResourcesLandmarks;
 
-    public static int currentIndexEye = -1;
-    public static int newIndexEye = 0;
-
     ImageView noPerson;
     ProgressBar progressBar;
 
@@ -138,13 +135,13 @@ public class FdActivity2 extends Activity {
         eyesResources = getResources().obtainTypedArray(R.array.masks_png);
         eyesResourcesSmall = getResources().obtainTypedArray(R.array.masks_small_png);
         eyesResourcesLandmarks = getResources().obtainTypedArray(R.array.masks_points_68);
-        newIndexEye = 0;
+        Static.newIndexEye = 0;
         itemsList.setAdapter(new EffectItemsAdapter(this, icons));
         itemsList.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                newIndexEye = position;
+                Static.newIndexEye = position;
 
             }
 
@@ -251,10 +248,6 @@ public class FdActivity2 extends Activity {
         ViewPager viewPager = (ViewPager) findViewById(R.id.photo_pager);
         MasksPagerAdapter pager = new MasksPagerAdapter(this, eyesResourcesSmall);
         viewPager.setAdapter(pager);
-    }
-
-    public void changeMask(int newMask) {
-        newIndexEye = newMask;
     }
 
     @Override

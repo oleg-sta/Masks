@@ -11,21 +11,20 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import ru.flightlabs.masks.R;
+import ru.flightlabs.masks.Static;
 import ru.flightlabs.masks.activity.FdActivity;
 import ru.flightlabs.masks.activity.FdActivity2;
 
 public class MasksPagerAdapter extends PagerAdapter {
 
-    FdActivity2 fdAct;
     Context mContext;
     TypedArray images;
     LayoutInflater mLayoutInflater;
 
-    public MasksPagerAdapter(FdActivity2 context, TypedArray images) {
+    public MasksPagerAdapter(Context context, TypedArray images) {
         mContext = context;
         mLayoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.images = images;
-        this.fdAct = context;
     }
 
     @Override
@@ -49,7 +48,7 @@ public class MasksPagerAdapter extends PagerAdapter {
             
             @Override
             public void onClick(View v) {
-                fdAct.changeMask(position);
+                Static.newIndexEye=position;
             }
         });
 

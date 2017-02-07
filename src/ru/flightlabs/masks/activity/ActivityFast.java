@@ -7,6 +7,7 @@ import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.widget.ProgressBar;
@@ -20,6 +21,7 @@ import ru.flightlabs.masks.FastView;
 import ru.flightlabs.masks.ModelLoaderTask;
 import ru.flightlabs.masks.R;
 import ru.flightlabs.masks.Static;
+import ru.flightlabs.masks.adapter.MasksPagerAdapter;
 import ru.flightlabs.masks.renderer.TestRenderer;
 
 /**
@@ -31,10 +33,10 @@ import ru.flightlabs.masks.renderer.TestRenderer;
  */
 public class ActivityFast extends Activity {
 
+    TypedArray eyesResourcesSmall;
+
     CompModel compModel;
     ProgressBar progressBar;
-    private static final int[] resourceDetector = {R.raw.lbpcascade_frontalface, R.raw.haarcascade_frontalface_alt2, R.raw.my_detector};
-
 
     private static final String TAG = "ActivityFast";
 
@@ -50,7 +52,7 @@ public class ActivityFast extends Activity {
                     Static.libsLoaded = true;
                     // load cascade file from application resources
                     Log.e(TAG, "findEyes onManagerConnected");
-                    compModel.loadHaarModel(resourceDetector[0]);
+                    compModel.loadHaarModel(Static.resourceDetector[0]);
                 }
                 break;
                 default: {
@@ -71,7 +73,13 @@ public class ActivityFast extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fast_view);
 
+        // magic numbers
+        // TODO evaluate by camera
+        final int cameraWidth = 960;
+        final int cameraHeight = 540;
+
         FastView sv = (FastView) findViewById(R.id.fd_fase_surface_view);
+        sv.setSizeCamera(cameraWidth, cameraHeight);
         mHolder = sv.getHolder();
         mHolder.addCallback(sv);
 
@@ -81,11 +89,19 @@ public class ActivityFast extends Activity {
         eyesResources = getResources().obtainTypedArray(R.array.masks_png);
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
+        eyesResourcesSmall = getResources().obtainTypedArray(R.array.masks_small_png);
+
+        ViewPager viewPager = (ViewPager) findViewById(R.id.photo_pager);
+        MasksPagerAdapter pager = new MasksPagerAdapter(this, eyesResourcesSmall);
+        viewPager.setAdapter(pager);
+
         gLSurfaceView = (GLSurfaceView)findViewById(R.id.fd_glsurface);
         gLSurfaceView.getHolder().setFormat(PixelFormat.TRANSPARENT);
         gLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         //gLSurfaceView.setZOrderOnTop(true);
         TestRenderer meRender = new TestRenderer(this, eyesResources, compModel);
+        // we are in
+        meRender.setSize(cameraHeight, cameraWidth);
         gLSurfaceView.setEGLContextClientVersion(2);
         gLSurfaceView.setRenderer(meRender);
         gLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);

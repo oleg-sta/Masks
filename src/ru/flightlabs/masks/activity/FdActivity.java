@@ -60,18 +60,15 @@ public class FdActivity extends Activity {
     private static final String TAG = "FdActivity_class";
 
     private volatile DetectionBasedTracker mNativeDetector;
-    private static final int[] resourceDetector = {R.raw.lbpcascade_frontalface, R.raw.haarcascade_frontalface_alt2, R.raw.my_detector};
 
     public static Mat currentMaskLandScaped; // рисунок хранится с альфа каналом для наложения, уже повернут для наложения в режиме landscape
     private boolean makeNewFace;
-    
+
     public TypedArray eyesResources;
     TypedArray eyesResourcesSmall;
     TypedArray eyesResourcesLandmarks;
     
-    int currentIndexEye = -1;
-    public static int newIndexEye = 0;
-    
+
     boolean findPupils = true;
     boolean multi = true;
     final boolean grad = false;
@@ -111,7 +108,7 @@ public class FdActivity extends Activity {
                     // load cascade file from application resources
                     Log.e(TAG, "findEyes onManagerConnected");
                     File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
-                    compModel.loadHaarModel(resourceDetector[0]);
+                    compModel.loadHaarModel(Static.resourceDetector[0]);
 
                     throw new IOException(); // ну выход такой:)
                 } catch (IOException e) {
@@ -201,13 +198,13 @@ public class FdActivity extends Activity {
         eyesResources = getResources().obtainTypedArray(R.array.masks_png);
         eyesResourcesSmall = getResources().obtainTypedArray(R.array.masks_small_png);
         eyesResourcesLandmarks = getResources().obtainTypedArray(R.array.masks_points_68);
-        newIndexEye = 0;
+        Static.newIndexEye = 0;
         itemsList.setAdapter(new EffectItemsAdapter(this, icons));
         itemsList.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                newIndexEye = position;
+                Static.newIndexEye = position;
                 // TODO start load new mask
                 
             }
@@ -292,10 +289,10 @@ public class FdActivity extends Activity {
             @Override
             public void onClick(View v) {
                 haarModel++;
-                if (haarModel >= resourceDetector.length) {
+                if (haarModel >= Static.resourceDetector.length) {
                     haarModel = 0;
                 }
-                compModel.loadHaarModel(resourceDetector[haarModel % resourceDetector.length]);
+                compModel.loadHaarModel(Static.resourceDetector[haarModel % Static.resourceDetector.length]);
             }
         });
         findViewById(R.id.make_face).setOnClickListener(new OnClickListener() {
@@ -320,7 +317,7 @@ public class FdActivity extends Activity {
     }
     
     public void changeMask(int newMask) {
-        newIndexEye = newMask;
+        Static.newIndexEye = newMask;
     }
     
     @Override

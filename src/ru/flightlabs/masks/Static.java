@@ -11,4 +11,10 @@ public class Static {
 
     public static boolean drawOrigTexture;
     public static boolean libsLoaded;
+
+
+    public static int currentIndexEye = -1;
+    public static int newIndexEye = 0;
+
+    public static final int[] resourceDetector = {R.raw.lbpcascade_frontalface, R.raw.haarcascade_frontalface_alt2, R.raw.my_detector};
 }
