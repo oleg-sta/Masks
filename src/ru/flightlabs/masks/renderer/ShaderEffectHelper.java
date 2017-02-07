@@ -272,6 +272,10 @@ public class ShaderEffectHelper {
     }
 
     public static void shaderEfffect2d(Point center, Point center2, int texIn, int programId, int poss, int texx) {
+        shaderEfffect2d(center, center2, texIn, programId, poss, texx, null);
+
+    }
+    public static void shaderEfffect2d(Point center, Point center2, int texIn, int programId, int poss, int texx, Integer texIn2) {
         GLES20.glUseProgram(programId);
         int uColorLocation = GLES20.glGetUniformLocation(programId, "u_Color");
         GLES20.glUniform4f(uColorLocation, 0.0f, 0.0f, 1.0f, 1.0f);
@@ -317,6 +321,12 @@ public class ShaderEffectHelper {
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texIn);
         GLES20.glUniform1i(GLES20.glGetUniformLocation(programId, "sTexture"), 0);
+
+        if (texIn2 != null) {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texIn2);
+            GLES20.glUniform1i(GLES20.glGetUniformLocation(programId, "sTexture2"), 1);
+        }
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
         GLES20.glFlush(); //?

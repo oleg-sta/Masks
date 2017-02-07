@@ -34,12 +34,13 @@ public class TestRenderer implements GLSurfaceView.Renderer {
     public static byte[] buffer;
 
     int programNv21ToRgba;
-    int texDraw[] = new int[1];
+    int texDraw[] = new int[2];
 
     int texDraw2[] = new int[1];
     int texFbo2[] = new int[1];
 
     ByteBuffer buffer2;
+    ByteBuffer buffer3;
 
     int width, height;
 
@@ -60,9 +61,16 @@ public class TestRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         Log.i(TAG, "onSurfaceCreated");
         initShaders();
-        GLES20.glGenTextures(1, texDraw, 0);
+        GLES20.glGenTextures(2, texDraw, 0);
         Log.i(TAG, "onSurfaceCreated2 " + texDraw[0]);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texDraw[0]);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
+
+        Log.i(TAG, "onSurfaceCreated2 " + texDraw[1]);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texDraw[1]);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
@@ -136,15 +144,27 @@ public class TestRenderer implements GLSurfaceView.Renderer {
             }
 
             if (buffer2 == null) {
-                buffer2 = ByteBuffer.allocateDirect(buffer.length);
+                buffer2 = ByteBuffer.allocateDirect(width * height);
+                buffer3 = ByteBuffer.allocateDirect(width * height / 2);
             }
-            buffer2.put(buffer);
+            buffer2.put(buffer, 0, width * height);
             buffer2.position(0);
+            buffer3.put(buffer, width * height, width * height / 2);
+            buffer3.position(0);
             Log.i(TAG, "onDrawFrame2 " + buffer[0]);
+            Log.i(TAG, "onDrawFrame2 " + buffer2.limit());
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texDraw[0]);
-            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, height / 4, (int)(width * 1.5), 0,
-                    GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, buffer2);
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, height, (int)(width), 0,
+                    GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, buffer2);
             GLES20.glFlush();
+            Log.i(TAG, "onDrawFrame2 " + buffer2.limit());
+            //buffer2.position(height * width);
+            Log.i(TAG, "onDrawFrame2 " + buffer2.limit());
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texDraw[1]);
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, height, (int)(width * 0.5), 0,
+                    GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, buffer3);
+            GLES20.glFlush();
+            Log.i(TAG, "onDrawFrame2 " + buffer2.limit());
             Log.i(TAG, "onDrawFrame3");
 
             GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, texFbo2[0]);
@@ -159,7 +179,7 @@ public class TestRenderer implements GLSurfaceView.Renderer {
 
             Log.i(TAG, "onDrawFrame5");
             // convert from NV21 to RGBA
-            ShaderEffectHelper.shaderEfffect2d(new Point(0, 0), new Point(width, height), texDraw[0], programNv21ToRgba, vPos, vTex);
+            ShaderEffectHelper.shaderEfffect2d(new Point(0, 0), new Point(width, height), texDraw[0], programNv21ToRgba, vPos, vTex, texDraw[1]);
 
             Log.i(TAG, "onDrawFrame6");
 
