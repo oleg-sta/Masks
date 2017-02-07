@@ -3,12 +3,12 @@ uniform sampler2D sTexture; // y - texture
 uniform sampler2D sTexture2; //uv texture
 varying vec2 texCoord;
 uniform int u_facing;
+uniform float cameraWidth;
+uniform float cameraHeight;
 
 // shader from convert NV21 to RGBA
 
 void main() {
-  float cameraWidth = 960.0;
-  float cameraHeight = 540.0;
   vec4 c1 = vec4(1.0, texCoord.x, 0.0, 1.0);
   vec2 coord = vec2(texCoord.y, texCoord.x);
   if (u_facing == 0) coord.x = 1.0 - coord.x;

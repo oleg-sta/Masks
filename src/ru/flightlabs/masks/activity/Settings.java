@@ -18,7 +18,7 @@ import ru.flightlabs.masks.R;
 
 public class Settings extends Activity {
 
-    public static boolean debugMode = true;
+    public static boolean debugMode = false;
     public static final String DIRECTORY_SELFIE = "Masks";
     
     public static final String PREFS = "eselfie";

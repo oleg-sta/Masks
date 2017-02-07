@@ -10,6 +10,10 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.SurfaceHolder;
+import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -37,6 +41,7 @@ public class ActivityFast extends Activity {
 
     CompModel compModel;
     ProgressBar progressBar;
+    boolean playSound = true;
 
     private static final String TAG = "ActivityFast";
 
@@ -73,13 +78,7 @@ public class ActivityFast extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fast_view);
 
-        // magic numbers
-        // TODO evaluate by camera
-        final int cameraWidth = 960;
-        final int cameraHeight = 540;
-
         FastView sv = (FastView) findViewById(R.id.fd_fase_surface_view);
-        sv.setSizeCamera(cameraWidth, cameraHeight);
         mHolder = sv.getHolder();
         mHolder.addCallback(sv);
 
@@ -91,6 +90,31 @@ public class ActivityFast extends Activity {
 
         eyesResourcesSmall = getResources().obtainTypedArray(R.array.masks_small_png);
 
+        final ImageView soundButton = (ImageView) findViewById(R.id.sound_button);
+        findViewById(R.id.sound_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playSound = !playSound;
+                if (playSound) {
+                    soundButton.setImageResource(R.drawable.ic_sound);
+                } else {
+                    soundButton.setImageResource(R.drawable.ic_nosound);
+                }
+            }
+        });
+        ((CheckBox)findViewById(R.id.checkDebug)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                Settings.debugMode = b;
+            }
+        });
+        ((CheckBox)findViewById(R.id.checkBoxLinear)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                Settings.useLinear = b;
+            }
+        });
+
         ViewPager viewPager = (ViewPager) findViewById(R.id.photo_pager);
         MasksPagerAdapter pager = new MasksPagerAdapter(this, eyesResourcesSmall);
         viewPager.setAdapter(pager);
@@ -100,8 +124,6 @@ public class ActivityFast extends Activity {
         gLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         //gLSurfaceView.setZOrderOnTop(true);
         TestRenderer meRender = new TestRenderer(this, eyesResources, compModel);
-        // we are in
-        meRender.setSize(cameraHeight, cameraWidth);
         gLSurfaceView.setEGLContextClientVersion(2);
         gLSurfaceView.setRenderer(meRender);
         gLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);

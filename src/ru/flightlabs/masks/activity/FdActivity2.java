@@ -164,6 +164,12 @@ public class FdActivity2 extends Activity {
                 }
             }
         });
+        ((CheckBox)findViewById(R.id.checkDebug)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                Settings.debugMode = b;
+            }
+        });
         ((CheckBox)findViewById(R.id.checkBoxLinear)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -211,7 +217,6 @@ public class FdActivity2 extends Activity {
                 } else {
                     soundButton.setImageResource(R.drawable.ic_nosound);
                 }
-                Settings.debugMode = playSound;
             }
         });
         noPerson = (ImageView) findViewById(R.id.no_person);

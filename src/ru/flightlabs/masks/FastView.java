@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import ru.flightlabs.masks.activity.ActivityFast;
+import ru.flightlabs.masks.camera.CameraHelper;
 import ru.flightlabs.masks.renderer.TestRenderer;
 
 /**
@@ -23,9 +24,6 @@ import ru.flightlabs.masks.renderer.TestRenderer;
  */
 
 public class FastView extends SurfaceView implements SurfaceHolder.Callback, Camera.PreviewCallback {
-
-    int cameraWidth;
-    int cameraHeigt;
 
     private static final int MAGIC_TEXTURE_ID = 10;
     public static boolean cameraFacing;
@@ -92,6 +90,7 @@ public class FastView extends SurfaceView implements SurfaceHolder.Callback, Cam
             // ignore: tried to stop a non-existent preview
         }
 
+        // we transpose view
 
         Camera.Parameters params = mCamera.getParameters();
         Log.d(TAG, "preview format " + params.getPreviewFormat());
@@ -103,7 +102,7 @@ public class FastView extends SurfaceView implements SurfaceHolder.Callback, Cam
         params.getPreviewFpsRange(s2);
         Log.d(TAG, "preview format " + Arrays.toString(s2));
         params.setPreviewFormat(ImageFormat.NV21);
-        params.setPreviewSize(cameraWidth, cameraHeigt);
+        CameraHelper.calculateCameraPreviewSize(params, h, w);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && !android.os.Build.MODEL.equals("GT-I9100"))
             params.setRecordingHint(true);
         List<String> FocusModes = params.getSupportedFocusModes();
@@ -161,17 +160,10 @@ public class FastView extends SurfaceView implements SurfaceHolder.Callback, Cam
         if (TestRenderer.buffer == null) {
             TestRenderer.buffer = new byte[data.length];
         }
-        // FIXME synchronize copying buffer
+        // TODO synchronize copying buffer
+        // TODO find face and features here or another thread for optimization
         System.arraycopy(data, 0, TestRenderer.buffer, 0, data.length);
         ActivityFast.gLSurfaceView.requestRender();
-
-        if (true) return;
-
-
     }
 
-    public void setSizeCamera(int width, int height) {
-        cameraWidth = width;
-        cameraHeigt = height;
-    }
 }

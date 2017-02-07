@@ -154,8 +154,6 @@ public class CameraRenderer extends CameraGLRendererBase {
                 mCamera.stopPreview();
                 mPreviewStarted = false;
             }
-//            bestWidth = 960;
-//            bestHeight = 540;
             mCameraWidth  = bestWidth;
             mCameraHeight = bestHeight;
             param.setPreviewSize(bestWidth, bestHeight);
