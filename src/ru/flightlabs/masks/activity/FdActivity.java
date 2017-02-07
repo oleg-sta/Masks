@@ -12,7 +12,6 @@ import android.graphics.PixelFormat;
 import android.media.MediaActionSound;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -40,20 +39,22 @@ import ru.flightlabs.masks.CompModel;
 import ru.flightlabs.masks.camera.CvCameraViewListener2Impl;
 import ru.flightlabs.masks.DetectionBasedTracker;
 import ru.flightlabs.masks.adapter.EffectItemsAdapter;
-import ru.flightlabs.masks.adapter.MasksPagerAdapter;
 import ru.flightlabs.masks.ModelLoaderTask;
 import ru.flightlabs.masks.R;
 import ru.flightlabs.masks.Static;
 import ru.flightlabs.masks.model.ImgLabModel;
 import ru.flightlabs.masks.model.SimpleModel;
-import ru.flightlabs.masks.renderer.MyGLRenderer2;
+import ru.flightlabs.masks.renderer.SimpleOpengl1Renderer;
 import ru.flightlabs.masks.utils.FileUtils;
 
+/**
+ * this activity uses opencv camera, very slow
+ */
 public class FdActivity extends Activity {
 
     CompModel compModel;
     public static Mat glViewMatrix2;
-    MyGLRenderer2 meRender;
+    SimpleOpengl1Renderer meRender;
 
     private GLSurfaceView gLSurfaceView;
 
@@ -106,7 +107,7 @@ public class FdActivity extends Activity {
 
                 try {
                     // load cascade file from application resources
-                    Log.e(TAG, "findEyes onManagerConnected");
+                    Log.e(TAG, "findLandMarks onManagerConnected");
                     File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
                     compModel.loadHaarModel(Static.resourceDetector[0]);
 
@@ -175,19 +176,8 @@ public class FdActivity extends Activity {
         setContentView(R.layout.face_detect_surface_view);
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.fd_activity_surface_view);
+        setFrontCameraIndex();
         mOpenCvCameraView.enableFpsMeter();
-        cameraIndex = 0;
-        numberOfCameras = android.hardware.Camera.getNumberOfCameras();
-        android.hardware.Camera.CameraInfo cameraInfo = new android.hardware.Camera.CameraInfo();
-        for (int i = 0; i < numberOfCameras; i++) {
-            android.hardware.Camera.getCameraInfo(i, cameraInfo);
-            if (cameraInfo.facing == android.hardware.Camera.CameraInfo.CAMERA_FACING_FRONT) {
-                cameraFacing = true;
-                cameraIndex = i;
-            }
-        }
-
-        mOpenCvCameraView.setCameraIndex(cameraIndex);
 
         compModel = new CompModel();
         compModel.context = getApplicationContext();
@@ -311,13 +301,9 @@ public class FdActivity extends Activity {
         gLSurfaceView.getHolder().setFormat(PixelFormat.TRANSPARENT);
         gLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         gLSurfaceView.setZOrderOnTop(true); // FIXME but why did you do that? because i can
-        meRender = new MyGLRenderer2(this, eyesResources);
+        meRender = new SimpleOpengl1Renderer(this, eyesResources);
         gLSurfaceView.setRenderer(meRender);
 
-    }
-    
-    public void changeMask(int newMask) {
-        Static.newIndexEye = newMask;
     }
     
     @Override
@@ -362,5 +348,20 @@ public class FdActivity extends Activity {
         mOpenCvCameraView.disableView();
         mOpenCvCameraView.setCameraIndex(cameraIndex);
         mOpenCvCameraView.enableView();
+    }
+
+    private void setFrontCameraIndex() {
+        cameraIndex = 0;
+        numberOfCameras = android.hardware.Camera.getNumberOfCameras();
+        android.hardware.Camera.CameraInfo cameraInfo = new android.hardware.Camera.CameraInfo();
+        for (int i = 0; i < numberOfCameras; i++) {
+            android.hardware.Camera.getCameraInfo(i, cameraInfo);
+            if (cameraInfo.facing == android.hardware.Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                cameraFacing = true;
+                cameraIndex = i;
+            }
+        }
+
+        mOpenCvCameraView.setCameraIndex(cameraIndex);
     }
 }

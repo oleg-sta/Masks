@@ -17,15 +17,15 @@ public class DetectionBasedTracker
     public DetectionBasedTracker(String cascadeName, int minFaceSize, String modelSp) {
         mNativeObj = nativeCreateObject(cascadeName, minFaceSize);
         if (new File(modelSp).exists()) {
-            Log.e("DetectionBasedTracker", "findEyes DetectionBasedTracker !" + modelSp);
+            Log.e("DetectionBasedTracker", "findLandMarks DetectionBasedTracker !" + modelSp);
             long nat = nativeCreateModel(modelSp);
             if (nat != 0) {
                 mNativeModel = nat;
             }
         } else {
-            Log.e("DetectionBasedTracker", "findEyes file doesn't exists !" + modelSp);
+            Log.e("DetectionBasedTracker", "findLandMarks file doesn't exists !" + modelSp);
         }
-        Log.e("DetectionBasedTracker", "findEyes mNativeModel " + mNativeModel);
+        Log.e("DetectionBasedTracker", "findLandMarks mNativeModel " + mNativeModel);
     }
 
     public void start() {
@@ -49,10 +49,10 @@ public class DetectionBasedTracker
         mNativeObj = 0;
     }
     
-    public Point[] findEyes(Mat imageGray, Rect face) {
+    public Point[] findLandMarks(Mat imageGray, Rect face) {
         if (mNativeModel != null) {
-//            return findEyes(mNativeObj, imageGray.getNativeObjAddr(), face.x, face.y, face.width, face.height, mNativeModel);
-            return findEyes(mNativeObj, imageGray.getNativeObjAddr(), face.x, face.y, face.width, face.height, mNativeModel);
+//            return findLandMarks(mNativeObj, imageGray.getNativeObjAddr(), face.x, face.y, face.width, face.height, mNativeModel);
+            return findLandMarks(mNativeObj, imageGray.getNativeObjAddr(), face.x, face.y, face.width, face.height, mNativeModel);
         } else {
             return new Point[0];
         }
@@ -85,7 +85,7 @@ public class DetectionBasedTracker
     private static native void nativeStop(long thiz);
     private static native void nativeSetFaceSize(long thiz, int size);
     private static native void nativeDetect(long thiz, long inputImage, long faces);
-    private static native Point[] findEyes(long thiz, long inputImage, int x, int y, int height, int width, long modelSp);
+    private static native Point[] findLandMarks(long thiz, long inputImage, int x, int y, int height, int width, long modelSp);
     private static native void mergeAlpha(long fromImage, long toImage);
     private static native void nativeDrawMask(long maskImage, long toImage, ru.flightlabs.masks.model.primitives.Point[] pointsWas,
             Point[] foundEyes, Line[] lines, Triangle[] trianlges);

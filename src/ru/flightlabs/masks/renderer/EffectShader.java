@@ -1,20 +1,20 @@
-package ru.flightlabs.masks.camera;
-
-import android.content.Intent;
+package ru.flightlabs.masks.renderer;
 
 /**
  * Created by sov on 29.01.2017.
  */
 
-public class Effect {
+public class EffectShader {
     public int programId;
     public String model3dName;
     public String textureName;
     public float alpha;
     public boolean needBlendShape;
 
-    public static Effect parseString(String effectStr) {
-        Effect effect = new Effect();
+    private EffectShader() {};
+
+    public static EffectShader parseString(String effectStr) {
+        EffectShader effect = new EffectShader();
         String[] par = effectStr.split(";");
         effect.programId = Integer.parseInt(par[0]);
         effect.model3dName = par[1];

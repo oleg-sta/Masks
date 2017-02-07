@@ -63,7 +63,7 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeStop
   JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_mergeAlpha
   (JNIEnv * jenv, jclass, jlong imageFrom, jlong imageTo);
 
-  JNIEXPORT jobjectArray JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_findEyes
+  JNIEXPORT jobjectArray JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_findLandMarks
   (JNIEnv * jenv, jclass, jlong thiz, jlong imageGray, jint x, jint y, jint height, jint width, jlong);
 /*
  * Class:     org_opencv_samples_fd_DetectionBasedTracker
@@ -73,16 +73,18 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeStop
 JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDetect
   (JNIEnv *, jclass, jlong, jlong, jlong);
 
+// drawing 2d mask by opencv, very slow
 JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_nativeDrawMask
 (JNIEnv * jenv, jclass, jlong imageFrom, jlong imageTo, jobjectArray, jobjectArray, jobjectArray, jobjectArray);
 
 JNIEXPORT jlong JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFaceInit
 (JNIEnv * jenv, jclass, jstring path);
 
+// morph face by blendshapes
 JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
 (JNIEnv * jenv, jclass, jlong, jlong, jlong, jlong, jint, jint);
 
-void findEyes(cv::Mat frame_gray, cv::Rect face, std::vector<cv::Point> &pixels,  ModelClass *modelClass);
+void findLandMarks(cv::Mat frame_gray, cv::Rect face, std::vector<cv::Point> &pixels,  ModelClass *modelClass);
 bool checkInTriangle(cv::Point*, Triangle* triangle, cv::Point**);
 void getBorder(cv::Point* p1, cv::Point* p2, cv::Point* opposite, int x, int* minMax);
 int getSide(cv::Point* pointCheck, cv::Point* point1, cv::Point* point2);

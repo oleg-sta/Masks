@@ -11,6 +11,7 @@ import java.util.List;
 
 public class CameraHelper {
 
+    // do not hold info
     public static int mCameraWidth;
     public static int mCameraHeight;
 

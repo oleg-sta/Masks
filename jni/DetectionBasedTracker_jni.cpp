@@ -434,17 +434,17 @@ int signum(double value) {
 	return 0;
 }
 
-JNIEXPORT jobjectArray JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_findEyes
+JNIEXPORT jobjectArray JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_findLandMarks
 (JNIEnv * jenv, jclass, jlong thiz, jlong imageGray, jint x, jint y, jint width, jint height, jlong thizModel)
 {
-	LOGD("Java_ru_flightlabs_masks_DetectionBasedTracker_findEyes");
+	LOGD("Java_ru_flightlabs_masks_DetectionBasedTracker_findLandMarks");
 
 	cv::Mat imageGrayInner = *((Mat*)imageGray);
 	cv::Rect faceRect(x, y,  width, height);
 	LOGD("findEyes imageGray %d %d", imageGrayInner.rows, imageGrayInner.cols);
 	LOGD("findEyes face %d %d %d %d", faceRect.x, faceRect.y, faceRect.height, faceRect.width);
 	std::vector<cv::Point> pixels;
-	findEyes(imageGrayInner, faceRect, pixels, (ModelClass*)thizModel);
+	findLandMarks(imageGrayInner, faceRect, pixels, (ModelClass*)thizModel);
 
 
 	jclass clsPoint = jenv->FindClass("org/opencv/core/Point");
@@ -662,15 +662,9 @@ JNIEXPORT void JNICALL Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace
     LOGD("Java_ru_flightlabs_masks_DetectionBasedTracker_morhpFace exit");
 }
 
-void findEyes(cv::Mat frame_gray, cv::Rect face, std::vector<cv::Point> &pixels, ModelClass *modelClass) {
-	LOGD("findEyes111");
-	shape_predictor sp;
-	LOGD("findEyes112");
+void findLandMarks(cv::Mat frame_gray, cv::Rect face, std::vector<cv::Point> &pixels, ModelClass *modelClass) {
 	LOGD("findEyes1121 %i", frame_gray.type());
-
-	//array2d<int> img;
 	LOGD("findEyes1122");
-	//dlib::assign_image ( img, cv_image<uchar> ( frame_gray ) );
 	cv_image<uchar> img(frame_gray);
 	LOGD("findEyes114");
 	dlib::rectangle d(face.x, face.y, face.x + face.width,

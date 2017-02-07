@@ -1,27 +1,19 @@
 package ru.flightlabs.masks.camera;
 
 import android.app.Activity;
-import android.content.Context;
 import android.util.Log;
 import android.view.View;
 
 import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfDouble;
-import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.MatOfPoint3f;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
-import org.opencv.core.Point3;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 import ru.flightlabs.masks.CompModel;
@@ -29,10 +21,8 @@ import ru.flightlabs.masks.DetectionBasedTracker;
 import ru.flightlabs.masks.R;
 import ru.flightlabs.masks.activity.FdActivity;
 import ru.flightlabs.masks.activity.Settings;
-import ru.flightlabs.masks.renderer.Model;
-import ru.flightlabs.masks.renderer.MyGLRenderer2;
+import ru.flightlabs.masks.renderer.SimpleOpengl1Renderer;
 import ru.flightlabs.masks.utils.OpencvUtils;
-import ru.flightlabs.masks.utils.PoseHelper;
 
 /**
  * Created by sov on 06.01.2017.
@@ -40,7 +30,7 @@ import ru.flightlabs.masks.utils.PoseHelper;
 
 public class CvCameraViewListener2Impl implements CameraBridgeViewBase.CvCameraViewListener2 {
 
-    MyGLRenderer2 meRender;
+    SimpleOpengl1Renderer meRender;
     Point[] foundEyes = null;
     int fremaCounter = 0;
 
@@ -159,10 +149,10 @@ public class CvCameraViewListener2Impl implements CameraBridgeViewBase.CvCameraV
         Point lEye = null;
         foundEyes = null;
         if (leftCorner != null && mNativeDetector != null) {
-            Log.i(TAG, "mNativeDetector.findEyes");
+            Log.i(TAG, "mNativeDetector.findLandMarks");
             Rect r = facesArray[0];
-            Log.i(TAG, "mNativeDetector.findEyes!!!");
-            foundEyes = mNativeDetector.findEyes(mGray, r);
+            Log.i(TAG, "mNativeDetector.findLandMarks!!!");
+            foundEyes = mNativeDetector.findLandMarks(mGray, r);
             Log.i(TAG, "findEyes116 java " + foundEyes.length);
             if (foundEyes != null && foundEyes.length > 1) {
                 Log.i(TAG, "findEyes116 java " + foundEyes[0].x + " " + foundEyes[0].y);

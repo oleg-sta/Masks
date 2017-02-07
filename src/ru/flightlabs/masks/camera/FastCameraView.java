@@ -1,6 +1,5 @@
-package ru.flightlabs.masks;
+package ru.flightlabs.masks.camera;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
@@ -15,15 +14,13 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import ru.flightlabs.masks.activity.ActivityFast;
-import ru.flightlabs.masks.camera.CameraHelper;
-import ru.flightlabs.masks.renderer.TestRenderer;
+import ru.flightlabs.masks.renderer.MaskRenderer;
 
 /**
  * Created by sov on 06.02.2017.
  */
 
-public class FastView extends SurfaceView implements SurfaceHolder.Callback, Camera.PreviewCallback {
+public class FastCameraView extends SurfaceView implements SurfaceHolder.Callback, Camera.PreviewCallback {
 
     private static final int MAGIC_TEXTURE_ID = 10;
     public static boolean cameraFacing;
@@ -33,7 +30,7 @@ public class FastView extends SurfaceView implements SurfaceHolder.Callback, Cam
     private Camera mCamera;
     private SurfaceTexture mSurfaceTexture;
 
-    public FastView(Context context, AttributeSet attrs) {
+    public FastCameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         int cameraIndex = 0;
@@ -91,7 +88,6 @@ public class FastView extends SurfaceView implements SurfaceHolder.Callback, Cam
         }
 
         // we transpose view
-
         Camera.Parameters params = mCamera.getParameters();
         Log.d(TAG, "preview format " + params.getPreviewFormat());
         List<int[]> s = params.getSupportedPreviewFpsRange();
@@ -110,7 +106,15 @@ public class FastView extends SurfaceView implements SurfaceHolder.Callback, Cam
         {
             params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
         }
-        params.setPreviewFpsRange( 30000, 30000 );
+
+        List<int[]> frameRates = params.getSupportedPreviewFpsRange();
+        int last = frameRates.size() - 1;
+        int minFps = (frameRates.get(last))[Camera.Parameters.PREVIEW_FPS_MIN_INDEX];
+        int maxFps = (frameRates.get(last))[Camera.Parameters.PREVIEW_FPS_MAX_INDEX];
+        params.setPreviewFpsRange(minFps, maxFps);
+        Log.d(TAG, "preview fps: " + minFps + ", " + maxFps);
+
+        //params.setPreviewFpsRange( 30000, 30000 );
         mCamera.setParameters(params);
 
         int size = w * h;
@@ -149,22 +153,20 @@ public class FastView extends SurfaceView implements SurfaceHolder.Callback, Cam
         mCamera.stopPreview();
         mCamera.setPreviewCallback(null);
         mCamera.release();
-
+        mCamera = null;
     }
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         Log.d(TAG, "Got a camera frame " + data.length);
         mCamera.addCallbackBuffer(mBuffer);
-        // TODO copy data to another buffer
-        if (TestRenderer.buffer == null) {
-            TestRenderer.buffer = new byte[data.length];
+        // TODO copy data to another bufferFromCamera
+        if (MaskRenderer.bufferFromCamera == null) {
+            MaskRenderer.bufferFromCamera = new byte[data.length];
         }
-        synchronized (FastView.class) {
-            // TODO synchronize copying buffer
+        synchronized (FastCameraView.class) {
             // TODO find face and features here or another thread for optimization
-            System.arraycopy(data, 0, TestRenderer.buffer, 0, data.length);
-            //ActivityFast.gLSurfaceView.requestRender();
+            System.arraycopy(data, 0, MaskRenderer.bufferFromCamera, 0, data.length);
         }
     }
 

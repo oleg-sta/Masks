@@ -35,10 +35,9 @@ import ru.flightlabs.masks.Static;
 import ru.flightlabs.masks.utils.PoseHelper;
 
 /**
- * Created by sov on 10.12.2016.
+ * very simple mask renderer, using opengl es 1.0
  */
-
-public class MyGLRenderer2 implements GLSurfaceView.Renderer {
+public class SimpleOpengl1Renderer implements GLSurfaceView.Renderer {
 
     final TypedArray eyesResources;
     public int currText = -1;
@@ -60,7 +59,7 @@ public class MyGLRenderer2 implements GLSurfaceView.Renderer {
 
     private static final String TAG = "MyGLRenderer2_class";
 
-    public MyGLRenderer2(Activity activity, TypedArray eyesResources) {
+    public SimpleOpengl1Renderer(Activity activity, TypedArray eyesResources) {
         this.activity = activity;
         this.eyesResources = eyesResources;
     }

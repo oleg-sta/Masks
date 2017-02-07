@@ -3,41 +3,25 @@ package ru.flightlabs.masks.camera;
 import android.app.Activity;
 import android.content.Context;
 import android.opengl.GLES20;
-import android.opengl.Matrix;
-import android.os.Environment;
 import android.util.Log;
 
 import org.opencv.android.CameraGLSurfaceView;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
 
 import ru.flightlabs.masks.CompModel;
-import ru.flightlabs.masks.DetectionBasedTracker;
-import ru.flightlabs.masks.R;
 import ru.flightlabs.masks.Static;
-import ru.flightlabs.masks.activity.FdActivity2;
+import ru.flightlabs.masks.activity.FdActivityOpenglCamera;
 import ru.flightlabs.masks.activity.Settings;
-import ru.flightlabs.masks.renderer.Model;
+import ru.flightlabs.masks.renderer.EffectShader;
 import ru.flightlabs.masks.renderer.ShaderEffectHelper;
-import ru.flightlabs.masks.utils.Decompress;
 import ru.flightlabs.masks.utils.FileUtils;
-import ru.flightlabs.masks.utils.OpenGlHelper;
-import ru.flightlabs.masks.utils.OpencvUtils;
 import ru.flightlabs.masks.utils.PhotoMaker;
 import ru.flightlabs.masks.utils.PoseHelper;
 import ru.flightlabs.masks.utils.ShaderUtils;
@@ -98,7 +82,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         poseHelper = new PoseHelper(compModel);
         poseHelper.init(act, width, height);
 
-        shaderHelper = new ShaderEffectHelper(act, FdActivity2.eyesResources);
+        shaderHelper = new ShaderEffectHelper(act, FdActivityOpenglCamera.eyesResources);
         shaderHelper.init();
         Log.i(TAG, "onCameraViewStarted");
     }
@@ -181,7 +165,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         }
 
         int indexEye = Static.newIndexEye;
-        final Effect effect = shaderHelper.effectsMap.get(indexEye);
+        final EffectShader effect = shaderHelper.effectsMap.get(indexEye);
         Log.i(TAG, "indexEye " + indexEye + " effect " + effect.programId + " " + effect.model3dName + " " + effect.textureName);
 
         PoseHelper.PoseResult poseResult = poseHelper.findShapeAndPose(findGray, mAbsoluteFaceSize, mRgba, width, height, effect.needBlendShape, shaderHelper.model, act);

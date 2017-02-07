@@ -12,8 +12,6 @@ import android.widget.LinearLayout;
 
 import ru.flightlabs.masks.R;
 import ru.flightlabs.masks.Static;
-import ru.flightlabs.masks.activity.FdActivity;
-import ru.flightlabs.masks.activity.FdActivity2;
 
 public class MasksPagerAdapter extends PagerAdapter {
 

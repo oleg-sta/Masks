@@ -58,6 +58,7 @@ public class PoseHelper {
     public PoseHelper(CompModel compModel) {
         this.compModel = compModel;
     }
+
     public void init(Context context, int width, int height) {
         Log.i(TAG, "init");
         intrinsics = Mat.eye(3, 3, CvType.CV_64F);
@@ -101,6 +102,7 @@ public class PoseHelper {
         viewMatrix = new Mat(4, 4, CvType.CV_64F, new Scalar(0));
     }
 
+    // TODO split by find landmarks and shape
     public PoseResult findShapeAndPose(Mat findGray, int mAbsoluteFaceSize, Mat mRgba, int width, int height, boolean shapeBlends, Model model, Context context) {
         MatOfRect faces = compModel.findFaces(findGray, mAbsoluteFaceSize);
         DetectionBasedTracker mNativeDetector = compModel.mNativeDetector;
@@ -116,7 +118,7 @@ public class PoseHelper {
             }
             center = OpencvUtils.convertToGl(new Point((2 * facesArray[0].x + facesArray[0].width) / 2.0, (2 * facesArray[0].y + facesArray[0].height) / 2.0), width, height);
             if (mNativeDetector != null) {
-                foundEyes = mNativeDetector.findEyes(findGray, facesArray[0]);
+                foundEyes = mNativeDetector.findLandMarks(findGray, facesArray[0]);
                 // FIXME temp
                 if (Settings.debugMode) {
                     for (Point p : foundEyes) {

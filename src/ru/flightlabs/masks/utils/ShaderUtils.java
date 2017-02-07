@@ -8,10 +8,6 @@ import android.content.Context;
 import android.opengl.GLES20;
 import android.util.Log;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.IntBuffer;
-
 import static android.opengl.GLES20.GL_COMPILE_STATUS;
 import static android.opengl.GLES20.GL_LINK_STATUS;
 import static android.opengl.GLES20.glAttachShader;
@@ -21,11 +17,9 @@ import static android.opengl.GLES20.glCreateShader;
 import static android.opengl.GLES20.glDeleteProgram;
 import static android.opengl.GLES20.glDeleteShader;
 import static android.opengl.GLES20.glGetProgramiv;
-import static android.opengl.GLES20.glGetShaderInfoLog;
 import static android.opengl.GLES20.glGetShaderiv;
 import static android.opengl.GLES20.glLinkProgram;
 import static android.opengl.GLES20.glShaderSource;
-import static java.sql.Types.NULL;
 
 
 public class ShaderUtils {
@@ -45,7 +39,7 @@ public class ShaderUtils {
         glGetProgramiv(programId, GL_LINK_STATUS, linkStatus, 0);
         if (linkStatus[0] == 0) {
             glDeleteProgram(programId);
-            return 0;
+            throw new RuntimeException("couldnt' create program");
         }
         return programId;
 
@@ -70,7 +64,7 @@ public class ShaderUtils {
         if (compileStatus[0] == 0) {
             Log.i("ShaderUtils", "error '"  + GLES20.glGetShaderInfoLog(shaderId) + "' compile shader " + shaderText);
             glDeleteShader(shaderId);
-            throw new RuntimeException("error compile shader");
+            throw new RuntimeException("error while compile shader");
         }
         return shaderId;
     }

@@ -22,6 +22,7 @@ import java.util.ArrayList;
  */
 // FIXME to many errrors
 // FIXME textures loaded incorrectly, case format obj is slightlu different then we excect, whe should create new vertices
+// 3d model holder
 public class Model {
 
     // Constants

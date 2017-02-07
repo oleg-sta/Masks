@@ -21,19 +21,15 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
 import ru.flightlabs.masks.CompModel;
-import ru.flightlabs.masks.FastView;
+import ru.flightlabs.masks.camera.FastCameraView;
 import ru.flightlabs.masks.ModelLoaderTask;
 import ru.flightlabs.masks.R;
 import ru.flightlabs.masks.Static;
 import ru.flightlabs.masks.adapter.MasksPagerAdapter;
-import ru.flightlabs.masks.renderer.TestRenderer;
+import ru.flightlabs.masks.renderer.MaskRenderer;
 
 /**
- * Created by sov on 06.02.2017.
- */
-
-/**
- * experimental fast activity with getting frame from camera on put it in GlView
+ * Acivity uses direct frame byte and opengl view
  */
 public class ActivityFast extends Activity {
 
@@ -56,7 +52,7 @@ public class ActivityFast extends Activity {
 
                     Static.libsLoaded = true;
                     // load cascade file from application resources
-                    Log.e(TAG, "findEyes onManagerConnected");
+                    Log.e(TAG, "findLandMarks onManagerConnected");
                     compModel.loadHaarModel(Static.resourceDetector[0]);
                 }
                 break;
@@ -78,7 +74,7 @@ public class ActivityFast extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fast_view);
 
-        FastView sv = (FastView) findViewById(R.id.fd_fase_surface_view);
+        FastCameraView sv = (FastCameraView) findViewById(R.id.fd_fase_surface_view);
         mHolder = sv.getHolder();
         mHolder.addCallback(sv);
 
@@ -123,7 +119,7 @@ public class ActivityFast extends Activity {
         gLSurfaceView.getHolder().setFormat(PixelFormat.TRANSPARENT);
         gLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         //gLSurfaceView.setZOrderOnTop(true);
-        TestRenderer meRender = new TestRenderer(this, eyesResources, compModel);
+        MaskRenderer meRender = new MaskRenderer(this, eyesResources, compModel);
         gLSurfaceView.setEGLContextClientVersion(2);
         gLSurfaceView.setRenderer(meRender);
         gLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);//RENDERMODE_WHEN_DIRTY);

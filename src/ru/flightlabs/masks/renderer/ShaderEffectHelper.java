@@ -19,7 +19,6 @@ import java.util.Random;
 
 import ru.flightlabs.masks.R;
 import ru.flightlabs.masks.Static;
-import ru.flightlabs.masks.camera.Effect;
 import ru.flightlabs.masks.utils.FileUtils;
 import ru.flightlabs.masks.utils.OpenGlHelper;
 import ru.flightlabs.masks.utils.PoseHelper;
@@ -45,7 +44,7 @@ public class ShaderEffectHelper {
     int[] programs;
     Map<String, Model> models = new HashMap<>();
     Map<String, Integer> textures = new HashMap<>();
-    public Map<Integer, Effect> effectsMap = new HashMap<>();
+    public Map<Integer, EffectShader> effectsMap = new HashMap<>();
 
     private static final String TAG = "ShaderEffectHelper";
 
@@ -80,7 +79,7 @@ public class ShaderEffectHelper {
         // init effects
         String[] effects = context.getResources().getStringArray(R.array.effects);
         for (int i = 0; i < effects.length; i++) {
-            effectsMap.put(i, Effect.parseString(effects[i]));
+            effectsMap.put(i, EffectShader.parseString(effects[i]));
         }
         load3dModel();
 
@@ -120,7 +119,7 @@ public class ShaderEffectHelper {
             OpenGlHelper.changeTexture(context, eyesResources.getResourceId(Static.newIndexEye, 0), maskTextureid);
         }
 
-        Effect effect = effectsMap.get(indexEye);
+        EffectShader effect = effectsMap.get(indexEye);
         int programId = programs[effect.programId];
         if (!"".equals(effect.textureName)) {
             int vPos = GLES20.glGetAttribLocation(programs[0], "vPosition");

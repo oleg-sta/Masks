@@ -1,6 +1,5 @@
 package ru.flightlabs.masks.renderer;
 
-import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.util.Log;
@@ -12,9 +11,9 @@ import javax.microedition.khronos.opengles.GL10;
  * Created by sov on 10.12.2016.
  */
 
-public class MyGLRenderer implements GLSurfaceView.Renderer {
+public class MyTestGLRenderer implements GLSurfaceView.Renderer {
 
-    private Cube mCube = new Cube();
+    private CubeTest mCube = new CubeTest();
     private float mCubeRotation;
 
 

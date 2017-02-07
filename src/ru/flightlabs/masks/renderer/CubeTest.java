@@ -7,10 +7,10 @@ import java.nio.FloatBuffer;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * Created by sov on 10.12.2016.
+ * 3d model for test only
  */
 
-public class Cube {
+public class CubeTest {
     private FloatBuffer mVertexBuffer;
     public FloatBuffer mColorBuffer;
     private ByteBuffer mIndexBuffer;
@@ -45,7 +45,7 @@ public class Cube {
             3, 0, 1, 3, 1, 2
     };
 
-    public Cube() {
+    public CubeTest() {
         ByteBuffer byteBuf = ByteBuffer.allocateDirect(vertices.length * 4);
         byteBuf.order(ByteOrder.nativeOrder());
         mVertexBuffer = byteBuf.asFloatBuffer();

@@ -25,7 +25,7 @@
             </intent-filter-->
         </activity>
         <activity
-            android:name=".activity.FdActivity2"
+            android:name=".activity.FdActivityOpenglCamera"
             android:configChanges="keyboardHidden|orientation"
             android:label="Masks1"
             android:screenOrientation="portrait" >

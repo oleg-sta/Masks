@@ -37,7 +37,10 @@ import ru.flightlabs.masks.adapter.EffectItemsAdapter;
 import ru.flightlabs.masks.ModelLoaderTask;
 import ru.flightlabs.masks.R;
 
-public class FdActivity2 extends Activity {
+/**
+ * this activity uses opengl camera frame, very slow getting
+ */
+public class FdActivityOpenglCamera extends Activity {
 
     CompModel compModel;
 
@@ -80,7 +83,7 @@ public class FdActivity2 extends Activity {
 
                     mOpenCvCameraView.enableView();
                     // load cascade file from application resources
-                    Log.e(TAG, "findEyes onManagerConnected");
+                    Log.e(TAG, "findLandMarks onManagerConnected");
                     compModel.loadHaarModel(resourceDetector[0]);
                 }
                 break;
@@ -94,7 +97,7 @@ public class FdActivity2 extends Activity {
 
     protected boolean drawMask;
 
-    public FdActivity2() {
+    public FdActivityOpenglCamera() {
         Log.i(TAG, "Instantiated new " + this.getClass());
     }
 
