@@ -313,7 +313,7 @@ public class FdActivity extends Activity {
         gLSurfaceView = (GLSurfaceView)findViewById(R.id.fd_glsurface);
         gLSurfaceView.getHolder().setFormat(PixelFormat.TRANSPARENT);
         gLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-        gLSurfaceView.setZOrderOnTop(true);
+        gLSurfaceView.setZOrderOnTop(true); // FIXME but why did you do that? because i can
         meRender = new MyGLRenderer2(this, eyesResources);
         gLSurfaceView.setRenderer(meRender);
 

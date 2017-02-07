@@ -25,7 +25,7 @@ public class CompModel {
     private static final String TAG = "CompModel_class";
 
     public CascadeClassifier mJavaDetector;
-    public DetectionBasedTracker mNativeDetector;
+    public volatile DetectionBasedTracker mNativeDetector;
     public Line[] lines;
     public Triangle[] trianlges;
     public File mCascadeFile;

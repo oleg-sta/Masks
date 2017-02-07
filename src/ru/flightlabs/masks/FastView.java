@@ -24,14 +24,29 @@ import ru.flightlabs.masks.renderer.TestRenderer;
 
 public class FastView extends SurfaceView implements SurfaceHolder.Callback, Camera.PreviewCallback {
 
+    private static final int MAGIC_TEXTURE_ID = 10;
+    public static boolean cameraFacing;
     private byte mBuffer[];
     private static final String TAG = "FastView";
     private SurfaceHolder mHolder;
     private Camera mCamera;
+    private SurfaceTexture mSurfaceTexture;
 
     public FastView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mCamera = Camera.open();
+
+        int cameraIndex = 0;
+        int numberOfCameras = android.hardware.Camera.getNumberOfCameras();
+        android.hardware.Camera.CameraInfo cameraInfo = new android.hardware.Camera.CameraInfo();
+        for (int i = 0; i < numberOfCameras; i++) {
+            android.hardware.Camera.getCameraInfo(i, cameraInfo);
+            if (cameraInfo.facing == android.hardware.Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                cameraFacing = true;
+                cameraIndex = i;
+            }
+        }
+
+        mCamera = Camera.open(cameraIndex);
 
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
@@ -45,6 +60,7 @@ public class FastView extends SurfaceView implements SurfaceHolder.Callback, Cam
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        Log.d(TAG, "surfaceCreated");
         try {
             mCamera.setPreviewDisplay(holder);
             mCamera.startPreview();
@@ -72,6 +88,7 @@ public class FastView extends SurfaceView implements SurfaceHolder.Callback, Cam
         } catch (Exception e){
             // ignore: tried to stop a non-existent preview
         }
+
 
         Camera.Parameters params = mCamera.getParameters();
         Log.d(TAG, "preview format " + params.getPreviewFormat());
@@ -108,8 +125,11 @@ public class FastView extends SurfaceView implements SurfaceHolder.Callback, Cam
             mCamera.setPreviewCallbackWithBuffer(this);
 
             // do not preview
-            SurfaceTexture mSurfaceTexture = new SurfaceTexture(10);
-            mCamera.setPreviewTexture(mSurfaceTexture);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                mSurfaceTexture = new SurfaceTexture(MAGIC_TEXTURE_ID);
+                mCamera.setPreviewTexture(mSurfaceTexture);
+            } else
+                mCamera.setPreviewDisplay(null);
 
             mCamera.startPreview();
             //mCamera.setPreviewCallback(this);
@@ -123,6 +143,7 @@ public class FastView extends SurfaceView implements SurfaceHolder.Callback, Cam
 
     @Override
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+        Log.d(TAG, "surfaceDestroyed");
         mCamera.stopPreview();
         mCamera.setPreviewCallback(null);
         mCamera.release();

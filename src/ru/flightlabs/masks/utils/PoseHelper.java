@@ -11,15 +11,22 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfDouble;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.MatOfPoint3f;
+import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Point3;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
+import java.io.File;
 import java.util.ArrayList;
 
+import ru.flightlabs.masks.CompModel;
+import ru.flightlabs.masks.DetectionBasedTracker;
 import ru.flightlabs.masks.R;
+import ru.flightlabs.masks.activity.FdActivity2;
 import ru.flightlabs.masks.activity.Settings;
+import ru.flightlabs.masks.camera.Effect;
 import ru.flightlabs.masks.renderer.Model;
 
 /**
@@ -28,6 +35,9 @@ import ru.flightlabs.masks.renderer.Model;
 
 public class PoseHelper {
 
+    CompModel compModel;
+
+    private static final String TAG = "PoseHelper";
     int[] p3d1;
     int[] p2d1;
     Mat intrinsics;
@@ -42,7 +52,13 @@ public class PoseHelper {
     Mat cvToGl;
     Mat rotation;
     Mat viewMatrix;
+    Mat initialParams;
+    String modelPath;
 
+
+    public PoseHelper(CompModel compModel) {
+        this.compModel = compModel;
+    }
     public void init(Context context, int width, int height) {
         intrinsics = Mat.eye(3, 3, CvType.CV_64F);
         intrinsics.put(0, 0, width); // ?
@@ -83,6 +99,89 @@ public class PoseHelper {
 
         rotation = new Mat(4, 4, CvType.CV_64F);
         viewMatrix = new Mat(4, 4, CvType.CV_64F, new Scalar(0));
+    }
+
+    public PoseResult findShapeAndPose(Mat findGray, int mAbsoluteFaceSize, Mat mRgba, int width, int height, boolean shapeBlends, Model model, Context context) {
+        MatOfRect faces = compModel.findFaces(findGray, mAbsoluteFaceSize);
+        DetectionBasedTracker mNativeDetector = compModel.mNativeDetector;
+        Rect[] facesArray = faces.toArray();
+        final boolean haveFace = facesArray.length > 0;
+        Log.i(TAG, "onCameraTexture5 " + haveFace);
+        Point center = new Point(0.5, 0.5);
+        Point center2 = new Point(0.5, 0.5);
+        Point[] foundEyes = null;
+        if (haveFace) {
+            if (Settings.debugMode) {
+                Imgproc.rectangle(mRgba, facesArray[0].tl(), facesArray[0].br(), new Scalar(255, 10 ,10), 3);
+            }
+            center = OpencvUtils.convertToGl(new Point((2 * facesArray[0].x + facesArray[0].width) / 2.0, (2 * facesArray[0].y + facesArray[0].height) / 2.0), width, height);
+            if (mNativeDetector != null) {
+                foundEyes = mNativeDetector.findEyes(findGray, facesArray[0]);
+                // FIXME temp
+                if (Settings.debugMode) {
+                    for (Point p : foundEyes) {
+                        Imgproc.circle(mRgba, p, 2, new Scalar(255, 10, 10));
+                    }
+                }
+                center = OpencvUtils.convertToGl(new Point((foundEyes[36].x + foundEyes[39].x) / 2.0, (foundEyes[36].y + foundEyes[39].y) / 2.0), width, height);
+                center2 = OpencvUtils.convertToGl(new Point((foundEyes[42].x + foundEyes[45].x) / 2.0, (foundEyes[42].y + foundEyes[45].y) / 2.0), width, height);
+            }
+        }
+
+        Mat glMatrix = null;
+        int indexEye = FdActivity2.currentIndexEye;
+        Log.i(TAG, "indexEye " + indexEye);
+        PoseHelper.bindMatrix(100, 100);
+
+        if (foundEyes != null) {
+            if (shapeBlends) {
+                Mat inputLandMarks = new Mat(68, 2, CvType.CV_64FC1);
+                double[] buff = new double[inputLandMarks.cols() * inputLandMarks.rows()];
+                for (int i = 0; i < foundEyes.length; i++) {
+                    buff[i * 2] = foundEyes[i].x;
+                    buff[i * 2 + 1] = foundEyes[i].y;
+                }
+                inputLandMarks.put(0, 0, buff);
+                Mat output3dShape = new Mat(113, 3, CvType.CV_64FC1);
+                if (initialParams == null) {
+                    initialParams = new Mat(20, 1, CvType.CV_64FC1, new Scalar(0));
+                }
+                if (modelPath == null) {
+                    if (new File("/storage/extSdCard/models").exists()) {
+                        modelPath = "/storage/extSdCard/models";
+                    } else {
+                        File cascadeDir = context.getDir("models", Context.MODE_PRIVATE);
+                        Decompress.unzipFromAssets(context, "models.zip", cascadeDir.getPath());
+                        modelPath = cascadeDir.getPath();
+                    }
+                    Log.i(TAG, "onCameraTexture1 " + modelPath);
+                }
+                mNativeDetector.morhpFace(inputLandMarks, output3dShape, initialParams, modelPath, true, Settings.useLinear);
+                double[] buffShape = new double[output3dShape.cols() * output3dShape.rows()];
+                output3dShape.get(0, 0, buffShape);
+                int rows = output3dShape.rows();
+                for (int i = 0; i < rows; i++) {
+                    model.tempV[i * 3] = (float) buffShape[i * 3];
+                    model.tempV[i * 3 + 1] = (float) buffShape[i * 3 + 1];
+                    model.tempV[i * 3 + 2] = (float) buffShape[i * 3 + 2];
+                }
+                model.recalcV();
+            }
+            glMatrix = findPose(model, foundEyes, mRgba);
+            //PoseHelper.drawDebug(mRgba, model, glMatrix);
+            if (Settings.debugMode) {
+                for (Point e : foundEyes) {
+                    Imgproc.circle(mRgba, e, 3, new Scalar(255, 255, 255), -1);
+                }
+            }
+
+        }
+        PoseResult result = new PoseResult();
+        result.glMatrix = glMatrix;
+        result.foundFeatures = foundEyes != null;
+        result.leftEye = center;
+        result.rightEye = center2;
+        return result;
     }
 
     public Mat findPose(Model model, Point[] foundEyes, Mat mRgba) {
@@ -271,6 +370,14 @@ public class PoseHelper {
         float[] mMatrix = new float[16];
         Matrix.multiplyMM(mMatrix, 0, createProjectionMatrix(width, height), 0, createViewMatrix(), 0);
         return mMatrix;
+    }
+
+
+    public static class PoseResult {
+        public Mat glMatrix;
+        public boolean foundFeatures;
+        public Point leftEye;
+        public Point rightEye;
     }
 
 }

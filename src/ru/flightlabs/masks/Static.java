@@ -10,4 +10,5 @@ public class Static {
     public static boolean makePhoto2;
 
     public static boolean drawOrigTexture;
+    public static boolean libsLoaded;
 }

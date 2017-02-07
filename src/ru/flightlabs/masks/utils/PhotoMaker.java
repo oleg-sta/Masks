@@ -7,7 +7,9 @@ import android.media.MediaScannerConnection;
 import android.os.Environment;
 
 import org.opencv.android.Utils;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 
@@ -19,6 +21,13 @@ import ru.flightlabs.masks.activity.Settings;
 
 public class PhotoMaker {
 
+    public static void makePhotoFromGrey(Mat mGrey, Context context) {
+        Mat rgba = new Mat(mGrey.width(), mGrey.height(), CvType.CV_8UC4);
+        Imgproc.cvtColor(mGrey, rgba, Imgproc.COLOR_GRAY2RGBA);
+        makePhoto(rgba, context);
+        rgba.release();
+
+    }
     public static void makePhoto(Mat mRgba, Context context) {
         File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
         File newFile = new File(file, Settings.DIRECTORY_SELFIE);
