@@ -269,7 +269,7 @@ public class FdActivity2 extends Activity {
         super.onResume();
 
         final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
-        Settings.debugMode = prefs.getBoolean(Settings.DEBUG_MODE, true);
+        //Settings.debugMode = prefs.getBoolean(Settings.DEBUG_MODE, true);
         OpenCVLoader.initDebug();
         mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         new ModelLoaderTask(progressBar).execute(compModel);

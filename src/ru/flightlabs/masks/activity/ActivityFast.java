@@ -126,7 +126,7 @@ public class ActivityFast extends Activity {
         TestRenderer meRender = new TestRenderer(this, eyesResources, compModel);
         gLSurfaceView.setEGLContextClientVersion(2);
         gLSurfaceView.setRenderer(meRender);
-        gLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        gLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);//RENDERMODE_WHEN_DIRTY);
         //gLSurfaceView.setZOrderOnTop(false);
 
     }
@@ -136,7 +136,7 @@ public class ActivityFast extends Activity {
         Log.i(TAG, "onResume");
         super.onResume();
         final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
-        Settings.debugMode = prefs.getBoolean(Settings.DEBUG_MODE, true);
+        //Settings.debugMode = prefs.getBoolean(Settings.DEBUG_MODE, true);
         Static.libsLoaded = false;
         OpenCVLoader.initDebug();
         mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);

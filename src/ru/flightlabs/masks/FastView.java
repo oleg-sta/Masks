@@ -160,10 +160,12 @@ public class FastView extends SurfaceView implements SurfaceHolder.Callback, Cam
         if (TestRenderer.buffer == null) {
             TestRenderer.buffer = new byte[data.length];
         }
-        // TODO synchronize copying buffer
-        // TODO find face and features here or another thread for optimization
-        System.arraycopy(data, 0, TestRenderer.buffer, 0, data.length);
-        ActivityFast.gLSurfaceView.requestRender();
+        synchronized (FastView.class) {
+            // TODO synchronize copying buffer
+            // TODO find face and features here or another thread for optimization
+            System.arraycopy(data, 0, TestRenderer.buffer, 0, data.length);
+            //ActivityFast.gLSurfaceView.requestRender();
+        }
     }
 
 }

@@ -67,6 +67,7 @@ public class TestRenderer implements GLSurfaceView.Renderer {
         GLES20.glGenTextures(2, texDraw, 0);
         Log.i(TAG, "onSurfaceCreated2 " + texDraw[0]);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texDraw[0]);
+        // FIXME use pixel to pixel, not average neighbours
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
@@ -100,55 +101,53 @@ public class TestRenderer implements GLSurfaceView.Renderer {
         int mCameraWidth = CameraHelper.mCameraWidth;
         int mCameraHeight = CameraHelper.mCameraHeight;
 
-        if (buffer != null) {
+        if (buffer != null && Static.libsLoaded) {
 
             PoseHelper.PoseResult poseResult = null;
-            // TODO find face and ...
-            if (Static.libsLoaded) {
+            synchronized (FastView.class) {
                 if (greyTemp == null) {
                     greyTemp = new Mat(mCameraHeight, mCameraWidth, CvType.CV_8UC1);
                     mRgbaDummy = new Mat(mCameraHeight, mCameraWidth, CvType.CV_8UC4);
                 }
                 greyTemp.put(0, 0, buffer);
 
-                // if back camera
-                Mat grey = greyTemp.t();
-                if (!FastView.cameraFacing) {
-                    Core.flip(grey, grey, 1);
-                } else {
-                    Core.flip(grey, grey, -1);
+
+                int cameraSize = mCameraWidth * mCameraHeight;
+                if (buffer2 == null) {
+                    buffer2 = ByteBuffer.allocateDirect(cameraSize);
+                    buffer3 = ByteBuffer.allocateDirect(cameraSize / 2);
                 }
-
-                int mAbsoluteFaceSize = Math.round((int) (mCameraHeight * 0.33));
-                boolean shapeBlendsd = shaderHelper.effectsMap.get(Static.newIndexEye).needBlendShape;
-                poseResult = poseHelper.findShapeAndPose(grey, mAbsoluteFaceSize, mRgbaDummy, widthSurf, heightSurf, shapeBlendsd, shaderHelper.model, activity);
-
+                buffer2.put(buffer, 0, cameraSize);
+                buffer2.position(0);
+                buffer3.put(buffer, cameraSize, cameraSize / 2);
+                buffer3.position(0);
+                Log.i(TAG, "onDrawFrame2 " + buffer[0]);
+                Log.i(TAG, "onDrawFrame2 " + buffer2.limit());
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texDraw[0]);
+                GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, mCameraWidth, (int) (mCameraHeight), 0,
+                        GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, buffer2);
+                GLES20.glFlush();
+                Log.i(TAG, "onDrawFrame2 " + buffer2.limit());
+                //buffer2.position(heightSurf * widthSurf);
+                Log.i(TAG, "onDrawFrame2 " + buffer2.limit());
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texDraw[1]);
+                GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, mCameraWidth, (int) (mCameraHeight * 0.5), 0,
+                        GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, buffer3);
+                GLES20.glFlush();
+                Log.i(TAG, "onDrawFrame2 " + buffer2.limit());
+                Log.i(TAG, "onDrawFrame3");
+            }
+            // if back camera
+            Mat grey = greyTemp.t();
+            if (!FastView.cameraFacing) {
+                Core.flip(grey, grey, 1);
+            } else {
+                Core.flip(grey, grey, -1);
             }
 
-            int cameraSize = mCameraWidth * mCameraHeight;
-            if (buffer2 == null) {
-                buffer2 = ByteBuffer.allocateDirect(cameraSize);
-                buffer3 = ByteBuffer.allocateDirect(cameraSize / 2);
-            }
-            buffer2.put(buffer, 0, cameraSize);
-            buffer2.position(0);
-            buffer3.put(buffer, cameraSize, cameraSize / 2);
-            buffer3.position(0);
-            Log.i(TAG, "onDrawFrame2 " + buffer[0]);
-            Log.i(TAG, "onDrawFrame2 " + buffer2.limit());
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texDraw[0]);
-            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, mCameraWidth, (int) (mCameraHeight), 0,
-                    GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, buffer2);
-            GLES20.glFlush();
-            Log.i(TAG, "onDrawFrame2 " + buffer2.limit());
-            //buffer2.position(heightSurf * widthSurf);
-            Log.i(TAG, "onDrawFrame2 " + buffer2.limit());
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texDraw[1]);
-            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, mCameraWidth, (int) (mCameraHeight * 0.5), 0,
-                    GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, buffer3);
-            GLES20.glFlush();
-            Log.i(TAG, "onDrawFrame2 " + buffer2.limit());
-            Log.i(TAG, "onDrawFrame3");
+            int mAbsoluteFaceSize = Math.round((int) (mCameraWidth * 0.33));
+            boolean shapeBlendsd = shaderHelper.effectsMap.get(Static.newIndexEye).needBlendShape;
+            poseResult = poseHelper.findShapeAndPose(grey, mAbsoluteFaceSize, mRgbaDummy, widthSurf, heightSurf, shapeBlendsd, shaderHelper.model, activity);
 
             GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, texFbo2[0]);
             GLES20.glViewport(0, 0, widthSurf, heightSurf);
