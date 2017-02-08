@@ -60,8 +60,7 @@
             android:layout_height="40dp"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:layout_marginTop="54dp"
-            android:layout_alignTop="@+id/gallery_button" />
+            android:layout_marginTop="54dp" />
 
         <CheckBox
             android:id="@+id/checkDebug"
@@ -69,8 +68,7 @@
             android:layout_height="40dp"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:layout_marginTop="104dp"
-            android:layout_alignTop="@+id/gallery_button" />
+            android:layout_marginTop="104dp" />
 
         <ImageView
             android:id="@+id/rotate_camera"

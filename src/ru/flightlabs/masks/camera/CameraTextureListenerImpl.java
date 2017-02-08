@@ -17,7 +17,6 @@ import java.nio.ByteOrder;
 
 import ru.flightlabs.masks.CompModel;
 import ru.flightlabs.masks.Static;
-import ru.flightlabs.masks.activity.FdActivityOpenglCamera;
 import ru.flightlabs.masks.activity.Settings;
 import ru.flightlabs.masks.renderer.EffectShader;
 import ru.flightlabs.masks.renderer.ShaderEffectHelper;
@@ -82,7 +81,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         poseHelper = new PoseHelper(compModel);
         poseHelper.init(act, width, height);
 
-        shaderHelper = new ShaderEffectHelper(act, FdActivityOpenglCamera.eyesResources);
+        shaderHelper = new ShaderEffectHelper(act);
         shaderHelper.init();
         Log.i(TAG, "onCameraViewStarted");
     }
@@ -102,7 +101,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, grayFbo[0]);
         GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER, GLES20.GL_COLOR_ATTACHMENT0, GLES20.GL_TEXTURE_2D, texGray[0], 0);
 
-        int vertexShaderId = ShaderUtils.createShader(GLES20.GL_VERTEX_SHADER, FileUtils.getStringFromAsset(act.getAssets(), "shaders/vss.glsl"));
+        int vertexShaderId = ShaderUtils.createShader(GLES20.GL_VERTEX_SHADER, FileUtils.getStringFromAsset(act.getAssets(), "shaders/vss_2d.glsl"));
         int fragmentShaderId = ShaderUtils.createShader(GLES20.GL_FRAGMENT_SHADER, FileUtils.getStringFromAsset(act.getAssets(), "shaders/fss_grey.glsl"));
         programGrey = ShaderUtils.createProgram(vertexShaderId, fragmentShaderId);
     }
@@ -145,7 +144,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
             int vTex = GLES20.glGetAttribLocation(programGrey, "vTexCoord");
             GLES20.glEnableVertexAttribArray(vPos);
             GLES20.glEnableVertexAttribArray(vTex);
-            ShaderEffectHelper.shaderEfffect2d(new Point(0, 0), new Point(width, height), texIn, programGrey, vPos, vTex);
+            ShaderEffectHelper.shaderEffect2dWholeScreen(new Point(0, 0), new Point(width, height), texIn, programGrey, vPos, vTex);
             GLES20.glReadPixels(0, 0, (width + 3) / 4, height, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, m_bbPixelsGrey);
             m_bbPixelsGrey.rewind();
             mGrayprogram.put(0, 0, m_bbPixelsGrey.array());
@@ -215,7 +214,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         GLES20.glViewport(0, 0, width, height);
 
         // shader effect
-        shaderHelper.makeShader(indexEye, poseResult, width, height, texIn, time, iGlobTime);
+        shaderHelper.makeShaderMask(indexEye, poseResult, width, height, texIn, time, iGlobTime);
           // shader effect
 
         if (makeAfterPhoto) {

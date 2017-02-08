@@ -127,6 +127,7 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
         try {
             //mCamera.setPreviewDisplay(mHolder);
 
+            // TODO if necessary you could use more buffer for speed
             mCamera.addCallbackBuffer(mBuffer);
             mCamera.setPreviewCallbackWithBuffer(this);
 
@@ -159,15 +160,17 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         Log.d(TAG, "Got a camera frame " + data.length);
-        mCamera.addCallbackBuffer(mBuffer);
         // TODO copy data to another bufferFromCamera
         if (MaskRenderer.bufferFromCamera == null) {
             MaskRenderer.bufferFromCamera = new byte[data.length];
         }
         synchronized (FastCameraView.class) {
             // TODO find face and features here or another thread for optimization
+            // TODO we can not copy buffer just find face features, morph face and let it go to renderer
             System.arraycopy(data, 0, MaskRenderer.bufferFromCamera, 0, data.length);
         }
+        // we should add buffer to queue, dut to buffer
+        mCamera.addCallbackBuffer(mBuffer);
     }
 
 }

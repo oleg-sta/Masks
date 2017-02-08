@@ -1,10 +1,15 @@
 package ru.flightlabs.masks.utils;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
+import android.util.Log;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Created by sov on 06.01.2017.
@@ -12,6 +17,8 @@ import android.opengl.GLUtils;
 
 public class OpenGlHelper {
 
+
+    private static final String TAG = "OpenGlHelper";
 
     public static int loadTexture(final Context context, final int resourceId)
     {
@@ -55,5 +62,28 @@ public class OpenGlHelper {
         Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), resourceID);
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
         bitmap.recycle();
+    }
+
+    public static void changeTexture(final Context context, String assetFileName, int texId) {
+        Log.i(TAG, "changeTexture " + assetFileName);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texId);
+        // Load the bitmap into the bound texture.
+        Bitmap bitmap = getBitmapFromAsset(context, assetFileName);
+        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+        bitmap.recycle();
+    }
+
+    public static Bitmap getBitmapFromAsset(Context context, String filePath) {
+        AssetManager assetManager = context.getAssets();
+        InputStream istr;
+        Bitmap bitmap = null;
+        try {
+            istr = assetManager.open(filePath);
+            bitmap = BitmapFactory.decodeStream(istr);
+        } catch (IOException e) {
+            // handle exception
+        }
+
+        return bitmap;
     }
 }

@@ -1,7 +1,6 @@
 package ru.flightlabs.masks.renderer;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.util.Log;
@@ -17,10 +16,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import ru.flightlabs.makeup.EditorEnvironment;
+import ru.flightlabs.makeup.ResourcesApp;
 import ru.flightlabs.masks.R;
 import ru.flightlabs.masks.Static;
 import ru.flightlabs.masks.utils.FileUtils;
 import ru.flightlabs.masks.utils.OpenGlHelper;
+import ru.flightlabs.masks.utils.PointsConverter;
 import ru.flightlabs.masks.utils.PoseHelper;
 import ru.flightlabs.masks.utils.ShaderUtils;
 
@@ -31,26 +33,33 @@ import ru.flightlabs.masks.utils.ShaderUtils;
 public class ShaderEffectHelper {
 
     private Context context;
-    TypedArray eyesResources;
     // 3d
     private int vPos3d;
     private int vTexFor3d;
 
     private int maskTextureid;
+
+    // for makeup
+    private int eyeShadowTextureid;
+    private int eyeLashesTextureid;
+    private int eyeLineTextureid;
+
+
     // 3d
     public Model model;
     float[] verticesParticels;
 
     int[] programs;
+    int program2dJustCopy;
+    int program2dTriangles;
     Map<String, Model> models = new HashMap<>();
-    Map<String, Integer> textures = new HashMap<>();
+    //Map<String, Integer> textures = new HashMap<>();
     public Map<Integer, EffectShader> effectsMap = new HashMap<>();
 
     private static final String TAG = "ShaderEffectHelper";
 
-    public ShaderEffectHelper(Context contex, TypedArray eyesResources) {
+    public ShaderEffectHelper(Context contex) {
         this.context = contex;
-        this.eyesResources = eyesResources;
     }
     public void init() {
         Log.i(TAG, "init");
@@ -83,50 +92,55 @@ public class ShaderEffectHelper {
         }
         load3dModel();
 
+        program2dJustCopy = ShaderUtils.createProgram(ShaderUtils.createShader(GLES20.GL_VERTEX_SHADER, FileUtils.getStringFromAsset(context.getAssets(), "shaders/vss_2d.glsl")), ShaderUtils.createShader(GLES20.GL_FRAGMENT_SHADER, FileUtils.getStringFromAsset(context.getAssets(), "shaders/fss_2d_simple.glsl")));
+        program2dTriangles = ShaderUtils.createProgram(ShaderUtils.createShader(GLES20.GL_VERTEX_SHADER, FileUtils.getStringFromAsset(context.getAssets(), "shaders/vss_2d.glsl")), ShaderUtils.createShader(GLES20.GL_FRAGMENT_SHADER, FileUtils.getStringFromAsset(context.getAssets(), "shaders/fss_solid.glsl")));
+
     }
 
     private void load3dModel() {
         Log.i(TAG, "load3dModel");
         model = new Model(R.raw.for_android_test,
                 context);
-        //if (true) return;
         maskTextureid = OpenGlHelper.loadTexture(context, R.raw.m1_2);
+        eyeShadowTextureid = OpenGlHelper.loadTexture(context, R.raw.eye2_0000_smokey_eeys);
+        eyeLashesTextureid = OpenGlHelper.loadTexture(context, R.raw.eye2_0000_lash);
+        eyeLineTextureid = OpenGlHelper.loadTexture(context, R.raw.eye2_0000_line);
+
         Log.i(TAG, "load3dModel2");
         Model modelGlasses = new Model(R.raw.glasses_3d,
                 context);
         Log.i(TAG, "load3dModel3");
-        int glassesTextureid = OpenGlHelper.loadTexture(context, R.raw.glasses);
-
         Model modelHat = new Model(R.raw.hat,
                 context);
-        int hatTextureid = OpenGlHelper.loadTexture(context, R.raw.hat_tex);
         models.put("model", model);
-        textures.put("maskTextureid", maskTextureid);
         models.put("modelGlasses", modelGlasses);
-        textures.put("glassesTextureid", glassesTextureid);
         models.put("modelHat", modelHat);
-        textures.put("hatTextureid", hatTextureid);
         models.put("star", new Model(R.raw.star, context));
         Log.i(TAG, "load3dModel exit");
     }
 
-    public void makeShader(int indexEye, PoseHelper.PoseResult poseResult, int width, int height, int texIn, long time, int iGlobTime) {
+    public void makeShaderMask(int indexEye, PoseHelper.PoseResult poseResult, int width, int height, int texIn, long time, int iGlobTime) {
 
+        EffectShader effect = effectsMap.get(indexEye);
         // TODO do in background
         // FIXME not in place
         if (Static.newIndexEye != Static.currentIndexEye) {
             Static.currentIndexEye = Static.newIndexEye;
-            OpenGlHelper.changeTexture(context, eyesResources.getResourceId(Static.newIndexEye, 0), maskTextureid);
+            if (effect.textureName != null && !"".equals(effect.textureName)) {
+                OpenGlHelper.changeTexture(context, "textures/" + effect.textureName + ".png", maskTextureid);
+            }
         }
 
-        EffectShader effect = effectsMap.get(indexEye);
         int programId = programs[effect.programId];
         if (!"".equals(effect.textureName)) {
+            // 3d effect
+            // first we copy whole texture to buffer
             int vPos = GLES20.glGetAttribLocation(programs[0], "vPosition");
             int vTex = GLES20.glGetAttribLocation(programs[0], "vTexCoord");
             GLES20.glEnableVertexAttribArray(vPos);
             GLES20.glEnableVertexAttribArray(vTex);
-            shaderEfffect2d(poseResult.leftEye, poseResult.rightEye, texIn, programs[0], vPos, vTex);
+            shaderEffect2dWholeScreen(poseResult.leftEye, poseResult.rightEye, texIn, programs[0], vPos, vTex);
+            // then we draw 3d/2d object on it
             if (poseResult.foundFeatures) {
                 // crazy simple animation
                 if (indexEye == 4) {
@@ -138,12 +152,13 @@ public class ShaderEffectHelper {
                     int uCenter2 = GLES20.glGetUniformLocation(programId, "iGlobalTime");
                     Log.i(TAG, "onCameraTexture4443 " + uCenter2 + " " + iGlobTime);
                     GLES20.glUniform1f(uCenter2, (float) iGlobTime);
-                    shaderEfffect3dParticle(poseResult.glMatrix, width, height, programId);
+                    effect3dParticle(poseResult.glMatrix, width, height, programId);
                 } else {
-                    shaderEfffect3d(poseResult.glMatrix, texIn, width, height, models.get(effect.model3dName), textures.get(effect.textureName), effect.alpha, programId);
+                    shaderEffect3d(poseResult.glMatrix, texIn, width, height, models.get(effect.model3dName), maskTextureid, effect.alpha, programId);
                 }
             }
         } else {
+            // 2d effect on whole screen
             Log.i(TAG, "onCameraTexture444");
             int vPos = GLES20.glGetAttribLocation(programId, "vPosition");
             int vTex = GLES20.glGetAttribLocation(programId, "vTexCoord");
@@ -159,15 +174,57 @@ public class ShaderEffectHelper {
             Log.i(TAG, "onCameraTexture44412");
             if (indexEye == 10) {
                 // just experiment with fur
-                shaderEfffect2d(poseResult.leftEye, poseResult.rightEye, textures.get("maskTextureid"), programId, vPos, vTex);
+                shaderEffect2dWholeScreen(poseResult.leftEye, poseResult.rightEye, maskTextureid, programId, vPos, vTex);
             } else {
-                shaderEfffect2d(poseResult.leftEye, poseResult.rightEye, texIn, programId, vPos, vTex);
+                shaderEffect2dWholeScreen(poseResult.leftEye, poseResult.rightEye, texIn, programId, vPos, vTex);
             }
             Log.i(TAG, "onCameraTexture4445");
         }
     }
 
-    private void shaderEfffect3d(Mat glMatrix, int texIn, int width, int height, final Model modelToDraw, int modelTextureId, float alpha, int programId) {
+    public void makeShaderMakeUp(int indexEye, PoseHelper.PoseResult poseResult, int width, int height, int texIn, long time, int iGlobTime) {
+        Log.i(TAG, "onDrawFrame6 draw maekup");
+        int vPos2 = GLES20.glGetAttribLocation(program2dJustCopy, "vPosition");
+        int vTex2 = GLES20.glGetAttribLocation(program2dJustCopy, "vTexCoord");
+        GLES20.glEnableVertexAttribArray(vPos2);
+        GLES20.glEnableVertexAttribArray(vTex2);
+        ShaderEffectHelper.shaderEffect2dWholeScreen(poseResult.leftEye, poseResult.rightEye, texIn, program2dJustCopy, vPos2, vTex2);
+
+        if (poseResult.foundLandmarks != null) {
+            Point[] onImageEyeLeft = EditorEnvironment.getOnlyPoints(poseResult.foundLandmarks, 36, 6);
+            // TODO add checkbox for rgb or hsv bleding
+            if (EditorEnvironment.currentColor[EditorEnvironment.EYE_SHADOW] != -1) {
+                Log.i(TAG, "onDrawFrame6 draw maekup2");
+                int vPos22 = GLES20.glGetAttribLocation(program2dTriangles, "vPosition");
+                int vTex22 = GLES20.glGetAttribLocation(program2dTriangles, "vTexCoord");
+                GLES20.glEnableVertexAttribArray(vPos22);
+                GLES20.glEnableVertexAttribArray(vTex22);
+                // TODO use blendshape for eyes
+
+                if (EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_SHADOW] != EditorEnvironment.newIndexItem && EditorEnvironment.EYE_SHADOW == EditorEnvironment.catgoryNum) {
+                    EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_SHADOW] = EditorEnvironment.newIndexItem;
+                    OpenGlHelper.changeTexture(context, ResourcesApp.eyeshadowSmall.getResourceId(EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_SHADOW], 0), eyeShadowTextureid);
+                }
+                if (EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_LASH] != EditorEnvironment.newIndexItem && EditorEnvironment.EYE_LASH == EditorEnvironment.catgoryNum) {
+                    EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_LASH] = EditorEnvironment.newIndexItem;
+                    OpenGlHelper.changeTexture(context, ResourcesApp.eyelashesSmall.getResourceId(EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_LASH], 0), eyeLashesTextureid);
+                }
+                if (EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_LINE] != EditorEnvironment.newIndexItem && EditorEnvironment.EYE_LINE == EditorEnvironment.catgoryNum) {
+                    EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_LINE] = EditorEnvironment.newIndexItem;
+                    OpenGlHelper.changeTexture(context, ResourcesApp.eyelinesSmall.getResourceId(EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_LINE], 0), eyeLineTextureid);
+                }
+                ShaderEffectHelper.effect2dTriangles(program2dTriangles, texIn, eyeShadowTextureid, PointsConverter.convertFromPointsGlCoord(PointsConverter.addEyePoints(onImageEyeLeft), width, height), PointsConverter.convertFromPointsGlCoord(EditorEnvironment.pointsLeftEye, 512, 512), vPos22, vTex22, PointsConverter.convertTriangle(EditorEnvironment.trianglesLeftEye));
+                // TODO add right eye
+                // FIXME elements erase each other
+                //ShaderEffectHelper.effect2dTriangles(program2dTriangles, texIn, eyeLashesTextureid, PointsConverter.convertFromPointsGlCoord(PointsConverter.addEyePoints(onImageEyeLeft), width, height), PointsConverter.convertFromPointsGlCoord(EditorEnvironment.pointsLeftEye, 512, 512), vPos22, vTex22, PointsConverter.convertTriangle(EditorEnvironment.trianglesLeftEye));
+                //ShaderEffectHelper.effect2dTriangles(program2dTriangles, texIn, eyeLineTextureid, PointsConverter.convertFromPointsGlCoord(PointsConverter.addEyePoints(onImageEyeLeft), width, height), PointsConverter.convertFromPointsGlCoord(EditorEnvironment.pointsLeftEye, 512, 512), vPos22, vTex22, PointsConverter.convertTriangle(EditorEnvironment.trianglesLeftEye));
+                //filter.drawMask(leftEyeShadow, mRgba, pointsLeftEye, onImageEyeLeft, trianglesLeftEye, opacity[EYE_SHADOW] / 100.0, false, currentColor[1]);
+                //filter.drawMask(rightEyeShadow, mRgba, pointsRightEye, onImageEyeRight, trianglesRightEye, opacity[EYE_SHADOW] / 100.0, true, currentColor[1]);
+            }
+        }
+    }
+
+    private void shaderEffect3d(Mat glMatrix, int texIn, int width, int height, final Model modelToDraw, int modelTextureId, float alpha, int programId) {
         GLES20.glUseProgram(programId);
         int matrixMvp = GLES20.glGetUniformLocation(programId, "u_MVPMatrix");
 
@@ -214,39 +271,33 @@ public class ShaderEffectHelper {
         matrix[15] = 1;
         GLES20.glUniformMatrix4fv(matrixMvp, 1, false, matrix, 0);
 
-        FloatBuffer vertexData;
-        float[] vertices = {
+        FloatBuffer vertexData = convertArray(new float[]{
                 -1, -1, 0,
                 -1,  1, 0,
                 0, 0, 0
-        };
-        vertexData = ByteBuffer
-                .allocateDirect(vertices.length * 4)
-                .order(ByteOrder.nativeOrder())
-                .asFloatBuffer();
-        vertexData.put(vertices);
-        vertexData.position(0);
+        });
         GLES20.glVertexAttribPointer(vPos3d, 3, GLES20.GL_FLOAT, false, 0, vertexData);
 
 
-        ShortBuffer indexArray;
-        short[] indexes = {
+        ShortBuffer indexArray = convertArray(new short[]{
                 0, 1, 2
-        };
-        indexArray = ByteBuffer
-                .allocateDirect(indexes.length * 2)
-                .order(ByteOrder.nativeOrder()).asShortBuffer();
-        indexArray.put(indexes);
-        indexArray.position(0);
-
-
-//        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
+        });
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, 3, GLES20.GL_UNSIGNED_SHORT, indexArray);
         GLES20.glFlush();
 
     }
 
-    private void shaderEfffect3dParticle(Mat glMatrix, int width, int height, int programId) {
+    public static void effect2dParticle(int width, int height, int programId, int vPos, float[] verticesParticels) {
+        GLES20.glUseProgram(programId);
+
+        FloatBuffer vertexData = convertArray(verticesParticels);
+        GLES20.glVertexAttribPointer(vPos, 2, GLES20.GL_FLOAT, false, 0, vertexData);
+
+        GLES20.glDrawArrays(GLES20.GL_POINTS, 0, verticesParticels.length / 2);
+        GLES20.glFlush();
+    }
+
+    private void effect3dParticle(Mat glMatrix, int width, int height, int programId) {
         GLES20.glUseProgram(programId);
 
         int matrixMvp = GLES20.glGetUniformLocation(programId, "u_MVPMatrix");
@@ -256,25 +307,66 @@ public class ShaderEffectHelper {
         Matrix.multiplyMM(mMatrix, 0, PoseHelper.createProjectionMatrixThroughPerspective(width, height), 0, matrixView, 0);
         GLES20.glUniformMatrix4fv(matrixMvp, 1, false, mMatrix, 0);
 
-
-        FloatBuffer vertexData;
-        vertexData = ByteBuffer
-                .allocateDirect(verticesParticels.length * 4)
-                .order(ByteOrder.nativeOrder())
-                .asFloatBuffer();
-        vertexData.put(verticesParticels);
-        vertexData.position(0);
+        FloatBuffer vertexData = convertArray(verticesParticels);
         GLES20.glVertexAttribPointer(vPos3d, 3, GLES20.GL_FLOAT, false, 0, vertexData);
 
         GLES20.glDrawArrays(GLES20.GL_POINTS, 0, 10);
         GLES20.glFlush();
     }
 
-    public static void shaderEfffect2d(Point center, Point center2, int texIn, int programId, int poss, int texx) {
-        shaderEfffect2d(center, center2, texIn, programId, poss, texx, null);
+    public static void shaderEffect2dWholeScreen(Point center, Point center2, int texIn, int programId, int poss, int texx) {
+        shaderEffect2dWholeScreen(center, center2, texIn, programId, poss, texx, null);
+    }
+
+    public static void effect2dTriangles(int programId, int textureForeground, int textureEffect, float[] verticesOnForeground, float[] verticesOnTexture, int posForeground, int posOnTexture, short[] triangles) {
+        GLES20.glUseProgram(programId);
+
+        int fAlpha = GLES20.glGetUniformLocation(programId, "f_alpha");
+        GLES20.glUniform1f(fAlpha, 0.5f);
+
+        FloatBuffer mVertexBuffer = convertArray(verticesOnForeground);
+        GLES20.glVertexAttribPointer(posForeground, 2, GLES20.GL_FLOAT, false, 0, mVertexBuffer);
+
+        FloatBuffer mTextureBuffer = convertArray(verticesOnTexture);
+        GLES20.glVertexAttribPointer(posOnTexture,  2, GLES20.GL_FLOAT, false, 0, mTextureBuffer);
+
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureEffect);
+        GLES20.glUniform1i(GLES20.glGetUniformLocation(programId, "u_Texture"), 0);
+
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureForeground);
+        GLES20.glUniform1i(GLES20.glGetUniformLocation(programId, "u_TextureOrig"), 1);
+
+        ShortBuffer mIndices = convertArray(triangles);
+        // FIXME with glDrawElements use can't use other texture coordinates
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, triangles.length, GLES20.GL_UNSIGNED_SHORT, mIndices);
+        GLES20.glFlush();
 
     }
-    public static void shaderEfffect2d(Point center, Point center2, int texIn, int programId, int poss, int texx, Integer texIn2) {
+
+    public static FloatBuffer convertArray(float[] vertices) {
+        FloatBuffer vertexData;
+        vertexData = ByteBuffer
+                .allocateDirect(vertices.length * 4)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer();
+        vertexData.put(vertices);
+        vertexData.position(0);
+        return vertexData;
+    }
+
+    public static ShortBuffer convertArray(short[] indexes) {
+        ShortBuffer indexArray;
+        indexArray = ByteBuffer
+                .allocateDirect(indexes.length * 2)
+                .order(ByteOrder.nativeOrder()).asShortBuffer();
+        indexArray.put(indexes);
+        indexArray.position(0);
+        return indexArray;
+    }
+
+    public static void shaderEffect2dWholeScreen(Point center, Point center2, int texIn, int programId, int poss, int texx, Integer texIn2) {
         GLES20.glUseProgram(programId);
         int uColorLocation = GLES20.glGetUniformLocation(programId, "u_Color");
         GLES20.glUniform4f(uColorLocation, 0.0f, 0.0f, 1.0f, 1.0f);
@@ -285,36 +377,21 @@ public class ShaderEffectHelper {
         int uCenter2 = GLES20.glGetUniformLocation(programId, "uCenter2");
         GLES20.glUniform2f(uCenter2, (float)center2.x, (float)center2.y);
 
-        FloatBuffer vertexData;
-        float[] vertices = {
+        FloatBuffer vertexData = convertArray(new float[]{
                 -1, -1,
                 -1,  1,
                 1, -1,
                 1,  1
-        };
+        });
 
-        vertexData = ByteBuffer
-                .allocateDirect(vertices.length * 4)
-                .order(ByteOrder.nativeOrder())
-                .asFloatBuffer();
-        vertexData.put(vertices);
-
-        FloatBuffer texData;
-        float[] tex = {
+        FloatBuffer texData = convertArray(new float[] {
                 0,  0,
                 0,  1,
                 1,  0,
                 1,  1
-        };
-        texData = ByteBuffer
-                .allocateDirect(tex.length * 4)
-                .order(ByteOrder.nativeOrder())
-                .asFloatBuffer();
-        texData.put(tex);
+        });
 
-        vertexData.position(0);
         GLES20.glVertexAttribPointer(poss, 2, GLES20.GL_FLOAT, false, 0, vertexData);
-        texData.position(0);
         GLES20.glVertexAttribPointer(texx,  2, GLES20.GL_FLOAT, false, 0, texData);
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
@@ -356,4 +433,5 @@ public class ShaderEffectHelper {
         }
         model.recalcV();
     }
+
 }

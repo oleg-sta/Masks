@@ -1,4 +1,4 @@
-package ru.flightlabs.masks.activity;
+package ru.flightlabs.makeup.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -15,29 +15,39 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
+import ru.flightlabs.makeup.CommonI;
+import ru.flightlabs.makeup.EditorEnvironment;
+import ru.flightlabs.makeup.ResourcesApp;
+import ru.flightlabs.makeup.adapter.CategoriesPagerAdapter;
+import ru.flightlabs.makeup.adapter.ColorsPagerAdapter;
+import ru.flightlabs.makeup.adapter.FilterPagerAdapter;
 import ru.flightlabs.masks.CompModel;
-import ru.flightlabs.masks.camera.FastCameraView;
 import ru.flightlabs.masks.ModelLoaderTask;
 import ru.flightlabs.masks.R;
 import ru.flightlabs.masks.Static;
-import ru.flightlabs.masks.adapter.MasksPagerAdapter;
+import ru.flightlabs.masks.activity.Settings;
+import ru.flightlabs.masks.camera.FastCameraView;
 import ru.flightlabs.masks.renderer.MaskRenderer;
 
 /**
- * Acivity uses direct frame byte and opengl view
+ * Created by sov on 08.02.2017.
  */
-public class ActivityFast extends Activity {
 
-    TypedArray eyesResourcesSmall;
+public class ActivityMakeUp extends Activity implements CommonI {
 
+    public static EditorEnvironment editorEnvironment;
+    ResourcesApp resourcesApp;
     CompModel compModel;
     ProgressBar progressBar;
-    boolean playSound = true;
+    public static GLSurfaceView gLSurfaceView;
+
+    private SurfaceHolder mHolder;
 
     private static final String TAG = "ActivityFast";
 
@@ -64,15 +74,10 @@ public class ActivityFast extends Activity {
         }
     };
 
-    TypedArray eyesResources;
-    public static GLSurfaceView gLSurfaceView;
-
-    private SurfaceHolder mHolder;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fast_view);
+        setContentView(R.layout.main_makeup);
 
         FastCameraView sv = (FastCameraView) findViewById(R.id.fd_fase_surface_view);
         mHolder = sv.getHolder();
@@ -81,23 +86,10 @@ public class ActivityFast extends Activity {
         compModel = new CompModel();
         compModel.context = getApplicationContext();
 
-        eyesResources = getResources().obtainTypedArray(R.array.masks_png);
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
-        eyesResourcesSmall = getResources().obtainTypedArray(R.array.masks_small_png);
+        resourcesApp = new ResourcesApp(this);
 
-        final ImageView soundButton = (ImageView) findViewById(R.id.sound_button);
-        findViewById(R.id.sound_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                playSound = !playSound;
-                if (playSound) {
-                    soundButton.setImageResource(R.drawable.ic_sound);
-                } else {
-                    soundButton.setImageResource(R.drawable.ic_nosound);
-                }
-            }
-        });
         ((CheckBox)findViewById(R.id.checkDebug)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -111,9 +103,28 @@ public class ActivityFast extends Activity {
             }
         });
 
-        ViewPager viewPager = (ViewPager) findViewById(R.id.photo_pager);
-        MasksPagerAdapter pager = new MasksPagerAdapter(this, eyesResourcesSmall);
-        viewPager.setAdapter(pager);
+        ViewPager viewPagerCategories = (ViewPager) findViewById(R.id.categories);
+        CategoriesPagerAdapter pagerCategories = new CategoriesPagerAdapter(this, getResources().getStringArray(R.array.categories));
+        viewPagerCategories.setAdapter(pagerCategories);
+
+        editorEnvironment = new EditorEnvironment(getApplication().getApplicationContext(), resourcesApp);
+        changeCategory(0);
+        ((SeekBar)findViewById(R.id.opacity)).setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                editorEnvironment.opacity[editorEnvironment.catgoryNum] = i;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
 
         gLSurfaceView = (GLSurfaceView)findViewById(R.id.fd_glsurface);
         gLSurfaceView.getHolder().setFormat(PixelFormat.TRANSPARENT);
@@ -138,7 +149,8 @@ public class ActivityFast extends Activity {
         mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         new ModelLoaderTask(progressBar).execute(compModel);
         gLSurfaceView.onResume();
-        Settings.makeUp = false;
+        editorEnvironment.init();
+        Settings.makeUp = true;
     }
 
 
@@ -148,5 +160,48 @@ public class ActivityFast extends Activity {
         super.onPause();
         gLSurfaceView.onPause();
         //TODO has something todo with FastCameraView (rlease, close etc.)
+    }
+
+    public void changeCategory(int position) {
+        int resourceId = R.array.colors_shadow;
+
+        editorEnvironment.newIndexItem = 0;
+        editorEnvironment.catgoryNum = position;
+        ViewPager viewPager = (ViewPager) findViewById(R.id.elements);
+        TypedArray iconsCategory = null;
+        if (position == 0) {
+            iconsCategory = resourcesApp.eyelashesSmall;
+            resourceId = R.array.colors_eyelashes;
+        } else if (position == 1) {
+            iconsCategory = resourcesApp.eyeshadowSmall;
+            resourceId = R.array.colors_shadow;
+        } else if (position == 2) {
+            resourceId = R.array.colors_eyelashes;
+            iconsCategory = resourcesApp.eyelinesSmall;
+        } else {
+            iconsCategory = resourcesApp.lipsSmall;
+            resourceId = R.array.colors_lips;
+        }
+        FilterPagerAdapter pager = new FilterPagerAdapter(this, iconsCategory);
+        viewPager.setAdapter(pager);
+
+        ViewPager viewPagerColors = (ViewPager) findViewById(R.id.colors);
+        ColorsPagerAdapter pagerColors = new ColorsPagerAdapter(this, getResources().getIntArray(resourceId));
+        viewPagerColors.setAdapter(pagerColors);
+        ((SeekBar)findViewById(R.id.opacity)).setProgress(editorEnvironment.opacity[editorEnvironment.catgoryNum]);
+    }
+
+    @Override
+    public void changeItemInCategory(int newItem) {
+        editorEnvironment.newIndexItem = newItem;
+
+    }
+
+    public void changeColor(int color, int position) {
+        if (position == 0) {
+            editorEnvironment.currentColor[editorEnvironment.catgoryNum] = -1;
+            return;
+        }
+        editorEnvironment.currentColor[editorEnvironment.catgoryNum] = color & 0xFFFFFF;
     }
 }

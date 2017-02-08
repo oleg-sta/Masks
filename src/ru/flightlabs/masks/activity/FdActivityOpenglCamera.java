@@ -276,6 +276,7 @@ public class FdActivityOpenglCamera extends Activity {
         OpenCVLoader.initDebug();
         mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         new ModelLoaderTask(progressBar).execute(compModel);
+        Settings.makeUp = false;
     }
 
     public void onDestroy() {

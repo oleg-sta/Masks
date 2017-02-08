@@ -30,6 +30,7 @@ public class Settings extends Activity {
     public static final String MODEL_PATH_DEFAULT = "/storage/extSdCard/sp_s2.dat";
     private static final String TAG = "Settings_class";
     public static boolean useLinear;
+    public static boolean makeUp;
 
 
     @Override

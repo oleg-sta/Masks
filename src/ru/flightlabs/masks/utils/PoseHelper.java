@@ -103,6 +103,7 @@ public class PoseHelper {
     }
 
     // TODO split by find landmarks and shape
+    // also this method midifies model to blend
     public PoseResult findShapeAndPose(Mat findGray, int mAbsoluteFaceSize, Mat mRgba, int width, int height, boolean shapeBlends, Model model, Context context) {
         MatOfRect faces = compModel.findFaces(findGray, mAbsoluteFaceSize);
         DetectionBasedTracker mNativeDetector = compModel.mNativeDetector;
@@ -111,37 +112,36 @@ public class PoseHelper {
         Log.i(TAG, "onCameraTexture5 " + haveFace);
         Point center = new Point(0.5, 0.5);
         Point center2 = new Point(0.5, 0.5);
-        Point[] foundEyes = null;
+        Point[] foundLandmarks = null;
         if (haveFace) {
             if (Settings.debugMode) {
                 Imgproc.rectangle(mRgba, facesArray[0].tl(), facesArray[0].br(), new Scalar(255, 10 ,10), 3);
             }
             center = OpencvUtils.convertToGl(new Point((2 * facesArray[0].x + facesArray[0].width) / 2.0, (2 * facesArray[0].y + facesArray[0].height) / 2.0), width, height);
             if (mNativeDetector != null) {
-                foundEyes = mNativeDetector.findLandMarks(findGray, facesArray[0]);
+                foundLandmarks = mNativeDetector.findLandMarks(findGray, facesArray[0]);
                 // FIXME temp
                 if (Settings.debugMode) {
-                    for (Point p : foundEyes) {
+                    for (Point p : foundLandmarks) {
                         Imgproc.circle(mRgba, p, 2, new Scalar(255, 10, 10));
                     }
                 }
-                center = OpencvUtils.convertToGl(new Point((foundEyes[36].x + foundEyes[39].x) / 2.0, (foundEyes[36].y + foundEyes[39].y) / 2.0), width, height);
-                center2 = OpencvUtils.convertToGl(new Point((foundEyes[42].x + foundEyes[45].x) / 2.0, (foundEyes[42].y + foundEyes[45].y) / 2.0), width, height);
+                center = OpencvUtils.convertToGl(new Point((foundLandmarks[36].x + foundLandmarks[39].x) / 2.0, (foundLandmarks[36].y + foundLandmarks[39].y) / 2.0), width, height);
+                center2 = OpencvUtils.convertToGl(new Point((foundLandmarks[42].x + foundLandmarks[45].x) / 2.0, (foundLandmarks[42].y + foundLandmarks[45].y) / 2.0), width, height);
             }
         }
 
         Mat glMatrix = null;
         int indexEye = Static.currentIndexEye;
         Log.i(TAG, "indexEye " + indexEye);
-        PoseHelper.bindMatrix(100, 100);
 
-        if (foundEyes != null) {
+        if (foundLandmarks != null) {
             if (shapeBlends) {
                 Mat inputLandMarks = new Mat(68, 2, CvType.CV_64FC1);
                 double[] buff = new double[inputLandMarks.cols() * inputLandMarks.rows()];
-                for (int i = 0; i < foundEyes.length; i++) {
-                    buff[i * 2] = foundEyes[i].x;
-                    buff[i * 2 + 1] = foundEyes[i].y;
+                for (int i = 0; i < foundLandmarks.length; i++) {
+                    buff[i * 2] = foundLandmarks[i].x;
+                    buff[i * 2 + 1] = foundLandmarks[i].y;
                 }
                 inputLandMarks.put(0, 0, buff);
                 Mat output3dShape = new Mat(113, 3, CvType.CV_64FC1);
@@ -161,6 +161,7 @@ public class PoseHelper {
                 mNativeDetector.morhpFace(inputLandMarks, output3dShape, initialParams, modelPath, true, Settings.useLinear);
                 double[] buffShape = new double[output3dShape.cols() * output3dShape.rows()];
                 output3dShape.get(0, 0, buffShape);
+                // TODO maybe we should't modify this model but return new model?
                 int rows = output3dShape.rows();
                 for (int i = 0; i < rows; i++) {
                     model.tempV[i * 3] = (float) buffShape[i * 3];
@@ -169,10 +170,10 @@ public class PoseHelper {
                 }
                 model.recalcV();
             }
-            glMatrix = findPose(model, foundEyes, mRgba);
+            glMatrix = findPose(model, foundLandmarks, mRgba);
             //PoseHelper.drawDebug(mRgba, model, glMatrix);
             if (Settings.debugMode) {
-                for (Point e : foundEyes) {
+                for (Point e : foundLandmarks) {
                     Imgproc.circle(mRgba, e, 3, new Scalar(255, 255, 255), -1);
                 }
             }
@@ -180,9 +181,10 @@ public class PoseHelper {
         }
         PoseResult result = new PoseResult();
         result.glMatrix = glMatrix;
-        result.foundFeatures = foundEyes != null;
+        result.foundFeatures = foundLandmarks != null;
         result.leftEye = center;
         result.rightEye = center2;
+        result.foundLandmarks = foundLandmarks;
         return result;
     }
 
@@ -380,6 +382,7 @@ public class PoseHelper {
         public boolean foundFeatures;
         public Point leftEye;
         public Point rightEye;
+        public Point[] foundLandmarks;
     }
 
 }

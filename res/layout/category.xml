@@ -4,12 +4,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <ImageView
-        android:id="@+id/item_image"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_margin="1dp" />
-
     <TextView
         android:id="@+id/item_text"
         android:layout_width="match_parent"

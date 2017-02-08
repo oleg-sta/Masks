@@ -11,24 +11,26 @@ import java.util.List;
 
 public class CameraHelper {
 
-    // do not hold info
+    // do not hold this info here
     public static int mCameraWidth;
     public static int mCameraHeight;
 
 
     private static final String LOGTAG = "CameraHelper";
 
-    public static void calculateCameraPreviewSize(Camera.Parameters param, int width, int height) {
-        Log.i(LOGTAG, "calculateCameraPreviewSize: "+width+"x"+height);
+    // find the preview size that best suits with aspect ratio and lower max size
+    // TODO should consider size and ratio simultaneously, e.g. min( abs(aspect - (float)w/h) + abs(w-maxWidth)/maxWidth + abs(h-maxHeight)/maxHeight)
+    public static void calculateCameraPreviewSize(Camera.Parameters param, int maxWidth, int maxHeight) {
+        Log.i(LOGTAG, "calculateCameraPreviewSize: "+maxWidth+"x"+maxHeight);
 
         List<Camera.Size> psize = param.getSupportedPreviewSizes();
         int bestWidth = 0, bestHeight = 0;
         if (psize.size() > 0) {
-            float aspect = (float)width / height;
+            float aspect = (float)maxWidth / maxHeight;
             for (Camera.Size size : psize) {
                 int w = size.width, h = size.height;
                 Log.d(LOGTAG, "checking camera preview size: "+w+"x"+h);
-                if ( w <= width && h <= height &&
+                if ( w <= maxWidth && h <= maxHeight &&
                         w >= bestWidth && h >= bestHeight &&
                         Math.abs(aspect - (float)w/h) < 0.2 ) {
                     bestWidth = w;
