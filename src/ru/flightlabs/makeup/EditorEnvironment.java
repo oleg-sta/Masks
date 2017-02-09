@@ -47,8 +47,8 @@ public class EditorEnvironment {
     // lips and eyes models points and triangles
     public static ru.flightlabs.masks.model.primitives.Point[] pointsLeftEye;
     public static Triangle[] trianglesLeftEye;
-    ru.flightlabs.masks.model.primitives.Point[] pointsWasLips;
-    Triangle[] trianglesLips;
+    public static ru.flightlabs.masks.model.primitives.Point[] pointsWasLips;
+    public static Triangle[] trianglesLips;
 
 
     Mat leftEyeLash;

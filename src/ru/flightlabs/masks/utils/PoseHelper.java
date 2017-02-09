@@ -137,13 +137,7 @@ public class PoseHelper {
 
         if (foundLandmarks != null) {
             if (shapeBlends) {
-                Mat inputLandMarks = new Mat(68, 2, CvType.CV_64FC1);
-                double[] buff = new double[inputLandMarks.cols() * inputLandMarks.rows()];
-                for (int i = 0; i < foundLandmarks.length; i++) {
-                    buff[i * 2] = foundLandmarks[i].x;
-                    buff[i * 2 + 1] = foundLandmarks[i].y;
-                }
-                inputLandMarks.put(0, 0, buff);
+                Mat inputLandMarks = PointsConverter.points2dToMat(foundLandmarks);//new Mat(68, 2, CvType.CV_64FC1);
                 Mat output3dShape = new Mat(113, 3, CvType.CV_64FC1);
                 if (initialParams == null) {
                     initialParams = new Mat(20, 1, CvType.CV_64FC1, new Scalar(0));
@@ -159,15 +153,7 @@ public class PoseHelper {
                     Log.i(TAG, "onCameraTexture1 " + modelPath);
                 }
                 mNativeDetector.morhpFace(inputLandMarks, output3dShape, initialParams, modelPath, true, Settings.useLinear);
-                double[] buffShape = new double[output3dShape.cols() * output3dShape.rows()];
-                output3dShape.get(0, 0, buffShape);
-                // TODO maybe we should't modify this model but return new model?
-                int rows = output3dShape.rows();
-                for (int i = 0; i < rows; i++) {
-                    model.tempV[i * 3] = (float) buffShape[i * 3];
-                    model.tempV[i * 3 + 1] = (float) buffShape[i * 3 + 1];
-                    model.tempV[i * 3 + 2] = (float) buffShape[i * 3 + 2];
-                }
+                PointsConverter.matToFloatArray(output3dShape, model.tempV);
                 model.recalcV();
             }
             glMatrix = findPose(model, foundLandmarks, mRgba);

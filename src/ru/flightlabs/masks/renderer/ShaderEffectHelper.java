@@ -43,6 +43,7 @@ public class ShaderEffectHelper {
     private int eyeShadowTextureid;
     private int eyeLashesTextureid;
     private int eyeLineTextureid;
+    private int lipsTextureid;
 
 
     // 3d
@@ -105,6 +106,7 @@ public class ShaderEffectHelper {
         eyeShadowTextureid = OpenGlHelper.loadTexture(context, R.raw.eye2_0000_smokey_eeys);
         eyeLashesTextureid = OpenGlHelper.loadTexture(context, R.raw.eye2_0000_lash);
         eyeLineTextureid = OpenGlHelper.loadTexture(context, R.raw.eye2_0000_line);
+        lipsTextureid = OpenGlHelper.loadTexture(context, R.raw.lips_icon);
 
         Log.i(TAG, "load3dModel2");
         Model modelGlasses = new Model(R.raw.glasses_3d,
@@ -192,35 +194,44 @@ public class ShaderEffectHelper {
 
         if (poseResult.foundLandmarks != null) {
             Point[] onImageEyeLeft = EditorEnvironment.getOnlyPoints(poseResult.foundLandmarks, 36, 6);
+            Point[] onImageEyeRight = EditorEnvironment.getOnlyPoints(poseResult.foundLandmarks, 36 + 6, 6);
             // TODO add checkbox for rgb or hsv bleding
-            if (EditorEnvironment.currentColor[EditorEnvironment.EYE_SHADOW] != -1) {
-                Log.i(TAG, "onDrawFrame6 draw maekup2");
-                int vPos22 = GLES20.glGetAttribLocation(program2dTriangles, "vPosition");
-                int vTex22 = GLES20.glGetAttribLocation(program2dTriangles, "vTexCoord");
-                GLES20.glEnableVertexAttribArray(vPos22);
-                GLES20.glEnableVertexAttribArray(vTex22);
-                // TODO use blendshape for eyes
+            Log.i(TAG, "onDrawFrame6 draw maekup2");
+            int vPos22 = GLES20.glGetAttribLocation(program2dTriangles, "vPosition");
+            int vTex22 = GLES20.glGetAttribLocation(program2dTriangles, "vTexCoord");
+            GLES20.glEnableVertexAttribArray(vPos22);
+            GLES20.glEnableVertexAttribArray(vTex22);
+            // TODO use blendshape for eyes
 
-                if (EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_SHADOW] != EditorEnvironment.newIndexItem && EditorEnvironment.EYE_SHADOW == EditorEnvironment.catgoryNum) {
-                    EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_SHADOW] = EditorEnvironment.newIndexItem;
-                    OpenGlHelper.changeTexture(context, ResourcesApp.eyeshadowSmall.getResourceId(EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_SHADOW], 0), eyeShadowTextureid);
-                }
-                if (EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_LASH] != EditorEnvironment.newIndexItem && EditorEnvironment.EYE_LASH == EditorEnvironment.catgoryNum) {
-                    EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_LASH] = EditorEnvironment.newIndexItem;
-                    OpenGlHelper.changeTexture(context, ResourcesApp.eyelashesSmall.getResourceId(EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_LASH], 0), eyeLashesTextureid);
-                }
-                if (EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_LINE] != EditorEnvironment.newIndexItem && EditorEnvironment.EYE_LINE == EditorEnvironment.catgoryNum) {
-                    EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_LINE] = EditorEnvironment.newIndexItem;
-                    OpenGlHelper.changeTexture(context, ResourcesApp.eyelinesSmall.getResourceId(EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_LINE], 0), eyeLineTextureid);
-                }
-                ShaderEffectHelper.effect2dTriangles(program2dTriangles, texIn, eyeShadowTextureid, PointsConverter.convertFromPointsGlCoord(PointsConverter.addEyePoints(onImageEyeLeft), width, height), PointsConverter.convertFromPointsGlCoord(EditorEnvironment.pointsLeftEye, 512, 512), vPos22, vTex22, PointsConverter.convertTriangle(EditorEnvironment.trianglesLeftEye));
-                // TODO add right eye
-                // FIXME elements erase each other
-                //ShaderEffectHelper.effect2dTriangles(program2dTriangles, texIn, eyeLashesTextureid, PointsConverter.convertFromPointsGlCoord(PointsConverter.addEyePoints(onImageEyeLeft), width, height), PointsConverter.convertFromPointsGlCoord(EditorEnvironment.pointsLeftEye, 512, 512), vPos22, vTex22, PointsConverter.convertTriangle(EditorEnvironment.trianglesLeftEye));
-                //ShaderEffectHelper.effect2dTriangles(program2dTriangles, texIn, eyeLineTextureid, PointsConverter.convertFromPointsGlCoord(PointsConverter.addEyePoints(onImageEyeLeft), width, height), PointsConverter.convertFromPointsGlCoord(EditorEnvironment.pointsLeftEye, 512, 512), vPos22, vTex22, PointsConverter.convertTriangle(EditorEnvironment.trianglesLeftEye));
-                //filter.drawMask(leftEyeShadow, mRgba, pointsLeftEye, onImageEyeLeft, trianglesLeftEye, opacity[EYE_SHADOW] / 100.0, false, currentColor[1]);
-                //filter.drawMask(rightEyeShadow, mRgba, pointsRightEye, onImageEyeRight, trianglesRightEye, opacity[EYE_SHADOW] / 100.0, true, currentColor[1]);
+            if (EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_SHADOW] != EditorEnvironment.newIndexItem && EditorEnvironment.EYE_SHADOW == EditorEnvironment.catgoryNum) {
+                EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_SHADOW] = EditorEnvironment.newIndexItem;
+                OpenGlHelper.changeTexture(context, ResourcesApp.eyeshadowSmall.getResourceId(EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_SHADOW], 0), eyeShadowTextureid);
             }
+            if (EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_LASH] != EditorEnvironment.newIndexItem && EditorEnvironment.EYE_LASH == EditorEnvironment.catgoryNum) {
+                EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_LASH] = EditorEnvironment.newIndexItem;
+                OpenGlHelper.changeTexture(context, ResourcesApp.eyelashesSmall.getResourceId(EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_LASH], 0), eyeLashesTextureid);
+            }
+            if (EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_LINE] != EditorEnvironment.newIndexItem && EditorEnvironment.EYE_LINE == EditorEnvironment.catgoryNum) {
+                EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_LINE] = EditorEnvironment.newIndexItem;
+                OpenGlHelper.changeTexture(context, ResourcesApp.eyelinesSmall.getResourceId(EditorEnvironment.currentIndexItem[EditorEnvironment.EYE_LINE], 0), eyeLineTextureid);
+            }
+            if (EditorEnvironment.currentIndexItem[EditorEnvironment.LIPS] != EditorEnvironment.newIndexItem && EditorEnvironment.LIPS == EditorEnvironment.catgoryNum) {
+                EditorEnvironment.currentIndexItem[EditorEnvironment.LIPS] = EditorEnvironment.newIndexItem;
+                OpenGlHelper.changeTexture(context, ResourcesApp.lipsSmall.getResourceId(EditorEnvironment.currentIndexItem[EditorEnvironment.LIPS], 0), lipsTextureid);
+            }
+            Point[] onImage = PointsConverter.completePointsByAffine(onImageEyeLeft, PointsConverter.convertToOpencvPoints(EditorEnvironment.pointsLeftEye), new int[]{0, 1, 2, 3, 4, 5});
+            ShaderEffectHelper.effect2dTriangles(program2dTriangles, texIn, eyeShadowTextureid, PointsConverter.convertFromPointsGlCoord(onImage, width, height), PointsConverter.convertFromPointsGlCoord(EditorEnvironment.pointsLeftEye, 512, 512), vPos22, vTex22, PointsConverter.convertTriangle(EditorEnvironment.trianglesLeftEye), eyeLashesTextureid, eyeLineTextureid, false);
+
+            Point[] onImageRight = PointsConverter.completePointsByAffine(PointsConverter.reallocateAndCut(onImageEyeRight, new int[] {3, 2, 1, 0 , 5, 4}), PointsConverter.convertToOpencvPoints(EditorEnvironment.pointsLeftEye), new int[]{0, 1, 2, 3, 4, 5});
+            // FIXME flip triangle on right eyes, cause left and right triangles are not the same
+            ShaderEffectHelper.effect2dTriangles(program2dTriangles, texIn, eyeShadowTextureid, PointsConverter.convertFromPointsGlCoord(onImageRight, width, height), PointsConverter.convertFromPointsGlCoord(EditorEnvironment.pointsLeftEye, 512, 512), vPos22, vTex22, PointsConverter.convertTriangle(EditorEnvironment.trianglesLeftEye), eyeLashesTextureid, eyeLineTextureid, false);
+
+            Point[] onImageLips = EditorEnvironment.getOnlyPoints(poseResult.foundLandmarks, 48, 20);
+            Point[] onImageLipsConv = PointsConverter.completePointsByAffine(onImageLips, PointsConverter.convertToOpencvPoints(EditorEnvironment.pointsWasLips), new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19});
+            ShaderEffectHelper.effect2dTriangles(program2dTriangles, texIn, lipsTextureid, PointsConverter.convertFromPointsGlCoord(onImageLipsConv, width, height), PointsConverter.convertFromPointsGlCoord(EditorEnvironment.pointsWasLips, 512, 512), vPos22, vTex22, PointsConverter.convertTriangle(EditorEnvironment.trianglesLips), lipsTextureid, lipsTextureid, true);
+
+            // TODO add right eye
+            // FIXME elements erase each other
         }
     }
 
@@ -318,11 +329,14 @@ public class ShaderEffectHelper {
         shaderEffect2dWholeScreen(center, center2, texIn, programId, poss, texx, null);
     }
 
-    public static void effect2dTriangles(int programId, int textureForeground, int textureEffect, float[] verticesOnForeground, float[] verticesOnTexture, int posForeground, int posOnTexture, short[] triangles) {
+    public static void effect2dTriangles(int programId, int textureForeground, int textureEffect, float[] verticesOnForeground, float[] verticesOnTexture, int posForeground, int posOnTexture, short[] triangles, Integer texture2, Integer texture3, boolean useHsv) {
         GLES20.glUseProgram(programId);
 
         int fAlpha = GLES20.glGetUniformLocation(programId, "f_alpha");
         GLES20.glUniform1f(fAlpha, 0.5f);
+
+        int fAlpha2 = GLES20.glGetUniformLocation(programId, "useHsv");
+        GLES20.glUniform1i(fAlpha2, useHsv? 1 : 0);
 
         FloatBuffer mVertexBuffer = convertArray(verticesOnForeground);
         GLES20.glVertexAttribPointer(posForeground, 2, GLES20.GL_FLOAT, false, 0, mVertexBuffer);
@@ -333,6 +347,18 @@ public class ShaderEffectHelper {
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureEffect);
         GLES20.glUniform1i(GLES20.glGetUniformLocation(programId, "u_Texture"), 0);
+
+        if (texture2 != null) {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE2);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture2);
+            GLES20.glUniform1i(GLES20.glGetUniformLocation(programId, "u_Texture2"), 2);
+        }
+
+        if (texture3 != null) {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE3);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture3);
+            GLES20.glUniform1i(GLES20.glGetUniformLocation(programId, "u_Texture3"), 3);
+        }
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureForeground);
