@@ -38,6 +38,7 @@ public class ActivityFast extends Activity {
     CompModel compModel;
     ProgressBar progressBar;
     boolean playSound = true;
+    FastCameraView cameraView;
 
     private static final String TAG = "ActivityFast";
 
@@ -67,16 +68,14 @@ public class ActivityFast extends Activity {
     TypedArray eyesResources;
     public static GLSurfaceView gLSurfaceView;
 
-    private SurfaceHolder mHolder;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fast_view);
 
-        FastCameraView sv = (FastCameraView) findViewById(R.id.fd_fase_surface_view);
-        mHolder = sv.getHolder();
-        mHolder.addCallback(sv);
+        cameraView = (FastCameraView) findViewById(R.id.fd_fase_surface_view);
+        SurfaceHolder mHolder = cameraView.getHolder();
+        mHolder.addCallback(cameraView);
 
         compModel = new CompModel();
         compModel.context = getApplicationContext();
@@ -108,6 +107,12 @@ public class ActivityFast extends Activity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 Settings.useLinear = b;
+            }
+        });
+        ((CheckBox)findViewById(R.id.useCalman)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                Settings.useCalman = b;
             }
         });
 
@@ -148,5 +153,6 @@ public class ActivityFast extends Activity {
         super.onPause();
         gLSurfaceView.onPause();
         //TODO has something todo with FastCameraView (rlease, close etc.)
+        cameraView.disableView();
     }
 }

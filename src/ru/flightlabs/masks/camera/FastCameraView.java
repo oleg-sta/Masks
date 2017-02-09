@@ -151,10 +151,7 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
     @Override
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
         Log.d(TAG, "surfaceDestroyed");
-        mCamera.stopPreview();
-        mCamera.setPreviewCallback(null);
-        mCamera.release();
-        mCamera = null;
+        releaseCamera();
     }
 
     @Override
@@ -173,4 +170,18 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
         mCamera.addCallbackBuffer(mBuffer);
     }
 
+    public void disableView() {
+        releaseCamera();
+    }
+
+    private void releaseCamera() {
+        synchronized (this) {
+            if (mCamera != null) {
+                mCamera.stopPreview();
+                mCamera.setPreviewCallback(null);
+                mCamera.release();
+            }
+            mCamera = null;
+        }
+    }
 }

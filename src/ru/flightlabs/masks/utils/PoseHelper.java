@@ -54,6 +54,8 @@ public class PoseHelper {
     Mat initialParams;
     String modelPath;
 
+    Point[] previous;
+
 
     public PoseHelper(CompModel compModel) {
         this.compModel = compModel;
@@ -102,9 +104,12 @@ public class PoseHelper {
         viewMatrix = new Mat(4, 4, CvType.CV_64F, new Scalar(0));
     }
 
+    public PoseResult findShapeAndPose(Mat findGray, int mAbsoluteFaceSize, Mat mRgba, int width, int height, boolean shapeBlends, Model model, Context context) {
+        return findShapeAndPose(findGray, mAbsoluteFaceSize, mRgba, width, height, shapeBlends, model, context, width, height);
+    }
     // TODO split by find landmarks and shape
     // also this method midifies model to blend
-    public PoseResult findShapeAndPose(Mat findGray, int mAbsoluteFaceSize, Mat mRgba, int width, int height, boolean shapeBlends, Model model, Context context) {
+    public PoseResult findShapeAndPose(Mat findGray, int mAbsoluteFaceSize, Mat mRgba, int width, int height, boolean shapeBlends, Model model, Context context, int mCameraWidth, int mCameraHeight) {
         MatOfRect faces = compModel.findFaces(findGray, mAbsoluteFaceSize);
         DetectionBasedTracker mNativeDetector = compModel.mNativeDetector;
         Rect[] facesArray = faces.toArray();
@@ -120,6 +125,14 @@ public class PoseHelper {
             center = OpencvUtils.convertToGl(new Point((2 * facesArray[0].x + facesArray[0].width) / 2.0, (2 * facesArray[0].y + facesArray[0].height) / 2.0), width, height);
             if (mNativeDetector != null) {
                 foundLandmarks = mNativeDetector.findLandMarks(findGray, facesArray[0]);
+                convertToSurface(foundLandmarks, width, height, mCameraWidth, mCameraHeight);
+
+                if (Settings.useCalman && previous != null) {
+                    for (int i = 0; i < previous.length; i++) {
+                        foundLandmarks[i].x = 0.4 * foundLandmarks[i].x + 0.6 * previous[i].x;
+                        foundLandmarks[i].y = 0.4 * foundLandmarks[i].y + 0.6 * previous[i].y;
+                    }
+                }
                 // FIXME temp
                 if (Settings.debugMode) {
                     for (Point p : foundLandmarks) {
@@ -171,7 +184,16 @@ public class PoseHelper {
         result.leftEye = center;
         result.rightEye = center2;
         result.foundLandmarks = foundLandmarks;
+        previous = foundLandmarks;
         return result;
+    }
+
+    // FIXME use only one size factor, from center of image
+    private void convertToSurface(Point[] points, int surfWidth, int surfHeight, int cameraWidth, int cameraHeight) {
+        for (Point p : points) {
+            p.x = p.x * surfWidth / cameraWidth;
+            p.y = p.y * surfHeight / cameraHeight;
+        }
     }
 
     public Mat findPose(Model model, Point[] foundEyes, Mat mRgba) {

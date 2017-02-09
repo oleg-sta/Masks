@@ -102,7 +102,12 @@ public class ActivityMakeUp extends Activity implements CommonI {
                 Settings.useLinear = b;
             }
         });
-
+        ((CheckBox)findViewById(R.id.useCalman)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                Settings.useCalman = b;
+            }
+        });
         ViewPager viewPagerCategories = (ViewPager) findViewById(R.id.categories);
         CategoriesPagerAdapter pagerCategories = new CategoriesPagerAdapter(this, getResources().getStringArray(R.array.categories));
         viewPagerCategories.setAdapter(pagerCategories);

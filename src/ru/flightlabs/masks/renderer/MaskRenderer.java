@@ -153,7 +153,7 @@ public class MaskRenderer implements GLSurfaceView.Renderer {
 
             int mAbsoluteFaceSize = Math.round((int) (mCameraWidth * 0.33));
             boolean shapeBlends = shaderHelper.effectsMap.get(Static.newIndexEye).needBlendShape;
-            poseResult = poseHelper.findShapeAndPose(grey, mAbsoluteFaceSize, mRgbaDummy, widthSurf, heightSurf, shapeBlends, shaderHelper.model, context);
+            poseResult = poseHelper.findShapeAndPose(grey, mAbsoluteFaceSize, mRgbaDummy, widthSurf, heightSurf, shapeBlends, shaderHelper.model, context, mCameraHeight, mCameraWidth);
 
             // convert from NV21 to RGBA
             GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fboRgba[0]);
@@ -175,7 +175,7 @@ public class MaskRenderer implements GLSurfaceView.Renderer {
             if (Settings.debugMode && poseResult.foundLandmarks != null) {
                 int vPos2 = GLES20.glGetAttribLocation(programId2dParticle, "vPosition");
                 GLES20.glEnableVertexAttribArray(vPos2);
-                ShaderEffectHelper.effect2dParticle(widthSurf, heightSurf, programId2dParticle, vPos2, PointsConverter.convertFromPointsGlCoord(poseResult.foundLandmarks, mCameraHeight, mCameraWidth));
+                ShaderEffectHelper.effect2dParticle(widthSurf, heightSurf, programId2dParticle, vPos2, PointsConverter.convertFromPointsGlCoord(poseResult.foundLandmarks, widthSurf, heightSurf));
             }
             // draw effect on rgba
             GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);

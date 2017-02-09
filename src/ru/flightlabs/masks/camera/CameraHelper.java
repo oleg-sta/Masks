@@ -44,7 +44,6 @@ public class CameraHelper {
             } else {
                 Log.i(LOGTAG, "Selected best size: "+bestWidth+" x "+bestHeight);
             }
-
             mCameraWidth  = bestWidth;
             mCameraHeight = bestHeight;
             param.setPreviewSize(bestWidth, bestHeight);
