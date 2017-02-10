@@ -37,10 +37,11 @@ public class EditorEnvironment {
     public static final int EYE_SHADOW = 1;
     public static final int EYE_LINE = 2;
     public static final int LIPS = 3;
+    public static final int FASHION = 4;
 
-    public static int[] currentIndexItem = {1, 1, 1, 1};
-    public static int[] currentColor = {-1, -1, -1, -1};
-    public static int[] opacity = {50, 50, 50, 50};
+    public static int[] currentIndexItem = {1, 1, 1, 1, 1};
+    public static int[] currentColor = {-1, -1, -1, -1, -1};
+    public static int[] opacity = {50, 50, 50, 50, 50};
     public static int newIndexItem = 0;
 
     private static final String TAG = "EditorEnvironment_class";

@@ -1,40 +1,39 @@
 package ru.flightlabs.makeup.adapter;
 
+
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.support.v4.view.PagerAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import ru.flightlabs.makeup.CommonI;
 import ru.flightlabs.masks.R;
-
-/**
- * Created by sov on 19.11.2016.
- */
+import ru.flightlabs.masks.utils.BitmapLibs;
 
 public class CategoriesPagerAdapter extends PagerAdapter {
 
     CommonI fdAct;
     Context mContext;
-    String[] texts;
+    TypedArray images;
     LayoutInflater mLayoutInflater;
 
-    public CategoriesPagerAdapter(CommonI context, String[] texts) {
-        // something terrible
+    public CategoriesPagerAdapter(CommonI context, TypedArray images) {
         mContext = (Context)context;
         mLayoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        this.images = images;
         this.fdAct = context;
-        this.texts = texts;
     }
 
     @Override
     public int getCount() {
-        return texts.length;
+        return images.length();
     }
 
     @Override
@@ -44,16 +43,17 @@ public class CategoriesPagerAdapter extends PagerAdapter {
 
     @Override
     public Object instantiateItem(ViewGroup container, final int position) {
-        View itemView = mLayoutInflater.inflate(R.layout.category, container, false);
-        TextView textView = (TextView) itemView.findViewById(R.id.item_text);
-        textView.setText(texts[position]);
+        View itemView = mLayoutInflater.inflate(R.layout.item_effect, container, false);
+        ImageView imageView = (ImageView) itemView.findViewById(R.id.item_image);
+        Bitmap bm = BitmapLibs.getSampledResource(mContext, images.getResourceId(position, 0));
+        imageView.setImageBitmap(bm);
+        imageView.setBackgroundColor(Color.WHITE);
         container.addView(itemView);
-        itemView.setOnClickListener(new View.OnClickListener() {
-
+        itemView.setOnClickListener(new OnClickListener() {
+            
             @Override
             public void onClick(View v) {
-                fdAct.changeCategory(position);
-
+                fdAct.changeItemInCategory(position);
             }
         });
         return itemView;
@@ -63,9 +63,10 @@ public class CategoriesPagerAdapter extends PagerAdapter {
     public void destroyItem(ViewGroup container, int position, Object object) {
         container.removeView((LinearLayout) object);
     }
-
+    
     @Override
     public float getPageWidth(int position) {
         return 1f / 4;
     }
-}
+
+ }

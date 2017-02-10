@@ -10,10 +10,8 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.SurfaceHolder;
-import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 
@@ -24,9 +22,9 @@ import org.opencv.android.OpenCVLoader;
 import ru.flightlabs.makeup.CommonI;
 import ru.flightlabs.makeup.EditorEnvironment;
 import ru.flightlabs.makeup.ResourcesApp;
-import ru.flightlabs.makeup.adapter.CategoriesPagerAdapter;
+import ru.flightlabs.makeup.adapter.CategoriesNamePagerAdapter;
 import ru.flightlabs.makeup.adapter.ColorsPagerAdapter;
-import ru.flightlabs.makeup.adapter.FilterPagerAdapter;
+import ru.flightlabs.makeup.adapter.CategoriesPagerAdapter;
 import ru.flightlabs.masks.CompModel;
 import ru.flightlabs.masks.ModelLoaderTask;
 import ru.flightlabs.masks.R;
@@ -109,7 +107,7 @@ public class ActivityMakeUp extends Activity implements CommonI {
             }
         });
         ViewPager viewPagerCategories = (ViewPager) findViewById(R.id.categories);
-        CategoriesPagerAdapter pagerCategories = new CategoriesPagerAdapter(this, getResources().getStringArray(R.array.categories));
+        CategoriesNamePagerAdapter pagerCategories = new CategoriesNamePagerAdapter(this, getResources().getStringArray(R.array.categories));
         viewPagerCategories.setAdapter(pagerCategories);
 
         editorEnvironment = new EditorEnvironment(getApplication().getApplicationContext(), resourcesApp);
@@ -183,11 +181,14 @@ public class ActivityMakeUp extends Activity implements CommonI {
         } else if (position == 2) {
             resourceId = R.array.colors_eyelashes;
             iconsCategory = resourcesApp.eyelinesSmall;
-        } else {
+        } else if (position == 3) {
             iconsCategory = resourcesApp.lipsSmall;
             resourceId = R.array.colors_lips;
+        } else  {
+            iconsCategory = resourcesApp.fashionSmall;
+            resourceId = R.array.colors_lips;
         }
-        FilterPagerAdapter pager = new FilterPagerAdapter(this, iconsCategory);
+        CategoriesPagerAdapter pager = new CategoriesPagerAdapter(this, iconsCategory);
         viewPager.setAdapter(pager);
 
         ViewPager viewPagerColors = (ViewPager) findViewById(R.id.colors);

@@ -196,10 +196,11 @@
 
     <!-- Make up data-->
     <array name="categories">
-        <item>ресницы</item>
-        <item>тени</item>
-        <item>линии</item>
-        <item>губы</item>
+        <item>РЕСНИЦЫ</item>
+        <item>ТЕНИ</item>
+        <item>ЛИНИИ</item>
+        <item>ГУБЫ</item>
+        <item>ОБРАЗ</item>
     </array>
 
     <!-- WARNING это взято из другого приложения-->
@@ -277,6 +278,26 @@
     <array name="lips">
         <item>@raw/lips_icon</item>
         <item>@raw/lips_icon_2</item>
+    </array>
+
+    <!-- just experiment-->
+    <array name="fashion">
+        <item>1;1;1</item>
+        <item>1;1;1</item>
+        <item>1;1;1</item>
+        <item>1;1;1</item>
+        <item>1;1;1</item>
+        <item>1;1;1</item>
+    </array>
+
+    <array name="fashion_ic">
+        <item>@drawable/fashion_1</item>
+        <item>@drawable/fashion_1</item>
+        <item>@drawable/fashion_1</item>
+        <item>@drawable/fashion_1</item>
+        <item>@drawable/fashion_1</item>
+        <item>@drawable/fashion_1</item>
+
     </array>
 
 
