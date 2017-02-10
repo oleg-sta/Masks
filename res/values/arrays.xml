@@ -113,7 +113,7 @@
 
     <!-- vertex shader file name; fragment shader file name; 2 or 3d sahder-->
     <string-array name="programs" translatable="false">
-        <item>vss_2d;fss4;2</item>
+        <item>vss_2d;fss_barrel;2</item>
         <item>vss3d;fss3d;3</item>
         <item>vss_2d;fss_rad_blur;2</item>
         <!--<item>vss;fss_light;2</item>-->

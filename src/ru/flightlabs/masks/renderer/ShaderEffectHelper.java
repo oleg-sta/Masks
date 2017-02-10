@@ -220,15 +220,23 @@ public class ShaderEffectHelper {
                 OpenGlHelper.changeTexture(context, ResourcesApp.lipsSmall.getResourceId(EditorEnvironment.currentIndexItem[EditorEnvironment.LIPS], 0), lipsTextureid);
             }
             Point[] onImage = PointsConverter.completePointsByAffine(onImageEyeLeft, PointsConverter.convertToOpencvPoints(EditorEnvironment.pointsLeftEye), new int[]{0, 1, 2, 3, 4, 5});
-            ShaderEffectHelper.effect2dTriangles(program2dTriangles, texIn, eyeShadowTextureid, PointsConverter.convertFromPointsGlCoord(onImage, width, height), PointsConverter.convertFromPointsGlCoord(EditorEnvironment.pointsLeftEye, 512, 512), vPos22, vTex22, PointsConverter.convertTriangle(EditorEnvironment.trianglesLeftEye), eyeLashesTextureid, eyeLineTextureid, false);
+            // TODO use blendshapes
+            onImage = PointsConverter.replacePoints(onImage, onImageEyeLeft, new int[]{0, 1, 2, 3, 4, 5});
+            ShaderEffectHelper.effect2dTriangles(program2dTriangles, texIn, eyeShadowTextureid, PointsConverter.convertFromPointsGlCoord(onImage, width, height), PointsConverter.convertFromPointsGlCoord(EditorEnvironment.pointsLeftEye, 512, 512), vPos22, vTex22, PointsConverter.convertTriangle(EditorEnvironment.trianglesLeftEye), eyeLashesTextureid, eyeLineTextureid, false,
+                    PointsConverter.convertTovec3(EditorEnvironment.currentColor[EditorEnvironment.EYE_SHADOW]), PointsConverter.convertTovec3(EditorEnvironment.currentColor[EditorEnvironment.EYE_LASH]), PointsConverter.convertTovec3(EditorEnvironment.currentColor[EditorEnvironment.EYE_LINE]),
+                    EditorEnvironment.opacity[EditorEnvironment.EYE_SHADOW] / 100f, EditorEnvironment.opacity[EditorEnvironment.EYE_LASH] / 100f, EditorEnvironment.opacity[EditorEnvironment.EYE_LINE] /100f);
 
             Point[] onImageRight = PointsConverter.completePointsByAffine(PointsConverter.reallocateAndCut(onImageEyeRight, new int[] {3, 2, 1, 0 , 5, 4}), PointsConverter.convertToOpencvPoints(EditorEnvironment.pointsLeftEye), new int[]{0, 1, 2, 3, 4, 5});
+            //onImageRight = PointsConverter.replacePoints(onImageRight, onImageEyeRight, new int[]{3, 2, 1, 0 , 5, 4});
             // FIXME flip triangle on right eyes, cause left and right triangles are not the same
-            ShaderEffectHelper.effect2dTriangles(program2dTriangles, texIn, eyeShadowTextureid, PointsConverter.convertFromPointsGlCoord(onImageRight, width, height), PointsConverter.convertFromPointsGlCoord(EditorEnvironment.pointsLeftEye, 512, 512), vPos22, vTex22, PointsConverter.convertTriangle(EditorEnvironment.trianglesLeftEye), eyeLashesTextureid, eyeLineTextureid, false);
+            ShaderEffectHelper.effect2dTriangles(program2dTriangles, texIn, eyeShadowTextureid, PointsConverter.convertFromPointsGlCoord(onImageRight, width, height), PointsConverter.convertFromPointsGlCoord(EditorEnvironment.pointsLeftEye, 512, 512), vPos22, vTex22, PointsConverter.convertTriangle(EditorEnvironment.trianglesLeftEye), eyeLashesTextureid, eyeLineTextureid, false,
+                    PointsConverter.convertTovec3(EditorEnvironment.currentColor[EditorEnvironment.EYE_SHADOW]), PointsConverter.convertTovec3(EditorEnvironment.currentColor[EditorEnvironment.EYE_LASH]), PointsConverter.convertTovec3(EditorEnvironment.currentColor[EditorEnvironment.EYE_LINE]),
+                    EditorEnvironment.opacity[EditorEnvironment.EYE_SHADOW] / 100f, EditorEnvironment.opacity[EditorEnvironment.EYE_LASH] / 100f, EditorEnvironment.opacity[EditorEnvironment.EYE_LINE] /100f);
 
             Point[] onImageLips = EditorEnvironment.getOnlyPoints(poseResult.foundLandmarks, 48, 20);
             Point[] onImageLipsConv = PointsConverter.completePointsByAffine(onImageLips, PointsConverter.convertToOpencvPoints(EditorEnvironment.pointsWasLips), new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19});
-            ShaderEffectHelper.effect2dTriangles(program2dTriangles, texIn, lipsTextureid, PointsConverter.convertFromPointsGlCoord(onImageLipsConv, width, height), PointsConverter.convertFromPointsGlCoord(EditorEnvironment.pointsWasLips, 512, 512), vPos22, vTex22, PointsConverter.convertTriangle(EditorEnvironment.trianglesLips), lipsTextureid, lipsTextureid, true);
+            onImageLipsConv = PointsConverter.replacePoints(onImageLipsConv, onImageLips, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19});
+            ShaderEffectHelper.effect2dTriangles(program2dTriangles, texIn, lipsTextureid, PointsConverter.convertFromPointsGlCoord(onImageLipsConv, width, height), PointsConverter.convertFromPointsGlCoord(EditorEnvironment.pointsWasLips, 512, 512), vPos22, vTex22, PointsConverter.convertTriangle(EditorEnvironment.trianglesLips), lipsTextureid, lipsTextureid, true, null, null, null, 0, 0, 0);
 
             // TODO add right eye
             // FIXME elements erase each other
@@ -329,14 +337,28 @@ public class ShaderEffectHelper {
         shaderEffect2dWholeScreen(center, center2, texIn, programId, poss, texx, null);
     }
 
-    public static void effect2dTriangles(int programId, int textureForeground, int textureEffect, float[] verticesOnForeground, float[] verticesOnTexture, int posForeground, int posOnTexture, short[] triangles, Integer texture2, Integer texture3, boolean useHsv) {
+    public static void effect2dTriangles(int programId, int textureForeground, int textureEffect, float[] verticesOnForeground, float[] verticesOnTexture, int posForeground, int posOnTexture, short[] triangles, Integer texture2, Integer texture3, boolean useHsv, float[] color0, float[] color1, float[] color2, float alpha0, float alpha1, float alpha2) {
         GLES20.glUseProgram(programId);
 
+
         int fAlpha = GLES20.glGetUniformLocation(programId, "f_alpha");
-        GLES20.glUniform1f(fAlpha, 0.5f);
+        GLES20.glUniform3f(fAlpha, alpha0, alpha1, alpha2);
 
         int fAlpha2 = GLES20.glGetUniformLocation(programId, "useHsv");
         GLES20.glUniform1i(fAlpha2, useHsv? 1 : 0);
+
+        if (color0 != null) {
+            int uColorLocation = GLES20.glGetUniformLocation(programId, "color0");
+            GLES20.glUniform3f(uColorLocation, color0[0], color0[1], color0[2]);
+        }
+        if (color1 != null) {
+            int uColorLocation = GLES20.glGetUniformLocation(programId, "color1");
+            GLES20.glUniform3f(uColorLocation, color1[0], color1[1], color1[2]);
+        }
+        if (color2 != null) {
+            int uColorLocation = GLES20.glGetUniformLocation(programId, "color2");
+            GLES20.glUniform3f(uColorLocation, color2[0], color2[1], color2[2]);
+        }
 
         FloatBuffer mVertexBuffer = convertArray(verticesOnForeground);
         GLES20.glVertexAttribPointer(posForeground, 2, GLES20.GL_FLOAT, false, 0, mVertexBuffer);

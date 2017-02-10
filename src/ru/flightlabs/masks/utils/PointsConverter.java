@@ -133,6 +133,17 @@ public class PointsConverter {
         return PointsConverter.matTo2dPoints(dst);
     }
 
+    public static Point[] replacePoints(Point[] src, Point[] from, int[] correspondence) {
+        Point[] res = new Point[src.length];
+        for (int i = 0; i < src.length; i++) {
+            res[i] = new Point(src[i].x, src[i].y);
+        }
+        for (int i = 0; i < correspondence.length; i++) {
+            res[correspondence[i]] = new Point(from[correspondence[i]].x, from[correspondence[i]].y);
+        }
+        return res;
+    }
+
     public static Mat convertToTwoDst(Mat src) {
         Mat res = new Mat(src.rows() / 3, 3, CvType.CV_64FC1);
         double[] buff = new double[src.cols() * src.rows()];
@@ -173,4 +184,11 @@ public class PointsConverter {
         return convertToTwoDst(aff);
     }
 
+    public static float[] convertTovec3(int i) {
+        float[] res = new float[3];
+        res[2] = (i % 256) / 256f;
+        res[1] = ((i / 256 ) % 256) / 256f;
+        res[0] = (i / 256 / 256) / 256f;
+        return res;
+    }
 }

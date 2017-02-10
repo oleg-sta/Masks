@@ -4,9 +4,14 @@ uniform sampler2D u_TextureOrig; // original screen texture
 uniform sampler2D u_Texture; // mask texture
 uniform sampler2D u_Texture2;
 uniform sampler2D u_Texture3;
+
+uniform vec3 color0; // color
+uniform vec3 color1; // color
+uniform vec3 color2; // color
+
 varying vec2 v_TexCoordinate;
 varying vec2 v_TexOrigCoordinate;
-uniform float f_alpha; // mask texture
+uniform vec3 f_alpha; // mask texture
 uniform int useHsv;
 
 vec3 rgb2hsv(vec3 c)
@@ -45,10 +50,9 @@ void main()
     }
     else
     {
-    float alpha =  maskColor[3] * f_alpha;
-    res = mix(origColor, maskColor, alpha);
-    res = mix(res, maskColor2, maskColor2[3]);
-    res = mix(res, maskColor3, maskColor3[3]);
+    res = mix(origColor, vec4(color0, 1.0), maskColor[3] * f_alpha[0]);
+    res = mix(res, vec4(color1, 1.0), maskColor2[3] * f_alpha[1]);
+    res = mix(res, vec4(color2, 1.0), maskColor3[3] * f_alpha[2]);
     }
     gl_FragColor = res;
 }

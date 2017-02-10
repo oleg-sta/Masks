@@ -40,7 +40,7 @@ public class EditorEnvironment {
 
     public static int[] currentIndexItem = {1, 1, 1, 1};
     public static int[] currentColor = {-1, -1, -1, -1};
-    public int[] opacity = {50, 50, 50, 50};
+    public static int[] opacity = {50, 50, 50, 50};
     public static int newIndexItem = 0;
 
     private static final String TAG = "EditorEnvironment_class";
