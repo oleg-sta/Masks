@@ -105,6 +105,9 @@ public class ModelLoaderTask extends AsyncTask<CompModel, Void, Void> {
 
         final SharedPreferences prefs = compModel.context.getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
         String detectorName = prefs.getString(Settings.MODEL_PATH, Settings.MODEL_PATH_DEFAULT);
+        if (!new File(detectorName).exists()) {
+            detectorName = "/storage/emulated/0/best_model.dat";
+        }
 
         if (!new File(detectorName).exists()) {
             Log.i(TAG, "ModelLoaderTask doInBackground66");

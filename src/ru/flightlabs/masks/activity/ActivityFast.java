@@ -11,6 +11,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -129,6 +130,7 @@ public class ActivityFast extends Activity {
         gLSurfaceView.setRenderer(meRender);
         gLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);//RENDERMODE_WHEN_DIRTY);
         //gLSurfaceView.setZOrderOnTop(false);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
     }
 

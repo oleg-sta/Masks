@@ -137,8 +137,8 @@ public class MaskRenderer implements GLSurfaceView.Renderer {
                 //bufferY.position(heightSurf * widthSurf);
                 Log.i(TAG, "onDrawFrame2 " + bufferY.limit());
                 GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texNV21FromCamera[1]);
-                GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, mCameraWidth, (int) (mCameraHeight * 0.5), 0,
-                        GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, bufferUV);
+                GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE_ALPHA, mCameraWidth / 2, (int) (mCameraHeight * 0.5), 0,
+                        GLES20.GL_LUMINANCE_ALPHA, GLES20.GL_UNSIGNED_BYTE, bufferUV);
                 GLES20.glFlush();
                 Log.i(TAG, "onDrawFrame2 " + bufferY.limit());
                 Log.i(TAG, "onDrawFrame3");
