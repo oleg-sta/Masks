@@ -9,6 +9,7 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.imgproc.Imgproc;
 
 import java.nio.ByteBuffer;
 
@@ -52,6 +53,7 @@ public class MaskRenderer implements GLSurfaceView.Renderer {
     ByteBuffer bufferUV;
 
     Mat greyTemp;
+    Mat grey;
     Mat mRgbaDummy;
     CompModel compModel;
     PoseHelper poseHelper;
@@ -114,6 +116,7 @@ public class MaskRenderer implements GLSurfaceView.Renderer {
             synchronized (FastCameraView.class) {
                 if (greyTemp == null) {
                     greyTemp = new Mat(mCameraHeight, mCameraWidth, CvType.CV_8UC1);
+                    grey = new Mat(mCameraWidth, mCameraHeight, CvType.CV_8UC1);
                     mRgbaDummy = new Mat(mCameraWidth, mCameraHeight, CvType.CV_8UC4);
                 }
                 greyTemp.put(0, 0, bufferFromCamera);
@@ -144,7 +147,8 @@ public class MaskRenderer implements GLSurfaceView.Renderer {
                 Log.i(TAG, "onDrawFrame3");
             }
             // if back camera
-            Mat grey = greyTemp.t();
+            //Mat grey = greyTemp.t();
+            Core.transpose(greyTemp, grey);
             if (!FastCameraView.cameraFacing) {
                 Core.flip(grey, grey, 1);
             } else {
