@@ -1,18 +1,15 @@
 package ru.flightlabs.masks.renderer;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
-import android.view.View;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
-import org.opencv.imgproc.Imgproc;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -20,7 +17,6 @@ import java.nio.ByteOrder;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import ru.flightlabs.makeup.EditorEnvironment;
 import ru.flightlabs.makeup.activity.ActivityPhoto;
 import ru.flightlabs.masks.CompModel;
 import ru.flightlabs.masks.activity.Settings;
@@ -63,13 +59,14 @@ public class MaskRenderer implements GLSurfaceView.Renderer {
     Mat mRgbaDummy;
     CompModel compModel;
     PoseHelper poseHelper;
-    ShaderEffectHelper shaderHelper;
+    ShaderEffect shaderHelper;
 
     private static final String TAG = "MaskRenderer";
 
-    public MaskRenderer(Activity context, CompModel compModel) {
+    public MaskRenderer(Activity context, CompModel compModel, ShaderEffect shaderHelper) {
         this.context = context;
         this.compModel = compModel;
+        this.shaderHelper = shaderHelper;
     }
 
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
@@ -91,7 +88,6 @@ public class MaskRenderer implements GLSurfaceView.Renderer {
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
 
-        shaderHelper = new ShaderEffectHelper(context);
         shaderHelper.init();
     }
 
@@ -162,7 +158,7 @@ public class MaskRenderer implements GLSurfaceView.Renderer {
             }
 
             int mAbsoluteFaceSize = Math.round((int) (mCameraWidth * 0.33));
-            boolean shapeBlends = shaderHelper.effectsMap.get(Static.newIndexEye).needBlendShape;
+            boolean shapeBlends = shaderHelper.needBlend();
             poseResult = poseHelper.findShapeAndPose(grey, mAbsoluteFaceSize, mRgbaDummy, widthSurf, heightSurf, shapeBlends, shaderHelper.model, context, mCameraHeight, mCameraWidth);
 
             // convert from NV21 to RGBA
@@ -190,12 +186,7 @@ public class MaskRenderer implements GLSurfaceView.Renderer {
             // draw effect on rgba
             GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
             GLES20.glViewport(0, 0, widthSurf, heightSurf);
-            if (!Settings.makeUp) {
-                shaderHelper.makeShaderMask(Static.newIndexEye, poseResult, widthSurf, heightSurf, texRgba[0], time, iGlobTime);
-                Log.i(TAG, "onDrawFrame4");
-            } else {
-                shaderHelper.makeShaderMakeUp(Static.newIndexEye, poseResult, widthSurf, heightSurf, texRgba[0], time, iGlobTime);
-            }
+            shaderHelper.makeShaderMask(Static.newIndexEye, poseResult, widthSurf, heightSurf, texRgba[0], time, iGlobTime);
 
             if (Static.makePhoto) {
                 Static.makePhoto = false;
@@ -247,5 +238,4 @@ public class MaskRenderer implements GLSurfaceView.Renderer {
         this.widthSurf = width;
         this.heightSurf = height;
     }
-
 }

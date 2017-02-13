@@ -1,5 +1,6 @@
 precision mediump float;        // Set the default precision to medium. We don't need as high of a
                                 // precision in the fragment shader.
+// draw 2d textures
 uniform sampler2D u_TextureOrig; // original screen texture
 uniform sampler2D u_Texture; // mask texture
 uniform sampler2D u_Texture2;

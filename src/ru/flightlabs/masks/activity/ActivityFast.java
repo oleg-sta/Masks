@@ -27,6 +27,7 @@ import ru.flightlabs.masks.R;
 import ru.flightlabs.masks.Static;
 import ru.flightlabs.masks.adapter.MasksPagerAdapter;
 import ru.flightlabs.masks.renderer.MaskRenderer;
+import ru.flightlabs.masks.renderer.ShaderEffectMask;
 
 /**
  * Acivity uses direct frame byte and opengl view
@@ -122,7 +123,7 @@ public class ActivityFast extends Activity {
         gLSurfaceView.getHolder().setFormat(PixelFormat.TRANSPARENT);
         gLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         //gLSurfaceView.setZOrderOnTop(true);
-        MaskRenderer meRender = new MaskRenderer(this, compModel);
+        MaskRenderer meRender = new MaskRenderer(this, compModel, new ShaderEffectMask(this));
         gLSurfaceView.setEGLContextClientVersion(2);
         gLSurfaceView.setRenderer(meRender);
         gLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);//RENDERMODE_WHEN_DIRTY);

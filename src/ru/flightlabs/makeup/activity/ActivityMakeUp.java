@@ -30,6 +30,7 @@ import ru.flightlabs.makeup.ResourcesApp;
 import ru.flightlabs.makeup.adapter.CategoriesNamePagerAdapter;
 import ru.flightlabs.makeup.adapter.CategoriesNewAdapter;
 import ru.flightlabs.makeup.adapter.ColorsPagerAdapter;
+import ru.flightlabs.makeup.shader.ShaderEffectMakeUp;
 import ru.flightlabs.masks.CompModel;
 import ru.flightlabs.masks.ModelLoaderTask;
 import ru.flightlabs.masks.R;
@@ -145,7 +146,7 @@ public class ActivityMakeUp extends Activity implements CommonI {
         gLSurfaceView.getHolder().setFormat(PixelFormat.TRANSPARENT);
         gLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         //gLSurfaceView.setZOrderOnTop(true);
-        MaskRenderer meRender = new MaskRenderer(this, compModel);
+        MaskRenderer meRender = new MaskRenderer(this, compModel, new ShaderEffectMakeUp(this));
         gLSurfaceView.setEGLContextClientVersion(2);
         gLSurfaceView.setRenderer(meRender);
         gLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);//RENDERMODE_WHEN_DIRTY);
