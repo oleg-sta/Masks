@@ -19,7 +19,8 @@ import ru.flightlabs.masks.CompModel;
 import ru.flightlabs.masks.Static;
 import ru.flightlabs.masks.activity.Settings;
 import ru.flightlabs.masks.renderer.EffectShader;
-import ru.flightlabs.masks.renderer.ShaderEffectHelper;
+import ru.flightlabs.masks.renderer.ShaderEffect;
+import ru.flightlabs.masks.renderer.ShaderEffectMask;
 import ru.flightlabs.masks.utils.FileUtils;
 import ru.flightlabs.masks.utils.PhotoMaker;
 import ru.flightlabs.masks.utils.PoseHelper;
@@ -54,7 +55,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
     private int[] texGray, grayFbo;
     int programGrey;
 
-    ShaderEffectHelper shaderHelper;
+    ShaderEffectMask shaderHelper;
 
     // 3d
     PoseHelper poseHelper;
@@ -81,7 +82,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
         poseHelper = new PoseHelper(compModel);
         poseHelper.init(act, width, height);
 
-        shaderHelper = new ShaderEffectHelper(act);
+        shaderHelper = new ShaderEffectMask(act);
         shaderHelper.init();
         Log.i(TAG, "onCameraViewStarted");
     }
@@ -144,7 +145,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
             int vTex = GLES20.glGetAttribLocation(programGrey, "vTexCoord");
             GLES20.glEnableVertexAttribArray(vPos);
             GLES20.glEnableVertexAttribArray(vTex);
-            ShaderEffectHelper.shaderEffect2dWholeScreen(new Point(0, 0), new Point(width, height), texIn, programGrey, vPos, vTex);
+            ShaderEffect.shaderEffect2dWholeScreen(new Point(0, 0), new Point(width, height), texIn, programGrey, vPos, vTex);
             GLES20.glReadPixels(0, 0, (width + 3) / 4, height, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, m_bbPixelsGrey);
             m_bbPixelsGrey.rewind();
             mGrayprogram.put(0, 0, m_bbPixelsGrey.array());
