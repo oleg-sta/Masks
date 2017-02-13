@@ -28,7 +28,7 @@ public class PhotoMaker {
         rgba.release();
 
     }
-    public static void makePhoto(Mat mRgba, Context context) {
+    public static String makePhoto(Mat mRgba, Context context) {
         File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
         File newFile = new File(file, Settings.DIRECTORY_SELFIE);
         if (!newFile.exists()) {
@@ -45,7 +45,7 @@ public class PhotoMaker {
         saveMatToFile(mRgba, fileJpg);
         // TODO посмотреть альтернативные способы
         MediaScannerConnection.scanFile(context, new String[]{fileJpg.getPath()}, new String[]{"image/jpeg"}, null);
-
+        return fileJpg.getPath();
     }
 
     public static void saveMatToFile(Mat mRgba, File fileJpg) {

@@ -1,9 +1,12 @@
 package ru.flightlabs.masks.renderer;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
+import android.view.View;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -12,17 +15,20 @@ import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import ru.flightlabs.makeup.EditorEnvironment;
+import ru.flightlabs.makeup.activity.ActivityPhoto;
 import ru.flightlabs.masks.CompModel;
 import ru.flightlabs.masks.activity.Settings;
 import ru.flightlabs.masks.camera.FastCameraView;
 import ru.flightlabs.masks.Static;
 import ru.flightlabs.masks.camera.CameraHelper;
 import ru.flightlabs.masks.utils.FileUtils;
+import ru.flightlabs.masks.utils.PhotoMaker;
 import ru.flightlabs.masks.utils.PointsConverter;
 import ru.flightlabs.masks.utils.PoseHelper;
 import ru.flightlabs.masks.utils.ShaderUtils;
@@ -37,7 +43,7 @@ public class MaskRenderer implements GLSurfaceView.Renderer {
     int heightSurf;
 
     int iGlobTime = 0;
-    Context context;
+    Activity context;
     public static byte[] bufferFromCamera;
 
     int programNv21ToRgba;
@@ -61,7 +67,7 @@ public class MaskRenderer implements GLSurfaceView.Renderer {
 
     private static final String TAG = "MaskRenderer";
 
-    public MaskRenderer(Context context, CompModel compModel) {
+    public MaskRenderer(Activity context, CompModel compModel) {
         this.context = context;
         this.compModel = compModel;
     }
@@ -189,6 +195,29 @@ public class MaskRenderer implements GLSurfaceView.Renderer {
                 Log.i(TAG, "onDrawFrame4");
             } else {
                 shaderHelper.makeShaderMakeUp(Static.newIndexEye, poseResult, widthSurf, heightSurf, texRgba[0], time, iGlobTime);
+            }
+
+            if (Static.makePhoto) {
+                Static.makePhoto = false;
+                ByteBuffer m_bbPixels = ByteBuffer.wrap(new byte[widthSurf * heightSurf * 4]);
+                Mat rgba = new Mat(heightSurf, widthSurf, CvType.CV_8UC4);
+                m_bbPixels.order(ByteOrder.LITTLE_ENDIAN);
+                GLES20.glReadPixels(0, 0, widthSurf, heightSurf, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, m_bbPixels);
+                m_bbPixels.rewind();
+                rgba.put(0, 0, m_bbPixels.array());
+                Core.flip(rgba, rgba, 0);
+                final String fileName = PhotoMaker.makePhoto(rgba, context);
+                rgba.release();
+                // TODO change view
+                context.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent intent =  new Intent(context, ActivityPhoto.class);
+                        intent.putExtra(ActivityPhoto.PHOTO, fileName);
+                        context.startActivity(intent);
+                    }
+                });
+
             }
         }
 

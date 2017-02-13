@@ -26,15 +26,20 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
     public static boolean cameraFacing;
     private byte mBuffer[];
     private static final String TAG = "FastView";
-    private SurfaceHolder mHolder;
     private Camera mCamera;
     private SurfaceTexture mSurfaceTexture;
+
+    int numberOfCameras;
+    int cameraIndex;
+
+    int previewWidth;
+    int previewHeight;
 
     public FastCameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        int cameraIndex = 0;
-        int numberOfCameras = android.hardware.Camera.getNumberOfCameras();
+        cameraIndex = 0;
+        numberOfCameras = android.hardware.Camera.getNumberOfCameras();
         android.hardware.Camera.CameraInfo cameraInfo = new android.hardware.Camera.CameraInfo();
         for (int i = 0; i < numberOfCameras; i++) {
             android.hardware.Camera.getCameraInfo(i, cameraInfo);
@@ -44,48 +49,46 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
             }
         }
 
-        mCamera = Camera.open(cameraIndex);
-
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
-        mHolder = getHolder();
-        mHolder.addCallback(this);
+        getHolder().addCallback(this);
         // deprecated setting, but required on Android versions prior to 3.0
         //mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        //mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         Log.d(TAG, "surfaceCreated");
-        try {
-            mCamera.setPreviewDisplay(holder);
-            mCamera.startPreview();
-        } catch (IOException e) {
-            Log.i(TAG, "Error setting camera preview: " + e.getMessage());
-        }
-
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-
         Log.d(TAG, "surfaceChanged " + format + " " + w + " " + h);
+        previewHeight = h;
+        previewWidth = w;
+        // TODO release camera if was
+        startCameraPreview(w , h);
+    }
+
+    private void startCameraPreview(int w, int h) {
+        Log.d(TAG, "startCameraPreview " + w + " " + h);
+        mCamera = Camera.open(cameraIndex);
         // If your preview can change or rotate, take care of those events here.
         // Make sure to stop the preview before resizing or reformatting it.
 
-        if (mHolder.getSurface() == null){
-            // preview surface does not exist
-            return;
-        }
+//        if (mHolder.getSurface() == null){
+//            // preview surface does not exist
+//            return;
+//        }
 
         // stop preview before making changes
-        try {
-            mCamera.stopPreview();
-        } catch (Exception e){
-            // ignore: tried to stop a non-existent preview
-        }
+//        try {
+//            mCamera.stopPreview();
+//        } catch (Exception e){
+//            // ignore: tried to stop a non-existent preview
+//        }
 
         // we transpose view
         Camera.Parameters params = mCamera.getParameters();
@@ -183,5 +186,20 @@ public class FastCameraView extends SurfaceView implements SurfaceHolder.Callbac
             }
             mCamera = null;
         }
+    }
+
+    public void swapCamera() {
+        releaseCamera();
+        cameraIndex++;
+        if (cameraIndex >= numberOfCameras) {
+            cameraIndex = 0;
+        }
+        android.hardware.Camera.CameraInfo cameraInfo = new android.hardware.Camera.CameraInfo();
+        android.hardware.Camera.getCameraInfo(cameraIndex, cameraInfo);
+        cameraFacing = false;
+        if (cameraInfo.facing == android.hardware.Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            cameraFacing = true;
+        }
+        startCameraPreview(previewWidth, previewHeight);
     }
 }

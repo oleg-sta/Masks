@@ -127,7 +127,8 @@ public class PoseHelper {
                 foundLandmarks = mNativeDetector.findLandMarks(findGray, facesArray[0]);
                 convertToSurface(foundLandmarks, width, height, mCameraWidth, mCameraHeight);
 
-                if (Settings.useCalman && previous != null) {
+                if (Settings.useKalman && previous != null) {
+                    // TODO if changes are greater then parameter, we should not use calman
                     for (int i = 0; i < previous.length; i++) {
                         foundLandmarks[i].x = 0.4 * foundLandmarks[i].x + 0.6 * previous[i].x;
                         foundLandmarks[i].y = 0.4 * foundLandmarks[i].y + 0.6 * previous[i].y;

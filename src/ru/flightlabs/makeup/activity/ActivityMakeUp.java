@@ -2,6 +2,7 @@ package ru.flightlabs.makeup.activity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
@@ -10,8 +11,12 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.SurfaceHolder;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 
@@ -23,8 +28,8 @@ import ru.flightlabs.makeup.CommonI;
 import ru.flightlabs.makeup.EditorEnvironment;
 import ru.flightlabs.makeup.ResourcesApp;
 import ru.flightlabs.makeup.adapter.CategoriesNamePagerAdapter;
+import ru.flightlabs.makeup.adapter.CategoriesNewAdapter;
 import ru.flightlabs.makeup.adapter.ColorsPagerAdapter;
-import ru.flightlabs.makeup.adapter.CategoriesPagerAdapter;
 import ru.flightlabs.masks.CompModel;
 import ru.flightlabs.masks.ModelLoaderTask;
 import ru.flightlabs.masks.R;
@@ -32,6 +37,8 @@ import ru.flightlabs.masks.Static;
 import ru.flightlabs.masks.activity.Settings;
 import ru.flightlabs.masks.camera.FastCameraView;
 import ru.flightlabs.masks.renderer.MaskRenderer;
+import us.feras.ecogallery.EcoGallery;
+import us.feras.ecogallery.EcoGalleryAdapterView;
 
 /**
  * Created by sov on 08.02.2017.
@@ -44,6 +51,7 @@ public class ActivityMakeUp extends Activity implements CommonI {
     CompModel compModel;
     ProgressBar progressBar;
     public static GLSurfaceView gLSurfaceView;
+    FastCameraView sv;
 
     private SurfaceHolder mHolder;
 
@@ -77,9 +85,7 @@ public class ActivityMakeUp extends Activity implements CommonI {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_makeup);
 
-        FastCameraView sv = (FastCameraView) findViewById(R.id.fd_fase_surface_view);
-        mHolder = sv.getHolder();
-        mHolder.addCallback(sv);
+        sv = (FastCameraView) findViewById(R.id.fd_fase_surface_view);
 
         compModel = new CompModel();
         compModel.context = getApplicationContext();
@@ -103,7 +109,13 @@ public class ActivityMakeUp extends Activity implements CommonI {
         ((CheckBox)findViewById(R.id.useCalman)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                Settings.useCalman = b;
+                Settings.useKalman = b;
+            }
+        });
+        findViewById(R.id.rotate_camera).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sv.swapCamera();
             }
         });
         ViewPager viewPagerCategories = (ViewPager) findViewById(R.id.categories);
@@ -111,7 +123,7 @@ public class ActivityMakeUp extends Activity implements CommonI {
         viewPagerCategories.setAdapter(pagerCategories);
 
         editorEnvironment = new EditorEnvironment(getApplication().getApplicationContext(), resourcesApp);
-        changeCategory(0);
+        changeCategory(EditorEnvironment.FASHION);
         ((SeekBar)findViewById(R.id.opacity)).setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -139,7 +151,58 @@ public class ActivityMakeUp extends Activity implements CommonI {
         gLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);//RENDERMODE_WHEN_DIRTY);
         //gLSurfaceView.setZOrderOnTop(false);
 
+        findViewById(R.id.camera_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Static.makePhoto = true;
+                //startActivity(new Intent(getApplication(), ActivityPhoto.class));
+            }
+        });
+        findViewById(R.id.settings).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getApplication(), ActivitySettings.class));
+            }
+        });
     }
+
+    private class ImageAdapter extends BaseAdapter {
+        private Context context;
+
+        ImageAdapter(Context context) {
+            this.context = context;
+        }
+
+        public int getCount() {
+            return 10;
+        }
+
+        public Object getItem(int position) {
+            return position;
+        }
+
+        public long getItemId(int position) {
+            return position;
+        }
+
+        public View getView(int position, View convertView, ViewGroup parent) {
+            // Not using convertView for sample app simplicity. You should probably use it in real application to get better performance.
+            ImageView imageView = new ImageView(context);
+            int resId;
+            switch (position) {
+                case 0: resId = R.drawable.fashion_1;
+                    break;
+                case 1: resId = R.drawable.fashion_1;
+                    break;
+                case 2: resId = R.drawable.fashion_1;
+                    break;
+                default: resId = R.drawable.fashion_1;
+            }
+            imageView.setImageResource(resId);
+            return imageView;
+        }
+    }
+
 
     @Override
     public void onResume() {
@@ -163,6 +226,7 @@ public class ActivityMakeUp extends Activity implements CommonI {
         super.onPause();
         gLSurfaceView.onPause();
         //TODO has something todo with FastCameraView (rlease, close etc.)
+        sv.disableView();
     }
 
     public void changeCategory(int position) {
@@ -170,7 +234,7 @@ public class ActivityMakeUp extends Activity implements CommonI {
 
         editorEnvironment.newIndexItem = 0;
         editorEnvironment.catgoryNum = position;
-        ViewPager viewPager = (ViewPager) findViewById(R.id.elements);
+        EcoGallery viewPager = (EcoGallery) findViewById(R.id.elements);
         TypedArray iconsCategory = null;
         if (position == 0) {
             iconsCategory = resourcesApp.eyelashesSmall;
@@ -188,8 +252,25 @@ public class ActivityMakeUp extends Activity implements CommonI {
             iconsCategory = resourcesApp.fashionSmall;
             resourceId = R.array.colors_lips;
         }
-        CategoriesPagerAdapter pager = new CategoriesPagerAdapter(this, iconsCategory);
+        CategoriesNewAdapter pager = new CategoriesNewAdapter(this, iconsCategory);
         viewPager.setAdapter(pager);
+        viewPager.setOnItemClickListener(new EcoGalleryAdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(EcoGalleryAdapterView<?> parent, View view, int position, long id) {
+                changeItemInCategory(position);
+            }
+        });
+        viewPager.setOnItemSelectedListener(new EcoGalleryAdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(EcoGalleryAdapterView<?> parent, View view, int position, long id) {
+                changeItemInCategory(position);
+            }
+
+            @Override
+            public void onNothingSelected(EcoGalleryAdapterView<?> parent) {
+
+            }
+        });
 
         ViewPager viewPagerColors = (ViewPager) findViewById(R.id.colors);
         ColorsPagerAdapter pagerColors = new ColorsPagerAdapter(this, getResources().getIntArray(resourceId));

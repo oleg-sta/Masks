@@ -31,7 +31,7 @@ public class Settings extends Activity {
     private static final String TAG = "Settings_class";
     public static boolean useLinear;
     public static boolean makeUp;
-    public static boolean useCalman;
+    public static boolean useKalman;
 
 
     @Override

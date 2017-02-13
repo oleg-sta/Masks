@@ -9,7 +9,6 @@ import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.CheckBox;
@@ -75,8 +74,6 @@ public class ActivityFast extends Activity {
         setContentView(R.layout.fast_view);
 
         cameraView = (FastCameraView) findViewById(R.id.fd_fase_surface_view);
-        SurfaceHolder mHolder = cameraView.getHolder();
-        mHolder.addCallback(cameraView);
 
         compModel = new CompModel();
         compModel.context = getApplicationContext();
@@ -113,7 +110,7 @@ public class ActivityFast extends Activity {
         ((CheckBox)findViewById(R.id.useCalman)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                Settings.useCalman = b;
+                Settings.useKalman = b;
             }
         });
 
