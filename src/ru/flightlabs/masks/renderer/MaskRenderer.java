@@ -174,14 +174,14 @@ public class MaskRenderer implements GLSurfaceView.Renderer {
             GLES20.glUniform1f(GLES20.glGetUniformLocation(programNv21ToRgba, "cameraWidth"), mCameraWidth);
             GLES20.glUniform1f(GLES20.glGetUniformLocation(programNv21ToRgba, "cameraHeight"), mCameraWidth);
             Log.i(TAG, "onDrawFrame5");
-            ShaderEffectHelper.shaderEffect2dWholeScreen(new Point(0, 0), new Point(widthSurf, heightSurf), texNV21FromCamera[0], programNv21ToRgba, vPos, vTex, texNV21FromCamera[1]);
+            ShaderEffect.shaderEffect2dWholeScreen(new Point(0, 0), new Point(widthSurf, heightSurf), texNV21FromCamera[0], programNv21ToRgba, vPos, vTex, texNV21FromCamera[1]);
             Log.i(TAG, "onDrawFrame6");
 
             // TODO draw debug with shaders
             if (Settings.debugMode && poseResult.foundLandmarks != null) {
                 int vPos2 = GLES20.glGetAttribLocation(programId2dParticle, "vPosition");
                 GLES20.glEnableVertexAttribArray(vPos2);
-                ShaderEffectHelper.effect2dParticle(widthSurf, heightSurf, programId2dParticle, vPos2, PointsConverter.convertFromPointsGlCoord(poseResult.foundLandmarks, widthSurf, heightSurf));
+                ShaderEffect.effect2dParticle(widthSurf, heightSurf, programId2dParticle, vPos2, PointsConverter.convertFromPointsGlCoord(poseResult.foundLandmarks, widthSurf, heightSurf));
             }
             // draw effect on rgba
             GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
