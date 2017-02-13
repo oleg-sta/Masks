@@ -44,17 +44,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!--MakeUp-->
-        <activity
-            android:name="ru.flightlabs.makeup.activity.ActivityMakeUp"
-            android:configChanges="keyboardHidden|orientation"
-            android:label="MasksMakeUp"
-            android:screenOrientation="portrait" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
         <activity
             android:name=".activity.SettingsActivity"
             android:label="@string/app_name"
@@ -62,18 +51,6 @@
         </activity>
         <activity
             android:name=".activity.Gallery"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait" >
-        </activity>
-
-        <!--MakeUps-->
-        <activity
-            android:name="ru.flightlabs.makeup.activity.ActivityPhoto"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait" >
-        </activity>
-        <activity
-            android:name="ru.flightlabs.makeup.activity.ActivitySettings"
             android:label="@string/app_name"
             android:screenOrientation="portrait" >
         </activity>
