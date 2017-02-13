@@ -20,6 +20,7 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
+import ru.flightlabs.commonlib.Settings;
 import ru.flightlabs.masks.CompModel;
 import ru.flightlabs.masks.camera.FastCameraView;
 import ru.flightlabs.masks.ModelLoaderTask;
@@ -137,7 +138,7 @@ public class ActivityFast extends Activity {
         Log.i(TAG, "onResume");
         super.onResume();
         final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
-        //Settings.debugMode = prefs.getBoolean(Settings.DEBUG_MODE, true);
+        //SettingsActivity.debugMode = prefs.getBoolean(SettingsActivity.DEBUG_MODE, true);
         Static.libsLoaded = false;
         OpenCVLoader.initDebug();
         mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);

@@ -35,6 +35,7 @@ import org.opencv.core.Mat;
 import java.io.File;
 import java.io.IOException;
 
+import ru.flightlabs.commonlib.Settings;
 import ru.flightlabs.masks.CompModel;
 import ru.flightlabs.masks.camera.CvCameraViewListener2Impl;
 import ru.flightlabs.masks.DetectionBasedTracker;
@@ -53,7 +54,6 @@ import ru.flightlabs.masks.utils.FileUtils;
 public class FdActivity extends Activity {
 
     CompModel compModel;
-    public static Mat glViewMatrix2;
     SimpleOpengl1Renderer meRender;
 
     private GLSurfaceView gLSurfaceView;
@@ -231,7 +231,7 @@ public class FdActivity extends Activity {
         findViewById(R.id.setting_button).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(d, Settings.class));
+                startActivity(new Intent(d, SettingsActivity.class));
 
             }
         });

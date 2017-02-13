@@ -14,24 +14,12 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import ru.flightlabs.commonlib.Settings;
 import ru.flightlabs.masks.R;
 
-public class Settings extends Activity {
+public class SettingsActivity extends Activity {
 
-    public static boolean debugMode = false;
-    public static final String DIRECTORY_SELFIE = "Masks";
-    
-    public static final String PREFS = "eselfie";
-    public static final String DEBUG_MODE = "debugMode";
-    public static final String MULTI_MODE = "multiMode";
-    public static final String PUPILS_MODE = "pupilsMode";
-    public static final String COUNTER_PHOTO = "photoCounter";
-    public static final String MODEL_PATH = "modelPath";
-    public static final String MODEL_PATH_DEFAULT = "/storage/extSdCard/sp_s2.dat";
     private static final String TAG = "Settings_class";
-    public static boolean useLinear;
-    public static boolean makeUp;
-    public static boolean useKalman;
 
 
     @Override
@@ -47,7 +35,7 @@ public class Settings extends Activity {
             }
         });
         final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
-        String path = prefs.getString(Settings.MODEL_PATH, MODEL_PATH_DEFAULT);
+        String path = prefs.getString(Settings.MODEL_PATH, Settings.MODEL_PATH_DEFAULT);
         TextView textView = (TextView)findViewById(R.id.file_model);
         textView.setText(path);
     }
@@ -61,7 +49,7 @@ public class Settings extends Activity {
     
     public void setFile(View view) {
         final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
-        String path = prefs.getString(Settings.MODEL_PATH, MODEL_PATH_DEFAULT);
+        String path = prefs.getString(Settings.MODEL_PATH, Settings.MODEL_PATH_DEFAULT);
         final EditText input = new EditText(this);
         input.setText(path);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

@@ -8,6 +8,7 @@ import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.support.v4.view.ActionProvider;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -24,6 +25,7 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
+import ru.flightlabs.commonlib.Settings;
 import ru.flightlabs.makeup.CommonI;
 import ru.flightlabs.makeup.EditorEnvironment;
 import ru.flightlabs.makeup.ResourcesApp;
@@ -35,7 +37,7 @@ import ru.flightlabs.masks.CompModel;
 import ru.flightlabs.masks.ModelLoaderTask;
 import ru.flightlabs.masks.R;
 import ru.flightlabs.masks.Static;
-import ru.flightlabs.masks.activity.Settings;
+import ru.flightlabs.masks.activity.SettingsActivity;
 import ru.flightlabs.masks.camera.FastCameraView;
 import ru.flightlabs.masks.renderer.MaskRenderer;
 import us.feras.ecogallery.EcoGallery;
@@ -167,50 +169,12 @@ public class ActivityMakeUp extends Activity implements CommonI {
         });
     }
 
-    private class ImageAdapter extends BaseAdapter {
-        private Context context;
-
-        ImageAdapter(Context context) {
-            this.context = context;
-        }
-
-        public int getCount() {
-            return 10;
-        }
-
-        public Object getItem(int position) {
-            return position;
-        }
-
-        public long getItemId(int position) {
-            return position;
-        }
-
-        public View getView(int position, View convertView, ViewGroup parent) {
-            // Not using convertView for sample app simplicity. You should probably use it in real application to get better performance.
-            ImageView imageView = new ImageView(context);
-            int resId;
-            switch (position) {
-                case 0: resId = R.drawable.fashion_1;
-                    break;
-                case 1: resId = R.drawable.fashion_1;
-                    break;
-                case 2: resId = R.drawable.fashion_1;
-                    break;
-                default: resId = R.drawable.fashion_1;
-            }
-            imageView.setImageResource(resId);
-            return imageView;
-        }
-    }
-
-
     @Override
     public void onResume() {
         Log.i(TAG, "onResume");
         super.onResume();
         final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
-        //Settings.debugMode = prefs.getBoolean(Settings.DEBUG_MODE, true);
+        //SettingsActivity.debugMode = prefs.getBoolean(SettingsActivity.DEBUG_MODE, true);
         Static.libsLoaded = false;
         OpenCVLoader.initDebug();
         mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
@@ -218,6 +182,7 @@ public class ActivityMakeUp extends Activity implements CommonI {
         gLSurfaceView.onResume();
         editorEnvironment.init();
         Settings.makeUp = true;
+        Settings.clazz = ActivityPhoto.class;
     }
 
 

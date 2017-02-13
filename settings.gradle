@@ -1,1 +1,1 @@
-include ':ecogallery'
+include ':ecogallery', ':commonlib'

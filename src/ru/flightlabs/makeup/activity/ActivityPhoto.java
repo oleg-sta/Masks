@@ -11,6 +11,7 @@ import android.widget.ImageView;
 
 import java.io.File;
 
+import ru.flightlabs.commonlib.Settings;
 import ru.flightlabs.masks.R;
 
 /**
@@ -19,7 +20,6 @@ import ru.flightlabs.masks.R;
 
 public class ActivityPhoto extends Activity {
 
-    public static String PHOTO = "photo";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,7 +27,7 @@ public class ActivityPhoto extends Activity {
 
         // TODO add pager
         Bundle extras = getIntent().getExtras();
-        final String fileName = extras.getString(PHOTO);
+        final String fileName = extras.getString(Settings.PHOTO);
 
         Bitmap photo = BitmapFactory.decodeFile(fileName);
         ImageView imageView = (ImageView) findViewById(R.id.main_image);

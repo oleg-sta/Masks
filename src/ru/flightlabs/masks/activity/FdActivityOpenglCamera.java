@@ -25,10 +25,8 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraGLSurfaceView;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Mat;
 
-import java.io.IOException;
-
+import ru.flightlabs.commonlib.Settings;
 import ru.flightlabs.masks.Static;
 import ru.flightlabs.masks.adapter.MasksPagerAdapter;
 import ru.flightlabs.masks.camera.CameraTextureListenerImpl;
@@ -192,7 +190,7 @@ public class FdActivityOpenglCamera extends Activity {
         findViewById(R.id.setting_button).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(d, Settings.class));
+                startActivity(new Intent(d, SettingsActivity.class));
 
             }
         });
@@ -272,7 +270,7 @@ public class FdActivityOpenglCamera extends Activity {
         super.onResume();
 
         final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
-        //Settings.debugMode = prefs.getBoolean(Settings.DEBUG_MODE, true);
+        //SettingsActivity.debugMode = prefs.getBoolean(SettingsActivity.DEBUG_MODE, true);
         OpenCVLoader.initDebug();
         mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         new ModelLoaderTask(progressBar).execute(compModel);

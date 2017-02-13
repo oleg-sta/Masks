@@ -15,11 +15,12 @@ import org.opencv.imgproc.Imgproc;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import ru.flightlabs.commonlib.Settings;
 import ru.flightlabs.masks.CompModel;
 import ru.flightlabs.masks.Static;
-import ru.flightlabs.masks.activity.Settings;
+import ru.flightlabs.masks.activity.SettingsActivity;
 import ru.flightlabs.masks.renderer.EffectShader;
-import ru.flightlabs.masks.renderer.ShaderEffect;
+import ru.flightlabs.masks.renderer.ShaderEffectHelper;
 import ru.flightlabs.masks.renderer.ShaderEffectMask;
 import ru.flightlabs.masks.utils.FileUtils;
 import ru.flightlabs.masks.utils.PhotoMaker;
@@ -136,7 +137,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
             initFboGray(width, height);
         }
         Mat findGray = null;
-        //if (Settings.debugMode)
+        //if (SettingsActivity.debugMode)
         if (!Settings.debugMode && false) {
             // strange, but it's slower then color!!!
             GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, grayFbo[0]);
@@ -145,7 +146,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
             int vTex = GLES20.glGetAttribLocation(programGrey, "vTexCoord");
             GLES20.glEnableVertexAttribArray(vPos);
             GLES20.glEnableVertexAttribArray(vTex);
-            ShaderEffect.shaderEffect2dWholeScreen(new Point(0, 0), new Point(width, height), texIn, programGrey, vPos, vTex);
+            ShaderEffectHelper.shaderEffect2dWholeScreen(new Point(0, 0), new Point(width, height), texIn, programGrey, vPos, vTex);
             GLES20.glReadPixels(0, 0, (width + 3) / 4, height, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, m_bbPixelsGrey);
             m_bbPixelsGrey.rewind();
             mGrayprogram.put(0, 0, m_bbPixelsGrey.array());
@@ -227,7 +228,7 @@ public class CameraTextureListenerImpl implements CameraGLSurfaceView.CameraText
             PhotoMaker.makePhoto(mRgba, act);
             // save 3d model
 //            File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-//            File newFile = new File(file, Settings.DIRECTORY_SELFIE);
+//            File newFile = new File(file, SettingsActivity.DIRECTORY_SELFIE);
 //            final File fileJpg = new File(newFile, "outModel.obj");
 //            model.saveModel(fileJpg.getPath());
         }

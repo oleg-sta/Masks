@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 
+import ru.flightlabs.commonlib.Settings;
 import ru.flightlabs.masks.adapter.PhotoPagerAdapter;
 import ru.flightlabs.masks.R;
 

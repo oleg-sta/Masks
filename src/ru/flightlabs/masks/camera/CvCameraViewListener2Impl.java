@@ -16,11 +16,13 @@ import org.opencv.imgproc.Imgproc;
 
 import java.util.Date;
 
+import ru.flightlabs.commonlib.Settings;
 import ru.flightlabs.masks.CompModel;
 import ru.flightlabs.masks.DetectionBasedTracker;
 import ru.flightlabs.masks.R;
+import ru.flightlabs.masks.Static;
 import ru.flightlabs.masks.activity.FdActivity;
-import ru.flightlabs.masks.activity.Settings;
+import ru.flightlabs.masks.activity.SettingsActivity;
 import ru.flightlabs.masks.renderer.SimpleOpengl1Renderer;
 import ru.flightlabs.masks.utils.OpencvUtils;
 
@@ -160,7 +162,7 @@ public class CvCameraViewListener2Impl implements CameraBridgeViewBase.CvCameraV
             }
         }
         if (foundEyes == null) {
-            FdActivity.glViewMatrix2 = null;
+            Static.glViewMatrix2 = null;
         }
         if (foundEyes != null) {
 

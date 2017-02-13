@@ -26,6 +26,7 @@ dependencies {
     compile 'com.android.support:support-v4:22.2.+'
     compile 'com.android.support:appcompat-v7:22.2.+'
     compile project(':ecogallery')
+    compile project(':commonlib')
 }
 
 android {
@@ -84,7 +85,7 @@ android {
             }
         }
     }
-
+/*
 
     task ndkBuild(type: Exec, description: 'Compile JNI source via NDK') {
         commandLine ndkDir + "\\ndk-build.cmd",
@@ -111,5 +112,5 @@ android {
         }
     }
 
-
+*/
 }
