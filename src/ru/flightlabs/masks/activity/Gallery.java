@@ -55,7 +55,7 @@ public class Gallery extends Activity {
         final PhotoPagerAdapter adapter = new PhotoPagerAdapter(this, photos);
         pager.setAdapter(adapter);
         
-        findViewById(R.id.bucket_button).setOnClickListener(new OnClickListener() {
+        findViewById(R.id.thrash_button).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(d);
@@ -86,6 +86,13 @@ public class Gallery extends Activity {
                 shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(adapter.photos.get(pager.getCurrentItem()))));
                 shareIntent.setType("image/jpeg");
                 startActivity(Intent.createChooser(shareIntent, getString(R.string.send_photo_with)));
+            }
+        });
+
+        findViewById(R.id.back_button).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
             }
         });
     }

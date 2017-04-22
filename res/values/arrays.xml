@@ -1,8 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
+
+    <array name="masks">
+        <item>@drawable/monkey</item>
+        <item>@drawable/m1_2</item>
+        <item>@drawable/m1_2</item>
+        <item>@drawable/m1_2</item>
+        <item>@drawable/m2</item>
+        <item>@drawable/m3_1</item>
+        <item>@drawable/m4_2</item>
+        <item>@drawable/m5_2</item>
+        <item>@drawable/bear</item>
+        <item>@drawable/bear</item>
+        <item>@drawable/bear</item>
+        <item>@drawable/bear</item>
+        <item>@drawable/bear</item>
+        <item>@drawable/bear</item>
+        <item>@drawable/bear</item>
+        <item>@drawable/bear</item>
+    </array>
+
+
     <array name="masks_small_png">
         <item>@drawable/monkey</item>
+        <item>@drawable/m1_2</item>
+        <item>@drawable/m1_2</item>
         <item>@drawable/m1_2</item>
         <item>@drawable/m2</item>
         <item>@drawable/m3_1</item>
@@ -20,6 +42,8 @@
     
     <array name="masks_png">
         <item>@raw/monkey</item>
+        <item>@raw/m1_2</item>
+        <item>@raw/m1_2</item>
         <item>@raw/m1_2</item>
         <item>@raw/m2</item>
         <item>@raw/m3_1</item>
@@ -115,6 +139,7 @@
     <string-array name="programs" translatable="false">
         <item>vss_2d;fss_barrel;2</item>
         <item>vss3d;fss3d;3</item>
+        <item>vss_2d;fss_2d_simple;2</item> <!-- no effect, just copy-->
         <item>vss_2d;fss_rad_blur;2</item>
         <!--<item>vss;fss_light;2</item>-->
         <item>vss_2d;fss_stars;2</item>
@@ -127,14 +152,15 @@
         <item>vss_particle;fss_particle;3</item>
     </string-array>
 
-    <!-- programId; 3d model namel; texutre name; alpha; 1 - need blend shape, 0 - no-->
+    <!-- programId; 3d model namel; texutre name; alpha; 1 - need blend shape, 0 - no; textureBlendShape-->
     <string-array name="effects" translatable="false">
         <item>0;;;0.1;0</item>
         <item>1;model;m1_2;0.7;1</item>
+        <item>1;deer_horns;mask_example_6;0.7;1;mask_example_555</item>
+        <item>1;face_hockey;mask_hockey5;0.9;0</item>
         <item>1;modelGlasses;glasses;0.9;0</item>
         <item>1;modelHat;hat_tex;1.0;0</item>
         <item>1;star;hat_tex;1.0;0</item>
-        <item>2;;;0.1;0</item>
         <item>3;;;0.1;0</item>
         <item>4;;;0.1;0</item>
         <item>5;;;0.1;0</item>
@@ -142,7 +168,8 @@
         <item>7;;;0.1;0</item>
         <item>8;;;0.1;0</item>
         <item>9;;;0.1;0</item>
-        <item>10;model;m1_2;0.7;1</item>
+        <item>10;;;0.1;0</item>
+        <item>11;model;m1_2;0.7;1</item>
     </string-array>
 
 </resources>

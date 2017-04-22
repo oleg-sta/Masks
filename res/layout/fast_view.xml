@@ -1,7 +1,7 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent">
 
     <ru.flightlabs.masks.camera.FastCameraView
         android:id="@+id/fd_fase_surface_view"
@@ -10,157 +10,131 @@
 
     <android.opengl.GLSurfaceView
         android:id="@+id/fd_glsurface"
-        android:layout_gravity="top"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_above="@+id/categories" />
 
-    <RelativeLayout
+
+    <View
+        android:id="@+id/nn"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignTop="@+id/categories"
+        android:background="@color/main_makeup_color" />
 
+    <ImageView
+        android:id="@+id/settings"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="10dip"
+        android:layout_marginTop="10dip"
+        android:src="@drawable/ic_settings2" />
 
-        <ListView
-            android:visibility="gone"
-            android:id="@+id/list_effects"
-            android:layout_width="70dp"
-            android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:cacheColorHint="#00000000"
-            android:scrollingCache="false"
-            android:stackFromBottom="true"
-            android:background="#D7D7D7" />
+    <View
+        android:id="@+id/border"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/border"
+        android:visibility="gone" />
 
-        <View
-            android:id="@+id/border"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/border"
-            android:visibility="gone" />
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="100dp" />
 
-        <CheckBox
-            android:id="@+id/rgbCheckBox"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
-            android:layout_alignParentRight="true"
-            android:layout_alignTop="@+id/gallery_button" />
+    <CheckBox
+        android:id="@+id/checkBoxLinear"
+        android:layout_width="40dip"
+        android:layout_height="40dip"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="54dp" />
 
+    <CheckBox
+        android:id="@+id/checkDebug"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="104dp" />
 
-        <ImageView
-            android:id="@+id/sound_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="14dp"
-            android:src="@drawable/ic_sound" />
-
-        <CheckBox
-            android:id="@+id/checkBoxLinear"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="54dp" />
-
-        <CheckBox
-            android:id="@+id/checkDebug"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="104dp" />
-
-        <CheckBox
-            android:id="@+id/useCalman"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="154dp" />
-
-        <ImageView
-            android:id="@+id/rotate_camera"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginRight="50dp"
-            android:src="@drawable/ic_camera_turn" />
-
-        <ImageView
-            android:id="@+id/setting_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:rotation="270"
-            android:src="@drawable/ic_settings" />
-
-        <ImageView
-            android:id="@+id/setting_button2"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/sound_button"
-            android:rotation="270"
-            android:src="@drawable/ic_settings" />
-
-        <ProgressBar
-            android:id="@+id/progress_bar"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="100dp"
-            android:layout_alignParentLeft="true" />
-
-        <ImageView
-            android:id="@+id/camera_button"
-            android:layout_width="78dp"
-            android:layout_height="78dp"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="25dp"
-            android:layout_centerHorizontal="true"
-            android:layout_above="@+id/gallery_button"
-            android:src="@drawable/ic_camera" />
-
-        <ImageView
-            android:id="@+id/video_button"
-            android:layout_width="58dp"
-            android:layout_height="58dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginBottom="25dp"
-            android:layout_marginRight="45dp"
-            android:src="@drawable/ic_camera" />
-
-        <ImageView
-            android:id="@+id/make_face"
-            android:layout_width="58dp"
-            android:layout_height="58dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_marginBottom="25dp"
-            android:layout_marginLeft="55dp"
-            android:src="@drawable/ic_camera" />
-
-        <ImageView
-            android:id="@+id/gallery_button"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_marginBottom="25dp"
-            android:layout_marginLeft="14dp"
-            android:src="@drawable/ic_gallery_large" />
-
-    </RelativeLayout>
+    <CheckBox
+        android:id="@+id/useCalman"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="154dp" />
 
     <android.support.v4.view.ViewPager
-        android:id="@+id/photo_pager"
+        android:id="@+id/colors"
         android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:layout_gravity="bottom"
-        android:layout_marginBottom="100dp" >
-    </android.support.v4.view.ViewPager>
+        android:layout_height="44dp"
+        android:layout_above="@+id/camera_button"
+        android:layout_marginBottom="25dip"></android.support.v4.view.ViewPager>
 
-</FrameLayout>
+    <us.feras.ecogallery.EcoGallery
+        android:id="@+id/elements"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_marginBottom="10dp"
+        android:layout_above="@+id/camera_button"></us.feras.ecogallery.EcoGallery>
+
+    <FrameLayout
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"
+        android:layout_above="@+id/camera_button">
+        <ImageView
+            android:id="@+id/border_fashion"
+            android:layout_width="73dp"
+            android:layout_height="73dp"
+            android:layout_gravity="center"
+            android:src="@drawable/border_selected" />
+    </FrameLayout>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/categories"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_above="@+id/elements"
+        android:layout_marginBottom="2dip"></android.support.v4.view.ViewPager>
+
+    <ImageView
+        android:id="@+id/camera_button"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="15dp"
+        android:src="@drawable/ic_photo" />
+
+    <ImageView
+        android:id="@+id/rotate_camera"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="10dip"
+        android:layout_marginTop="10dip"
+        android:src="@drawable/ic_rotate_camera" />
+
+    <ImageView
+        android:id="@+id/back_button"
+        android:layout_width="18dp"
+        android:layout_height="23dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignTop="@+id/camera_button"
+        android:layout_alignBottom="@+id/camera_button"
+        android:layout_marginLeft="20dp"
+        android:src="@drawable/ic_back"
+        android:visibility="gone" />
+
+</RelativeLayout>

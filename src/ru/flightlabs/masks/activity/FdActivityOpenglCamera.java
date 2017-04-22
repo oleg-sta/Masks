@@ -38,7 +38,7 @@ import ru.flightlabs.masks.R;
 /**
  * this activity uses opengl camera frame, very slow getting
  */
-public class FdActivityOpenglCamera extends Activity {
+public class FdActivityOpenglCamera extends Activity implements ModelLoaderTask.Callback {
 
     CompModel compModel;
 
@@ -157,7 +157,7 @@ public class FdActivityOpenglCamera extends Activity {
                     Static.makePhoto = true;
                     Static.makePhoto2 = true;
                     // MediaActionSound sound = new MediaActionSound();
-                    cameraButton.setImageResource(R.drawable.ic_camera_r);
+                    cameraButton.setImageResource(R.drawable.ic_trash);
                     borderCam.setVisibility(View.VISIBLE);
                     if (playSound) {
                         sound.play(MediaActionSound.SHUTTER_CLICK);
@@ -214,9 +214,9 @@ public class FdActivityOpenglCamera extends Activity {
             public void onClick(View v) {
                 playSound = !playSound;
                 if (playSound) {
-                    soundButton.setImageResource(R.drawable.ic_sound);
+                    soundButton.setImageResource(R.drawable.ic_trash);
                 } else {
-                    soundButton.setImageResource(R.drawable.ic_nosound);
+                    soundButton.setImageResource(R.drawable.ic_trash);
                 }
             }
         });
@@ -273,8 +273,8 @@ public class FdActivityOpenglCamera extends Activity {
         //SettingsActivity.debugMode = prefs.getBoolean(SettingsActivity.DEBUG_MODE, true);
         OpenCVLoader.initDebug();
         mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
-        new ModelLoaderTask(progressBar).execute(compModel);
-        Settings.makeUp = false;
+        new ModelLoaderTask(this).execute(compModel);
+        //Settings.makeUp = false;
     }
 
     public void onDestroy() {
@@ -297,5 +297,10 @@ public class FdActivityOpenglCamera extends Activity {
         mOpenCvCameraView.disableView();
         mOpenCvCameraView.setCameraIndex(cameraIndex);
         mOpenCvCameraView.enableView();
+    }
+
+    @Override
+    public void onModelLoaded() {
+        progressBar.setVisibility(View.INVISIBLE);
     }
 }

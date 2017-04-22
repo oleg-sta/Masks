@@ -31,6 +31,7 @@ public class ShaderEffectMask extends ShaderEffect {
     private static final String TAG = "ShaderEffectMask";
 
     private int maskTextureid;
+    private int maskTextureBlendid;
     float[] verticesParticels;
 
     int[] programs;
@@ -83,6 +84,7 @@ public class ShaderEffectMask extends ShaderEffect {
     private void load3dModel() {
         Log.i(TAG, "load3dModel");
         maskTextureid = OpenGlHelper.loadTexture(context, R.raw.m1_2);
+        maskTextureBlendid = OpenGlHelper.loadTexture(context, R.raw.m1_2);
         Log.i(TAG, "load3dModel2");
         Model modelGlasses = new Model(R.raw.glasses_3d,
                 context);
@@ -93,6 +95,8 @@ public class ShaderEffectMask extends ShaderEffect {
         models.put("modelGlasses", modelGlasses);
         models.put("modelHat", modelHat);
         models.put("star", new Model(R.raw.star, context));
+        models.put("face_hockey", new Model(R.raw.face_hockey, context));
+        models.put("deer_horns", new Model(R.raw.deer_horns, context));
         Log.i(TAG, "load3dModel exit");
     }
 
@@ -106,32 +110,45 @@ public class ShaderEffectMask extends ShaderEffect {
             if (effect.textureName != null && !"".equals(effect.textureName)) {
                 OpenGlHelper.changeTexture(context, "textures/" + effect.textureName + ".png", maskTextureid);
             }
+            if (effect.textureNamBlendshape != null && !"".equals(effect.textureNamBlendshape)) {
+                OpenGlHelper.changeTexture(context, "textures/" + effect.textureNamBlendshape + ".png", maskTextureBlendid);
+            }
         }
 
         int programId = programs[effect.programId];
         if (!"".equals(effect.textureName)) {
             // 3d effect
             // first we copy whole texture to buffer
-            int vPos = GLES20.glGetAttribLocation(programs[0], "vPosition");
-            int vTex = GLES20.glGetAttribLocation(programs[0], "vTexCoord");
+            int vPos = GLES20.glGetAttribLocation(programs[2], "vPosition");
+            int vTex = GLES20.glGetAttribLocation(programs[2], "vTexCoord");
             GLES20.glEnableVertexAttribArray(vPos);
             GLES20.glEnableVertexAttribArray(vTex);
-            ShaderEffectHelper.shaderEffect2dWholeScreen(poseResult.leftEye, poseResult.rightEye, texIn, programs[0], vPos, vTex);
+            ShaderEffectHelper.shaderEffect2dWholeScreen(poseResult.leftEye, poseResult.rightEye, texIn, programs[2], vPos, vTex);
             // then we draw 3d/2d object on it
             if (poseResult.foundFeatures) {
                 // crazy simple animation
-                if (indexEye == 4) {
+                if (indexEye == 6) {
                     animate(models.get(effect.model3dName), time);
                 }
-                if (indexEye == 13) {
-                    Log.i(TAG, "index 13");
+                if (indexEye == 15) {
+                    Log.i(TAG, "index 15");
                     GLES20.glUseProgram(programId);
                     int uCenter2 = GLES20.glGetUniformLocation(programId, "iGlobalTime");
                     Log.i(TAG, "onCameraTexture4443 " + uCenter2 + " " + iGlobTime);
                     GLES20.glUniform1f(uCenter2, (float) iGlobTime);
                     effect3dParticle(poseResult.glMatrix, width, height, programId);
                 } else {
+                    GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+                    GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
                     ShaderEffectHelper.shaderEffect3d(poseResult.glMatrix, texIn, width, height, models.get(effect.model3dName), maskTextureid, effect.alpha, programId, vPos3d, vTexFor3d);
+                    if (!"".equals(effect.textureNamBlendshape)) {
+                        GLES20.glFinish();
+                        ShaderEffectHelper.shaderEffect3d(poseResult.glMatrix, texIn, width, height, model, maskTextureBlendid, effect.alpha, programId, vPos3d, vTexFor3d);
+                    } else {
+                        //GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+                    }
+
+                    GLES20.glDisable(GLES20.GL_DEPTH_TEST);
                 }
             }
         } else {

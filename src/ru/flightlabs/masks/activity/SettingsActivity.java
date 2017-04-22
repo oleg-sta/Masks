@@ -20,57 +20,37 @@ import ru.flightlabs.masks.R;
 public class SettingsActivity extends Activity {
 
     private static final String TAG = "Settings_class";
-
-
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        Log.i(TAG, "called onCreate");
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings);
-        findViewById(R.id.back_button).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-                
-            }
-        });
-        final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
-        String path = prefs.getString(Settings.MODEL_PATH, Settings.MODEL_PATH_DEFAULT);
-        TextView textView = (TextView)findViewById(R.id.file_model);
-        textView.setText(path);
-    }
-    
-    public void mailTo(View view) {
-        Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
-                "mailto", "feedback@flightlabs.ru", null));
-        intent.putExtra(Intent.EXTRA_SUBJECT, "eSelfie");
-        startActivity(Intent.createChooser(intent, getString(R.string.send_mail_with)));
-    }
-    
-    public void setFile(View view) {
-        final SharedPreferences prefs = getSharedPreferences(Settings.PREFS, Context.MODE_PRIVATE);
-        String path = prefs.getString(Settings.MODEL_PATH, Settings.MODEL_PATH_DEFAULT);
-        final EditText input = new EditText(this);
-        input.setText(path);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Введи путь модели");
-        builder.setView(input).setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                String newName = input.getText().toString();
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putString(Settings.MODEL_PATH, newName);
-                editor.commit();
-                
-            }
-        }).setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                Log.i("DragOverListMen", "No");
-            }
-        });
-        AlertDialog alertDialog = builder.create();
-        alertDialog.show();
 
-        
+        findViewById(R.id.back_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
+
+    }
+
+    public void rateApp(View view) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id="
+                + getPackageName()));
+        startActivity(intent);
+    }
+    public void shareApp(View view) {
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT,
+                "Hey check out my app at: https://play.google.com/store/apps/details?id=" + getPackageName());
+        sendIntent.setType("text/plain");
+        startActivity(sendIntent);
+    }
+
+    public void gotoUrl(View view) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://flightlabs.ru"));
+        startActivity(browserIntent);
     }
 
 }

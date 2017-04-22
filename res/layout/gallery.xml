@@ -1,48 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#000000" >
+    android:layout_height="match_parent">
+
+    <View
+        android:id="@+id/top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="-10dip"
+        android:background="@color/main_makeup_color"
+        android:layout_alignParentTop="true"
+        android:layout_alignBottom="@+id/settings"/>
+
+    <ImageView
+        android:id="@+id/settings"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="10dip"
+        android:layout_marginTop="10dip"
+        android:src="@drawable/ic_settings2" />
 
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/top"
+        android:layout_marginTop="10dip"
+        android:layout_marginBottom="62dip"
+        android:layout_above="@+id/lower"
         android:layout_gravity="center_horizontal" />
 
-    <RelativeLayout
+    <View
+        android:id="@+id/lower"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/share_button"
+        android:layout_marginTop="-62dp"
+        android:background="@color/main_makeup_color"
+        android:layout_alignParentBottom="true"/>
 
-        <ImageView
-            android:id="@+id/bucket_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginRight="54dp"
-            android:layout_marginTop="9dp"
-            android:src="@drawable/ic_bucket" />
-
-        <ImageView
-            android:id="@+id/share_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginRight="9dp"
-            android:layout_marginTop="9dp"
-            android:src="@drawable/ic_share" />
-    </RelativeLayout>
-    <!--
-         <ru.flightlabs.eselfie.adapters.HorizontalListView
-        android:id="@+id/gallery1"
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/share_button"
+        android:layout_width="80dp"
         android:layout_height="80dp"
-        android:layout_gravity="bottom"
-        android:fadingEdgeLength="5dp"
-        android:requiresFadingEdge="horizontal"
-        android:layout_marginBottom="15dp" / -->
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="15dp"
+        android:src="@drawable/ic_share"/>
 
-</FrameLayout>
+    <ImageView
+        android:id="@+id/back_button"
+        android:layout_width="18dp"
+        android:layout_height="23dp"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_alignTop="@+id/share_button"
+        android:layout_alignBottom="@+id/share_button"
+        android:src="@drawable/ic_back"
+        android:layout_marginLeft="20dp"/>
+
+    <ImageView
+        android:id="@+id/thrash_button"
+        android:layout_width="18dp"
+        android:layout_height="23dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_alignTop="@+id/share_button"
+        android:layout_alignBottom="@+id/share_button"
+        android:src="@drawable/ic_trash"
+        android:layout_marginRight="20dp"/>
+
+
+</RelativeLayout>

@@ -51,7 +51,7 @@ import ru.flightlabs.masks.utils.FileUtils;
 /**
  * this activity uses opencv camera, very slow
  */
-public class FdActivity extends Activity {
+public class FdActivity extends Activity implements ModelLoaderTask.Callback {
 
     CompModel compModel;
     SimpleOpengl1Renderer meRender;
@@ -210,7 +210,7 @@ public class FdActivity extends Activity {
                     Static.makePhoto = true;
                     Static.makePhoto2 = true;
                     // MediaActionSound sound = new MediaActionSound();
-                    cameraButton.setImageResource(R.drawable.ic_camera_r);
+                    cameraButton.setImageResource(R.drawable.ic_trash);
                     borderCam.setVisibility(View.VISIBLE);
                     if (playSound) {
                         sound.play(MediaActionSound.SHUTTER_CLICK);
@@ -255,9 +255,9 @@ public class FdActivity extends Activity {
             public void onClick(View v) {
                 playSound = !playSound;
                 if (playSound) {
-                    soundButton.setImageResource(R.drawable.ic_sound);
+                    soundButton.setImageResource(R.drawable.ic_trash);
                 } else {
-                    soundButton.setImageResource(R.drawable.ic_nosound);
+                    soundButton.setImageResource(R.drawable.ic_trash);
                 }
                 Settings.debugMode = playSound;
             }
@@ -325,7 +325,7 @@ public class FdActivity extends Activity {
         multi = prefs.getBoolean(Settings.MULTI_MODE, true);
         OpenCVLoader.initDebug();
         mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
-        new ModelLoaderTask(progressBar).execute(compModel);
+        new ModelLoaderTask(this).execute(compModel);
     }
 
     public void onDestroy() {
@@ -363,5 +363,10 @@ public class FdActivity extends Activity {
         }
 
         mOpenCvCameraView.setCameraIndex(cameraIndex);
+    }
+
+    @Override
+    public void onModelLoaded() {
+
     }
 }
