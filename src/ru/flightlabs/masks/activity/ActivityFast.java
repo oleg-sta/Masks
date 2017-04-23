@@ -112,6 +112,12 @@ public class ActivityFast extends Activity implements ModelLoaderTask.Callback, 
                 Settings.useKalman = b;
             }
         });
+        ((CheckBox)findViewById(R.id.useBroader)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                Settings.useBroader = b;
+            }
+        });
 
         EcoGallery viewPager = (EcoGallery) findViewById(R.id.elements);
         TypedArray iconsCategory = getResources().obtainTypedArray(R.array.masks);
