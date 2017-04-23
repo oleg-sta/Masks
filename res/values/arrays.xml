@@ -6,6 +6,7 @@
         <item>@drawable/m1_2</item>
         <item>@drawable/m1_2</item>
         <item>@drawable/m1_2</item>
+        <item>@drawable/m1_2</item>
         <item>@drawable/m2</item>
         <item>@drawable/m3_1</item>
         <item>@drawable/m4_2</item>
@@ -156,6 +157,7 @@
     <string-array name="effects" translatable="false">
         <item>0;;;0.1;0</item>
         <item>1;model;m1_2;0.7;1</item>
+        <item>1;model;m1_2;0.1;1</item>
         <item>1;deer_horns;mask_example_6;0.7;1;mask_example_555</item>
         <item>1;face_hockey;mask_hockey5;0.9;0</item>
         <item>1;modelGlasses;glasses;0.9;0</item>

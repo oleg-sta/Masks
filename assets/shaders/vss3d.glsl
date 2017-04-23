@@ -12,4 +12,5 @@ void main() {
   if (gl_Position.z != 0.0) {z = 1.0 / gl_Position.z;};
   v_TexOrigCoordinate.x = (v_TexOrigCoordinate.x * z + 1.0) / 2.0;
   v_TexOrigCoordinate.y = (v_TexOrigCoordinate.y * z + 1.0) / 2.0;
+  gl_PointSize = 10.0;
 }

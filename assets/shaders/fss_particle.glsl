@@ -5,11 +5,11 @@ uniform sampler2D u_Texture; // mask texture
 varying vec2 v_TexCoordinate;
 varying vec2 v_TexOrigCoordinate;
 uniform float f_alpha; // mask texture
-
+uniform vec3 f_color;
 
 void main()
 {
-vec4 FragColor = vec4(1.0);
-FragColor.a *= 1.0;
+vec4 FragColor = vec4(f_color, 1.0);
+//FragColor.a *= 1.0;
 gl_FragColor = FragColor;
 }
