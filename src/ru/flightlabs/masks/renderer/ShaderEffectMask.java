@@ -12,10 +12,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import ru.flightlabs.commonlib.Settings;
 import ru.flightlabs.masks.R;
 import ru.flightlabs.masks.Static;
 import ru.flightlabs.masks.utils.FileUtils;
 import ru.flightlabs.masks.utils.OpenGlHelper;
+import ru.flightlabs.masks.utils.PointsConverter;
 import ru.flightlabs.masks.utils.PoseHelper;
 import ru.flightlabs.masks.utils.ShaderUtils;
 
@@ -97,6 +99,9 @@ public class ShaderEffectMask extends ShaderEffect {
         models.put("star", new Model(R.raw.star, context));
         models.put("face_hockey", new Model(R.raw.face_hockey, context));
         models.put("deer_horns", new Model(R.raw.deer_horns, context));
+        models.put("cat_mesh", new Model(R.raw.cat_mesh, context));
+        models.put("ochki_mesh", new Model(R.raw.ochki_mesh, context));
+        models.put("ochki_nnada_mesh", new Model(R.raw.ochki_nnada_mesh, context));
         Log.i(TAG, "load3dModel exit");
     }
 
@@ -128,9 +133,9 @@ public class ShaderEffectMask extends ShaderEffect {
             if (poseResult.foundFeatures) {
                 // crazy simple animation
                 if (indexEye == 6) {
-                    animate(models.get(effect.model3dName), time);
+                    //animate(models.get(effect.model3dName), time);
                 }
-                if (indexEye == 15) {
+                if (indexEye == 1500) {
                     Log.i(TAG, "index 15");
                     GLES20.glUseProgram(programId);
                     int uCenter2 = GLES20.glGetUniformLocation(programId, "iGlobalTime");
@@ -140,7 +145,13 @@ public class ShaderEffectMask extends ShaderEffect {
                 } else {
                     GLES20.glEnable(GLES20.GL_DEPTH_TEST);
                     GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
-                    ShaderEffectHelper.shaderEffect3d(poseResult.glMatrix, texIn, width, height, models.get(effect.model3dName), maskTextureid, effect.alpha, programId, vPos3d, vTexFor3d);
+
+
+                    int vTexOrtho = GLES20.glGetAttribLocation(programs[1], "vTexCoordOrtho");
+                    GLES20.glEnableVertexAttribArray(vTexOrtho);
+
+
+                    ShaderEffectHelper.shaderEffect3d2(poseResult.glMatrix, texIn, width, height, models.get(effect.model3dName), maskTextureid, effect.alpha, programId, vPos3d, vTexFor3d, PointsConverter.convertFromProjectedTo2dPoints(poseResult.projected,width,height), vTexOrtho, Settings.flagOrtho, poseResult.initialParams);
                     if (!"".equals(effect.textureNamBlendshape)) {
                         GLES20.glFinish();
                         ShaderEffectHelper.shaderEffect3d(poseResult.glMatrix, texIn, width, height, model, maskTextureBlendid, effect.alpha, programId, vPos3d, vTexFor3d);

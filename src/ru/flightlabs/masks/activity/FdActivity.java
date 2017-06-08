@@ -303,6 +303,7 @@ public class FdActivity extends Activity implements ModelLoaderTask.Callback {
         gLSurfaceView.setZOrderOnTop(true); // FIXME but why did you do that? because i can
         meRender = new SimpleOpengl1Renderer(this, eyesResources);
         gLSurfaceView.setRenderer(meRender);
+        CvCameraViewListener2Impl.meRender = meRender;
 
     }
     

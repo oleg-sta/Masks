@@ -25,6 +25,7 @@ import ru.flightlabs.masks.activity.FdActivity;
 import ru.flightlabs.masks.activity.SettingsActivity;
 import ru.flightlabs.masks.renderer.SimpleOpengl1Renderer;
 import ru.flightlabs.masks.utils.OpencvUtils;
+import ru.flightlabs.masks.utils.PoseHelper;
 
 /**
  * Created by sov on 06.01.2017.
@@ -32,7 +33,7 @@ import ru.flightlabs.masks.utils.OpencvUtils;
 
 public class CvCameraViewListener2Impl implements CameraBridgeViewBase.CvCameraViewListener2 {
 
-    SimpleOpengl1Renderer meRender;
+    public static SimpleOpengl1Renderer meRender;
     Point[] foundEyes = null;
     int fremaCounter = 0;
 
@@ -45,6 +46,7 @@ public class CvCameraViewListener2Impl implements CameraBridgeViewBase.CvCameraV
     double lastCount = 0.5f;
     DetectionBasedTracker mNativeDetector;
     Activity act;
+    PoseHelper poseHelper;
 
 
     private static final String TAG = "FdActivityCam_class";
@@ -86,6 +88,10 @@ public class CvCameraViewListener2Impl implements CameraBridgeViewBase.CvCameraV
             }
         }
         Mat mRgba = inputFrame.rgba();
+        if (poseHelper == null) {
+            poseHelper = new PoseHelper(compModel);
+            poseHelper.init(act, mRgba.width(), mRgba.height());
+        }
         Mat ret = mRgba;
         Log.i(TAG, "onCameraFrame1");
         mGray = inputFrame.gray();
@@ -167,14 +173,14 @@ public class CvCameraViewListener2Impl implements CameraBridgeViewBase.CvCameraV
         if (foundEyes != null) {
 
             // FIXME you know what i mean
-            //FdActivity.glViewMatrix2 = PoseHelper.findPose(meRender.model, mGray.width(), act, foundEyes, mRgba);
+            poseHelper.findPose(meRender.model, foundEyes, mRgba);
 
             if (Settings.debugMode) {
                 for (Point p : foundEyes) {
                     Imgproc.circle(mRgba, OpencvUtils.orient(p, w, h), 2, FACE_RECT_COLOR);
                 }
             }
-            if (FdActivity.drawMask) {
+            if (FdActivity.drawMask && false) {
                 int[] bases = act.getResources().getIntArray(R.array.eyes_center_y_44);
                 int indexPo = 0;
                 Point leftEye = null;
@@ -217,7 +223,7 @@ public class CvCameraViewListener2Impl implements CameraBridgeViewBase.CvCameraV
 //                drawEye(mRgba, leftEye, rightEye);
 
                 foundEyes = ru.flightlabs.masks.model.Utils.completeModel(FdActivity.pointsWas, foundEyes, new int[]{0, 16, 27});
-                mNativeDetector.drawMask(FdActivity.currentMaskLandScaped, mRgba, FdActivity.pointsWas, foundEyes, compModel.lines, compModel.trianlges);
+                //mNativeDetector.drawMask(FdActivity.currentMaskLandScaped, mRgba, FdActivity.pointsWas, foundEyes, compModel.lines, compModel.trianlges);
             }
 
         }
