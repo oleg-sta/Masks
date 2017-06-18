@@ -170,16 +170,10 @@ public class ShaderEffectMask extends ShaderEffect {
             GLES20.glEnableVertexAttribArray(vPos);
             GLES20.glEnableVertexAttribArray(vTex);
             Log.i(TAG, "onCameraTexture4441");
-            if (indexEye >= 6) {
-                GLES20.glUseProgram(programId);
-                int uCenter2 = GLES20.glGetUniformLocation(programId, "iGlobalTime");
-                Log.i(TAG, "onCameraTexture4443 " + uCenter2 + " " + iGlobTime);
-                GLES20.glUniform1f(uCenter2, (float) iGlobTime);
-            }
             Log.i(TAG, "onCameraTexture44412");
-            if (indexEye == 10) {
-                // just experiment with fur
-                ShaderEffectHelper.shaderEffect2dWholeScreen(poseResult.leftEye, poseResult.rightEye, maskTextureid, programId, vPos, vTex);
+            if (indexEye > 16 && poseResult.foundLandmarks != null) {
+                Log.i(TAG, "onCameraTexture44412 using new shaders");
+                ShaderEffectHelper.shaderEffect2dWholeScreen(poseResult, texIn, programId, vPos, vTex, width, height);
             } else {
                 ShaderEffectHelper.shaderEffect2dWholeScreen(poseResult.leftEye, poseResult.rightEye, texIn, programId, vPos, vTex);
             }
