@@ -2,90 +2,53 @@
 <resources>
 
     <array name="masks">
-        <item>@drawable/monkey</item>
-        <item>@drawable/m1_2</item>
-        <item>@drawable/m1_2</item>
-        <item>@drawable/m1_2</item>
-        <item>@drawable/m1_2</item>
-        <item>@drawable/m2</item>
-        <item>@drawable/m3_1</item>
-        <item>@drawable/m4_2</item>
-        <item>@drawable/m5_2</item>
-        <item>@drawable/bear</item>
-        <item>@drawable/bear</item>
-        <item>@drawable/bear</item>
-        <item>@drawable/bear</item>
-        <item>@drawable/bear</item>
-        <item>@drawable/bear</item>
-        <item>@drawable/bear</item>
-        <item>@drawable/bear</item>
+        <item>@drawable/mask_1</item>
+        <item>@drawable/mask_2</item>
+        <item>@drawable/mask_3</item>
+        <item>@drawable/mask_4</item>
+        <item>@drawable/mask_5</item>
+        <item>@drawable/mask_6</item>
+        <item>@drawable/mask_7</item>
+        <item>@drawable/mask_8</item>
+        <item>@drawable/mask_9</item>
+        <item>@drawable/mask_10</item>
+        <item>@drawable/mask_11</item>
+        <item>@drawable/mask_12</item>
+        <item>@drawable/mask_13</item>
+        <item>@drawable/mask_14</item>
+        <item>@drawable/mask_15</item>
+        <item>@drawable/mask_16</item>
+        <item>@drawable/mask_17</item>
+        <item>@drawable/mask_18</item>
+        <item>@drawable/mask_19</item>
+        <item>@drawable/mask_20</item>
+        <item>@drawable/mask_21</item>
+        <item>@drawable/mask_22</item>
+        <item>@drawable/mask_23</item>
+        <item>@drawable/mask_24</item>
+        <item>@drawable/mask_25</item>
+        <item>@drawable/mask_26</item>
+        <item>@drawable/mask_27</item>
+        <item>@drawable/mask_28</item>
+        <item>@drawable/mask_29</item>
+        <item>@drawable/mask_30</item>
+        <item>@drawable/mask_31</item>
+        <item>@drawable/mask_32</item>
+        <item>@drawable/mask_9</item>
+        <item>@drawable/mask_9</item>
     </array>
 
 
     <array name="masks_small_png">
-        <item>@drawable/monkey</item>
-        <item>@drawable/m1_2</item>
-        <item>@drawable/m1_2</item>
-        <item>@drawable/m1_2</item>
-        <item>@drawable/m2</item>
-        <item>@drawable/m3_1</item>
-        <item>@drawable/m4_2</item>
-        <item>@drawable/m5_2</item>
-        <item>@drawable/bear</item>
-        <item>@drawable/bear</item>
-        <item>@drawable/bear</item>
-        <item>@drawable/bear</item>
-        <item>@drawable/bear</item>
-        <item>@drawable/bear</item>
-        <item>@drawable/bear</item>
-        <item>@drawable/bear</item>
     </array>
     
     <array name="masks_png">
-        <item>@raw/monkey</item>
-        <item>@raw/m1_2</item>
-        <item>@raw/m1_2</item>
-        <item>@raw/m1_2</item>
-        <item>@raw/m2</item>
-        <item>@raw/m3_1</item>
-        <item>@raw/m4_2</item>
-        <item>@raw/m5_2</item>
-        <item>@raw/bear</item>
-        <item>@raw/bear</item>
-        <item>@raw/bear</item>
-        <item>@raw/bear</item>
-        <item>@raw/bear</item><!--item>@raw/tex10</item-->
-        <item>@raw/bear</item>
-        <item>@raw/bear</item>
-        <item>@raw/bear</item>
     </array>
     
     <array name="masks_points_44">
-        <item>@raw/monkey_44</item>
-        <item>@raw/m1_2_44</item>
-        <item>@raw/m2_44</item>
-        <item>@raw/m3_1_44</item>
-        <item>@raw/m4_2_44</item>
-        <item>@raw/m5_2_44</item>
-        <item>@raw/bear_44</item>
-        <item>@raw/bear_44</item>
-        <item>@raw/bear_44</item>
-        <item>@raw/bear_44</item>
-        <item>@raw/bear_44</item>
     </array>
     
     <array name="masks_points_68">
-        <item>@raw/monkey_68</item>
-        <item>@raw/m1_2_68</item>
-        <item>@raw/m2_68</item>
-        <item>@raw/m3_1_68</item>
-        <item>@raw/m4_2_68</item>
-        <item>@raw/m5_2_68</item>
-        <item>@raw/bear_68</item>
-        <item>@raw/bear_68</item>
-        <item>@raw/bear_68</item>
-        <item>@raw/bear_68</item>
-        <item>@raw/bear_68</item>
     </array>
 
     <integer-array name="eyes_center_y">
@@ -151,27 +114,54 @@
         <item>vss_2d;fss_ocean;2</item>
         <item>vss_2d;fss_alien_cocons;2</item>
         <item>vss_particle;fss_particle;3</item>
+
+        <item>vss_2d;fss_cheecks;2</item>
+        <item>vss_2d;fss_eyes_slightly;2</item>
+        <item>vss_2d;fss_lips;2</item>
+        <item>vss_2d;fss_small_lips;2</item>
     </string-array>
 
     <!-- programId; 3d model namel; texutre name; alpha; 1 - need blend shape, 0 - no; textureBlendShape-->
     <string-array name="effects" translatable="false">
-        <item>0;;;0.1;0</item>
-        <item>1;model;m1_2;0.7;1</item>
-        <item>1;model;m1_2;0.1;1</item>
-        <item>1;deer_horns;mask_example_6;0.7;1;mask_example_555</item>
-        <item>1;face_hockey;mask_hockey5;0.9;0</item>
-        <item>1;modelGlasses;glasses;0.9;0</item>
-        <item>1;modelHat;hat_tex;1.0;0</item>
-        <item>1;star;hat_tex;1.0;0</item>
-        <item>3;;;0.1;0</item>
-        <item>4;;;0.1;0</item>
-        <item>5;;;0.1;0</item>
-        <item>6;;;0.1;0</item>
-        <item>7;;;0.1;0</item>
-        <item>8;;;0.1;0</item>
-        <item>9;;;0.1;0</item>
-        <item>10;;;0.1;0</item>
-        <item>11;model;m1_2;0.7;1</item>
+        <!--item>0;;;0.1;0</item-->
+        <!-- just faces -->
+        <item>1;model;mask_1;0.7;1</item>
+        <item>1;model;mask_2;0.7;1</item>
+        <item>1;model;mask_3;0.7;1</item>
+        <item>1;model;mask_4;0.7;1</item>
+
+        <item>1;zhdun;mask_5;1.0;0</item>
+
+        <item>1;cat_mesh;mask_6_1;0.7;1;mask_6_2</item>
+        <item>1;deer_horns;mask_7_1;0.7;1;mask_7</item>
+        <item>1;face_hockey;mask_8;0.9;0</item>
+        <item>1;ochki_mesh;mask_9_1;0.9;0</item>
+        <item>1;ochki_mesh;mask_10;0.9;0</item>
+        <item>1;ochki_nnada_mesh;mask_11;0.9;0</item>
+        <item>1;protivo;mask_12_2;0.7;1;mask_12_1</item>
+        <item>1;sam;mask_13_2;0.7;1;mask_13_1</item>
+        <item>1;model;mask_14;0.7;1</item>
+        <item>1;cat_mesh;mask_15;0.7;1;mask_15</item>
+        <item>1;model;mask_16;0.7;1</item>
+        <item>1;model;mask_17;0.7;1</item>
+        <item>1;model;mask_18;0.7;1</item>
+        <item>1;model;mask_19;0.7;1</item>
+        <item>1;cat_mesh;mask_20_1;0.7;1;mask_20_2</item>
+        <item>1;model;mask_21;0.7;1</item>
+        <item>1;cat_mesh;mask_22_2;0.7;1;mask_22_1</item>
+        <item>1;cat_mesh;mask_23_2;0.7;1;mask_23_1</item>
+        <item>1;cat_mesh;mask_24_2;0.7;1;mask_24_1</item>
+        <item>1;cat_mesh;mask_25;0.7;1;mask_25</item>
+        <item>1;cat_mesh;mask_26_2;0.7;1;mask_26_1</item>
+        <item>1;cat_mesh;mask_27_2;0.7;1;mask_27_1</item>
+
+        <item>12;;;0.1;0</item>
+        <item>13;;;0.1;0</item>
+        <item>14;;;0.1;0</item>
+        <item>15;;;0.1;0</item>
+        <item>15;;;0.1;0</item>
+
+
     </string-array>
 
 </resources>

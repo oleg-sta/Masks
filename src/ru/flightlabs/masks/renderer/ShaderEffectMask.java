@@ -102,6 +102,10 @@ public class ShaderEffectMask extends ShaderEffect {
         models.put("cat_mesh", new Model(R.raw.cat_mesh, context));
         models.put("ochki_mesh", new Model(R.raw.ochki_mesh, context));
         models.put("ochki_nnada_mesh", new Model(R.raw.ochki_nnada_mesh, context));
+
+        models.put("protivo", new Model(R.raw.protivo, context));
+        models.put("sam", new Model(R.raw.sam, context));
+        models.put("zhdun", new Model(R.raw.zhdun, context));
         Log.i(TAG, "load3dModel exit");
     }
 
@@ -131,36 +135,21 @@ public class ShaderEffectMask extends ShaderEffect {
             ShaderEffectHelper.shaderEffect2dWholeScreen(poseResult.leftEye, poseResult.rightEye, texIn, programs[2], vPos, vTex);
             // then we draw 3d/2d object on it
             if (poseResult.foundFeatures) {
-                // crazy simple animation
-                if (indexEye == 6) {
-                    //animate(models.get(effect.model3dName), time);
-                }
-                if (indexEye == 1500) {
-                    Log.i(TAG, "index 15");
-                    GLES20.glUseProgram(programId);
-                    int uCenter2 = GLES20.glGetUniformLocation(programId, "iGlobalTime");
-                    Log.i(TAG, "onCameraTexture4443 " + uCenter2 + " " + iGlobTime);
-                    GLES20.glUniform1f(uCenter2, (float) iGlobTime);
-                    effect3dParticle(poseResult.glMatrix, width, height, programId);
+
+                //GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+                //GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
+
+                int vTexOrtho = GLES20.glGetAttribLocation(programs[1], "vTexCoordOrtho");
+                GLES20.glEnableVertexAttribArray(vTexOrtho);
+
+                ShaderEffectHelper.shaderEffect3d2(poseResult.glMatrix, texIn, width, height, models.get(effect.model3dName), maskTextureid, effect.alpha, programId, vPos3d, vTexFor3d, PointsConverter.convertFromProjectedTo2dPoints(poseResult.projected, width, height), vTexOrtho, Settings.flagOrtho, poseResult.initialParams);
+                if (!"".equals(effect.textureNamBlendshape)) {
+                    GLES20.glFinish();
+                    ShaderEffectHelper.shaderEffect3d(poseResult.glMatrix, texIn, width, height, model, maskTextureBlendid, effect.alpha, programId, vPos3d, vTexFor3d);
                 } else {
-                    GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-                    GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
-
-
-                    int vTexOrtho = GLES20.glGetAttribLocation(programs[1], "vTexCoordOrtho");
-                    GLES20.glEnableVertexAttribArray(vTexOrtho);
-
-
-                    ShaderEffectHelper.shaderEffect3d2(poseResult.glMatrix, texIn, width, height, models.get(effect.model3dName), maskTextureid, effect.alpha, programId, vPos3d, vTexFor3d, PointsConverter.convertFromProjectedTo2dPoints(poseResult.projected,width,height), vTexOrtho, Settings.flagOrtho, poseResult.initialParams);
-                    if (!"".equals(effect.textureNamBlendshape)) {
-                        GLES20.glFinish();
-                        ShaderEffectHelper.shaderEffect3d(poseResult.glMatrix, texIn, width, height, model, maskTextureBlendid, effect.alpha, programId, vPos3d, vTexFor3d);
-                    } else {
-                        //GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-                    }
-
-                    GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+                    //GLES20.glDisable(GLES20.GL_DEPTH_TEST);
                 }
+                //GLES20.glDisable(GLES20.GL_DEPTH_TEST);
             }
         } else {
             // 2d effect on whole screen
@@ -172,9 +161,10 @@ public class ShaderEffectMask extends ShaderEffect {
             Log.i(TAG, "onCameraTexture4441");
             Log.i(TAG, "onCameraTexture44412");
             if (indexEye > 16 && poseResult.foundLandmarks != null) {
-                Log.i(TAG, "onCameraTexture44412 using new shaders");
+                Log.i(TAG, "onCameraTexture44412 using new shaders"); // new format with all 68 points
                 ShaderEffectHelper.shaderEffect2dWholeScreen(poseResult, texIn, programId, vPos, vTex, width, height);
             } else {
+                // should be deprecated
                 ShaderEffectHelper.shaderEffect2dWholeScreen(poseResult.leftEye, poseResult.rightEye, texIn, programId, vPos, vTex);
             }
             Log.i(TAG, "onCameraTexture4445");
