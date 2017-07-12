@@ -15,6 +15,8 @@ import java.util.Random;
 import ru.flightlabs.commonlib.Settings;
 import ru.flightlabs.masks.R;
 import ru.flightlabs.masks.Static;
+import ru.flightlabs.masks.model3d.Model;
+import ru.flightlabs.masks.model3d.ModelNew;
 import ru.flightlabs.masks.utils.FileUtils;
 import ru.flightlabs.masks.utils.OpenGlHelper;
 import ru.flightlabs.masks.utils.PointsConverter;
@@ -105,7 +107,7 @@ public class ShaderEffectMask extends ShaderEffect {
 
         models.put("protivo", new Model(R.raw.protivo, context));
         models.put("sam", new Model(R.raw.sam, context));
-        models.put("zhdun", new Model(R.raw.zhdun, context));
+        models.put("zhdun", new ModelNew(R.raw.zhdun, context));
         Log.i(TAG, "load3dModel exit");
     }
 
@@ -142,10 +144,10 @@ public class ShaderEffectMask extends ShaderEffect {
                 int vTexOrtho = GLES20.glGetAttribLocation(programs[1], "vTexCoordOrtho");
                 GLES20.glEnableVertexAttribArray(vTexOrtho);
 
-                ShaderEffectHelper.shaderEffect3d2(poseResult.glMatrix, texIn, width, height, models.get(effect.model3dName), maskTextureid, effect.alpha, programId, vPos3d, vTexFor3d, PointsConverter.convertFromProjectedTo2dPoints(poseResult.projected, width, height), vTexOrtho, Settings.flagOrtho, poseResult.initialParams);
+                ShaderEffectHelper.shaderEffect3d2(PoseHelper.convertToArray(poseResult.glMatrix), texIn, width, height, models.get(effect.model3dName), maskTextureid, effect.alpha, programId, vPos3d, vTexFor3d, PointsConverter.convertFromProjectedTo2dPoints(poseResult.projected, width, height), vTexOrtho, Settings.flagOrtho, poseResult.initialParams);
                 if (!"".equals(effect.textureNamBlendshape)) {
                     GLES20.glFinish();
-                    ShaderEffectHelper.shaderEffect3d(poseResult.glMatrix, texIn, width, height, model, maskTextureBlendid, effect.alpha, programId, vPos3d, vTexFor3d);
+                    ShaderEffectHelper.shaderEffect3d(PoseHelper.convertToArray(poseResult.glMatrix), texIn, width, height, model, maskTextureBlendid, effect.alpha, programId, vPos3d, vTexFor3d);
                 } else {
                     //GLES20.glDisable(GLES20.GL_DEPTH_TEST);
                 }
