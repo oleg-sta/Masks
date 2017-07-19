@@ -105,7 +105,7 @@ public class ShaderEffectMask extends ShaderEffect {
         models.put("ochki_mesh", new Model(R.raw.ochki_mesh, context));
         models.put("ochki_nnada_mesh", new Model(R.raw.ochki_nnada_mesh, context));
 
-        models.put("protivo", new Model(R.raw.protivo, context));
+        models.put("protivo", new ModelNew(R.raw.protivo, context));
         models.put("sam", new Model(R.raw.sam, context));
         models.put("zhdun", new ModelNew(R.raw.zhdun, context));
         Log.i(TAG, "load3dModel exit");
@@ -138,8 +138,8 @@ public class ShaderEffectMask extends ShaderEffect {
             // then we draw 3d/2d object on it
             if (poseResult.foundFeatures) {
 
-                //GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-                //GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
+                GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+                GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
 
                 int vTexOrtho = GLES20.glGetAttribLocation(programs[1], "vTexCoordOrtho");
                 GLES20.glEnableVertexAttribArray(vTexOrtho);
@@ -148,10 +148,8 @@ public class ShaderEffectMask extends ShaderEffect {
                 if (!"".equals(effect.textureNamBlendshape)) {
                     GLES20.glFinish();
                     ShaderEffectHelper.shaderEffect3d(PoseHelper.convertToArray(poseResult.glMatrix), texIn, width, height, model, maskTextureBlendid, effect.alpha, programId, vPos3d, vTexFor3d);
-                } else {
-                    //GLES20.glDisable(GLES20.GL_DEPTH_TEST);
                 }
-                //GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+                GLES20.glDisable(GLES20.GL_DEPTH_TEST);
             }
         } else {
             // 2d effect on whole screen
