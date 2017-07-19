@@ -11,5 +11,6 @@ void main()
     vec4 maskColor = texture2D(u_Texture, v_TexCoordinate);
     vec4 origColor = texture2D(u_TextureOrig, v_TexOrigCoordinate);
     float alpha =  maskColor[3] * f_alpha;
+    if (alpha == 0.0) discard; // solving problem with showing area behind ears
     gl_FragColor = mix(origColor, maskColor, alpha);
 }
