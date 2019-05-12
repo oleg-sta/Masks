@@ -19,4 +19,4 @@ Make settings to submodule [commonLib](https://github.com/oleg-sta/commonLibMask
 
 ## How it works
 
-Deatails how this application works you could find [here](https://github.com/oleg-sta/commonLibMask)
+It uses my submodule [here](https://github.com/oleg-sta/commonLibMask) with all description of logic in it.
